@@ -1,13 +1,27 @@
 {
+    "Stand Still":{
+        "number of movements" : 1,
+
+        "address1" : 116,
+        "position1" : [1724,2367,2217,1878,627,3468,2052,2044,2032,2106,1712,2384,2791,1306,2536,1560,2048,2136,2048,1586],
+        "sleep1" : 0
+    },
+
     "Stand Up Front":{
-        "number of movements" : 2,
+        "number of movements" : 3,
+        
         "address1" : 112,
         "id1" : 254,
         "velocity1" : 80,
 
         "address2" : 116,
         "position2" : [2047,2047,2183,1896,417,3679,2048,2067,2047,2047,2047,2047,2047,2047,2047,2047,2047,2047,2047, 2047],
-        "sleep2" : 3
+        "sleep2" : 3,
+
+        "address3" : 112,
+        "id3" : 254,
+        "velocity3" : 10
     }
+
 }
 

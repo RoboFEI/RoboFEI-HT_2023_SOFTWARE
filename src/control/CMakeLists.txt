@@ -94,13 +94,6 @@ ament_target_dependencies(control
   custom_interfaces
   rclcpp
   sensor_msgs
-)
-
-add_executable(teste src/teste.cpp)
-ament_target_dependencies(teste
-  custom_interfaces
-  rclcpp
-  sensor_msgs
   rclcpp_action
 )
 
@@ -126,7 +119,6 @@ install(TARGETS
   control
   decision
   client
-  teste
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -1,4 +1,4 @@
-# RoboFEI-HT_2022_SOFTWARE
+# RoboFEI-HT_2023_SOFTWARE
 
 This repository contains the code written using ROS2, by RoboFEI team, which is currently used in our physical robots. 
 
@@ -17,7 +17,7 @@ It is divided in 8 packages:
 ## Installation:
 1. First, download this repo from github:
 
-    ```$ git clone https://github.com/RoboFEI/RoboFEI-HT_2022_SOFTWARE.git```
+    ```$ git clone https://github.com/RoboFEI/RoboFEI-HT_2023_SOFTWARE.git```
 
 2. Then, install ROS2 Humble and all the libraries that are used in our code:
 
