@@ -19,7 +19,7 @@ from geometry_msgs.msg import Vector3Stamped
 
 TEAM_ROBOFEI = 7
 ROBOT_NUMBER = 0 # Goleiro = 1, jogadores != 1
-LADO = 1 # 0 vira para o lado DIREITO e 1 para o lado ESQUERDO, depende de que lado o nosso time vai começar
+LADO = 0 # 0 vira para o lado DIREITO e 1 para o lado ESQUERDO, depende de que lado o nosso time vai começar
 
 
 
