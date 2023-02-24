@@ -200,9 +200,6 @@ private:
               RCLCPP_INFO(this->get_logger(), "Goal canceled");
               return;
           }
-          message_walk.walk = walk;   
-          message_walk.sidle = sidle;  
-          message_walk.turn = turn; 
           message_walk.walk_number = parameter_number;  
           publisher_walk->publish(message_walk);
         }
