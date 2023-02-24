@@ -8,4 +8,6 @@ ros2 run vision_test detect
 ros2 run um7 um7_node
 ros2 run controller talker
 ros2 run decision_pkg decision_node
+
+# Localização não funciona ainda
 ros2 run localization_pkg localization_node --mcl -l -g
