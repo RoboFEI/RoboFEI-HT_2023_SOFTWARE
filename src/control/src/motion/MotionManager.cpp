@@ -123,12 +123,6 @@ void MotionManager::topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> 
 
 void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces::msg::Walk> walk_msg_) const
     {
-		X_AMPLITUDE = walk_msg_->walk;
-		RCLCPP_INFO(this->get_logger(), "WALK VALUE: %f", X_AMPLITUDE);
-        Y_AMPLITUDE = walk_msg_->sidle;
-		RCLCPP_INFO(this->get_logger(), "SIDLE VALUE: %f", Y_AMPLITUDE);
-		A_AMPLITUDE = walk_msg_->turn;
-		RCLCPP_INFO(this->get_logger(), "TURN VALUE: %f", A_AMPLITUDE);
         walk = walk_msg_->walk_number;
 		printf("MOVEMENT %d\n", walk);
 		printf("FASE %d\n", Walking::GetInstance()->GetCurrentPhase());
@@ -212,12 +206,6 @@ void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces:
 					MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);
 					MotionManager::GetInstance()->SetEnable(true);
 					printf("%d\n", MotionManager::GetInstance()->GetEnable());
-					Walking::GetInstance()->X_MOVE_AMPLITUDE = X_AMPLITUDE; 
-					RCLCPP_INFO(this->get_logger(), "WALK INSIDE WAALKING VALUE: %f", X_AMPLITUDE);
-					Walking::GetInstance()->Y_MOVE_AMPLITUDE = Y_AMPLITUDE; 
-					RCLCPP_INFO(this->get_logger(), "SIDLE INSIDE WAALKING VALUE: %f", Y_AMPLITUDE);
-					Walking::GetInstance()->A_MOVE_AMPLITUDE = A_AMPLITUDE; 
-					RCLCPP_INFO(this->get_logger(), "TURN INSIDE WAALKING VALUE: %f", A_AMPLITUDE);
 					Walking::GetInstance()->Start();
 					// printf("WALKING %d\n", Walking::GetInstance()->IsRunning());
 					// printf("ACTION %d\n", Action::GetInstance()->IsRunning());
@@ -225,12 +213,6 @@ void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces:
 					//printf("KEEP WALKING DEPOIS %d\n", MotionManager::GetInstance()->keep_walking);
 				}
 			}
-			Walking::GetInstance()->X_MOVE_AMPLITUDE = X_AMPLITUDE; 
-			RCLCPP_INFO(this->get_logger(), "WALK INSIDE WALKING VALUE: %f", X_AMPLITUDE);
-			Walking::GetInstance()->Y_MOVE_AMPLITUDE = Y_AMPLITUDE; 
-			RCLCPP_INFO(this->get_logger(), "SIDLE INSIDE WALKING VALUE: %f", Y_AMPLITUDE);
-			Walking::GetInstance()->A_MOVE_AMPLITUDE = A_AMPLITUDE; 
-			RCLCPP_INFO(this->get_logger(), "TURN INSIDE WALKING VALUE: %f", A_AMPLITUDE);
 		}
 		
 		else{ // parar o walking

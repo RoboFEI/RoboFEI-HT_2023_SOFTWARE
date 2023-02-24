@@ -128,6 +128,9 @@ void Walking::LoadINISettings(minIni* ini, const std::string &section)
     if((value = ini->getd(section, "lean_fb_accel_gain", INVALID_VALUE)) != INVALID_VALUE) LEAN_FB_ACCEL = value;
     if((value = ini->getd(section, "lean_turn_gain", INVALID_VALUE)) != INVALID_VALUE) LEAN_TURN = value;
     if((value = ini->getd(section, "start_step_factor", INVALID_VALUE)) != INVALID_VALUE) START_STEP_FACTOR = value;
+    if((value = ini->getd(section, "turn_angle", INVALID_VALUE)) != INVALID_VALUE) A_MOVE_AMPLITUDE = value;
+    if((value = ini->getd(section, "walk_foward", INVALID_VALUE)) != INVALID_VALUE) X_MOVE_AMPLITUDE = value;
+    if((value = ini->getd(section, "sidle", INVALID_VALUE)) != INVALID_VALUE) Y_MOVE_AMPLITUDE = value;
 
     printf("X OFFSET %f", X_OFFSET_START);
     int ivalue = INVALID_VALUE;
