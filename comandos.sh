@@ -29,18 +29,18 @@ pip install -r requirements.txt
 sudo pip install construct
 
 echo -e "${blue} setup new rules for usb names${NC}"
-sudo mv robot-usb-ports.rules /etc/udev/rules.d/
+sudo cp robot-usb-ports.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
 echo -e "${blue} setup commands${NC}"
-sudo cp ~/RoboFEI-HT_2022_SOFTWARE/scripts/compile.sh /usr/local/bin/compile
-sudo cp ~/RoboFEI-HT_2022_SOFTWARE/scripts/imu.sh /usr/local/bin/imu
-sudo cp ~/RoboFEI-HT_2022_SOFTWARE/scripts/control.sh /usr/local/bin/control
-sudo cp ~/RoboFEI-HT_2022_SOFTWARE/scripts/vision.sh /usr/local/bin/vision
-sudo cp ~/RoboFEI-HT_2022_SOFTWARE/scripts/decision.sh /usr/local/bin/decision
-sudo cp ~/RoboFEI-HT_2022_SOFTWARE/scripts/gamecontroller.sh /usr/local/bin/gamecontroller
-sudo cp ~/RoboFEI-HT_2022_SOFTWARE/scripts/motors.sh /usr/local/bin/motors
+sudo cp /scripts/compile.sh /usr/local/bin/compile
+sudo cp /scripts/imu.sh /usr/local/bin/imu
+sudo cp /scripts/control.sh /usr/local/bin/control
+sudo cp /scripts/vision.sh /usr/local/bin/vision
+sudo cp /scripts/decision.sh /usr/local/bin/decision
+sudo cp /scripts/gamecontroller.sh /usr/local/bin/gamecontroller
+sudo cp /scripts/motors.sh /usr/local/bin/motors
 
 sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 sudo chmod 755 /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors

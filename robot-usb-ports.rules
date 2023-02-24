@@ -1,0 +1,8 @@
+KERNEL=="ttyUSB*", ATTRS{product}=="CP2102 USB to UART Bridge Controller", SYMLINK+="imu" 
+KERNEL=="ttyUSB*", ATTRS{product}=="USB Serial Controller", SYMLINK+="imu"
+KERNEL=="ttyUSB*", ATTRS{idProduct}=="2817" , SYMLINK+="imu"
+
+KERNEL=="ttyUSB*", ATTRS{idProduct}=="6001", SYMLINK+="motors"
+KERNEL=="ttyUSB*", ATTRS{idProduct}=="0002", SYMLINK+="motors"
+
+KERNEL=="video*", ATTRS{product}=="HD Pro Webcam C920",ATTR{index}=="0", SYMLINK+="camera"
