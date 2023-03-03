@@ -64,6 +64,9 @@ typedef OutputAxisOptions::OutputAxisOption OutputAxisOption;
 class Driver : public rclcpp::Node
 {
 public:
+  bool first_offset = true;
+  int cont_for_offset = 0;
+  double offset[3] = {0,0,0}; // x, y, z
   Driver(const rclcpp::NodeOptions & options);
 
 private:
