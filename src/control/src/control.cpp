@@ -177,17 +177,11 @@ private:
           case 14: // Walking
             parameters = true;
             RCLCPP_INFO(this->get_logger(), "Walking"); 
-            walk= 20;   
-            sidle = 0;  
-            turn = 0; 
             parameter_number = 1;  
             break;
           case 15: // Gait
             parameters = true;
             RCLCPP_INFO(this->get_logger(), "Gait"); 
-            walk= 0;   
-            sidle = 0;  
-            turn = 0; 
             parameter_number = 2;  
             break;
           case 17: // Stand up Front
@@ -206,9 +200,6 @@ private:
               RCLCPP_INFO(this->get_logger(), "Goal canceled");
               return;
           }
-          message_walk.walk = walk;   
-          message_walk.sidle = sidle;  
-          message_walk.turn = turn; 
           message_walk.walk_number = parameter_number;  
           publisher_walk->publish(message_walk);
         }
