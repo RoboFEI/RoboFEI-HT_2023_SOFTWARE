@@ -33,9 +33,10 @@
  *
  */
 
-// ros2 service call /imu/reset um7/srv/Reset "{reset_ekf: True}"
+// ros2 service call /imu/reset custom_interfaces/srv/Reset "{reset_ekf: True}"
 
 #include <string>
+#include <math.h> 
 #include "um7/um7.h"
 #include "custom_interfaces/srv/reset.hpp"
 
@@ -70,7 +71,7 @@ void Driver::handle_reset_service(
 {
   um7::Registers r;
   if (req->zero_gyros) send_command(r.cmd_zero_gyros, "zero gyroscopes");
-  if (req->reset_ekf) send_command(r.cmd_reset_ekf, "reset EKF");
+  if (req->reset_ekf) send_command(r.cmd_reset_ekf, "reset EKF");     
   if (req->set_mag_ref) send_command(r.cmd_set_mag_ref, "set magnetometer reference");
 }
 
@@ -175,6 +176,9 @@ void Driver::configure_sensor(std::shared_ptr<um7::Comms> sensor)
  */
 void Driver::publish(um7::Registers& r)
 {
+  
+  double new_value[3] = {0,0,0}; // x, y, z
+  
   if (imu_pub_->get_subscription_count() > 0)
   {
     switch (axes_)
@@ -285,33 +289,57 @@ void Driver::publish(um7::Registers& r)
     geometry_msgs::msg::Vector3Stamped rpy_msg;
     rpy_msg.header = imu_msg_.header;
 
+    if(this->first_offset)
+    {
+      if(this->cont_for_offset > 50)
+      {
+        for(int i=0; i<3; i++)
+        {
+          this->offset[i] = r.euler.get_scaled(i);
+        }
+        this->first_offset = false;        
+      }
+      this->cont_for_offset++;
+    }
+
+    for(int i=0; i<3; i++)
+    {
+      new_value[i] = r.euler.get_scaled(i) - this->offset[i];
+      if(new_value[i]<-3.14) new_value[i] = 3.14 - fmod(fabs(new_value[i]), 3.14);
+      else if (new_value[i] > 3.14) new_value[i] =  -3.14 + fmod(fabs(new_value[i]), 3.14);
+      
+    }
+
     switch (axes_)
     {
       case OutputAxisOptions::ENU:
       {
         // world frame
-        rpy_msg.vector.x = r.euler.get_scaled(1);
-        rpy_msg.vector.y = r.euler.get_scaled(0);
-        rpy_msg.vector.z = -r.euler.get_scaled(2);
+        rpy_msg.vector.x = new_value[0];
+        rpy_msg.vector.y = new_value[1];
+        rpy_msg.vector.z = -new_value[2];
         break;
       }
       case OutputAxisOptions::ROBOT_FRAME:
       {
-        rpy_msg.vector.x =  r.euler.get_scaled(0);
-        rpy_msg.vector.y = -r.euler.get_scaled(1);
-        rpy_msg.vector.z = -r.euler.get_scaled(2);
+        rpy_msg.vector.x =  new_value[0];
+        rpy_msg.vector.y = -new_value[1];
+        rpy_msg.vector.z = -new_value[2];
         break;
       }
       case OutputAxisOptions::DEFAULT:
       {
-        rpy_msg.vector.x = r.euler.get_scaled(0);
-        rpy_msg.vector.y = r.euler.get_scaled(1);
-        rpy_msg.vector.z = r.euler.get_scaled(2);
+        rpy_msg.vector.x = new_value[0];
+        rpy_msg.vector.y = new_value[1];
+        rpy_msg.vector.z = new_value[2];
+        
         break;
       }
       default:
         RCLCPP_ERROR(this->get_logger(), "OuputAxes enum value invalid");
     }
+
+
 
     rpy_pub_->publish(rpy_msg);
   }
@@ -373,7 +401,7 @@ Driver::Driver(const rclcpp::NodeOptions & options) :
 
   // Parameters for configure_sensor
   this->declare_parameter<int>("update_rate", 20);
-  this->declare_parameter<bool>("mag_updates", true);
+  this->declare_parameter<bool>("mag_updates", false);
   this->declare_parameter<bool>("quat_mode", true);
   this->declare_parameter<bool>("zero_gyros", true);
 
