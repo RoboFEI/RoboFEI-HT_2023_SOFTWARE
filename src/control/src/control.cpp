@@ -36,8 +36,6 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "json/single_include/nlohmann/json.hpp"
 
-
-
 using namespace std;
 using namespace Robot;
 using namespace std::chrono_literals;
@@ -47,11 +45,12 @@ using GoalHandleAction = rclcpp_action::ServerGoalHandle<Control_action>;
 
 using json = nlohmann::json;
 
+int robot_number = 1;
+
 int movement = 1;
 int contador = 0;
 int cont_vision = 2047;
 int cont_vision_up = 1300;
-int cont_fall_side = 0;
 bool stop_gait = true;
 uint32_t valor = 246;
 uint32_t valor_up = 250;
@@ -63,8 +62,6 @@ int parameter_number = 0;
 int walk = 0;
 int sidle = 0;
 int turn = 0;
-int ender = 0;
-int value = 0;
 int number_of_mov = 0;
 int address_value = 116;
 std::string address_name = "address";
@@ -75,10 +72,9 @@ std::string sleep_name = "sleep";
 std::string section = "Stand Still";
 
 
-ifstream fJson("./src/control/Data/motion.json");
+ifstream fJson("./src/control/Data/motion" + std::to_string(robot_number) + ".json");
 json j = json::parse(fJson);
 
-#define INI_FILE_PATH       "src/control/Data/motion.json"
 
 class Control : public rclcpp::Node
 {
@@ -203,7 +199,7 @@ private:
             section = "Goodbye";
             break;
           case 8: // não está em sessão nenhuma
-            RCLCPP_INFO(this->get_logger(), "Mooving Head");
+            RCLCPP_INFO(this->get_logger(), "Moving Head");
             parameters = false;
             section = "Mooving Head";
             break;
@@ -269,18 +265,15 @@ private:
             break;
           case 21: //
             RCLCPP_INFO(this->get_logger(), "Centralizando bola à esquerda");
-            parameters = true;
-            parameter_number = 1;  
+            parameters = false;
             break;
           case 22: //
             RCLCPP_INFO(this->get_logger(), "Centralizando bola à direita");
-            parameters = true;
-            parameter_number = 1;  
+            parameters = false;
             break;
           case 23: //
             RCLCPP_INFO(this->get_logger(), "Centralizando bola no pé");
-            parameters = true;
-            parameter_number = 1;  
+            parameters = false; 
             break;
           case 24: // Trial Case
             RCLCPP_INFO(this->get_logger(), "Trial Case");

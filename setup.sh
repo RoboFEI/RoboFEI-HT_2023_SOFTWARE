@@ -34,13 +34,13 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 
 echo -e "${blue} setup commands${NC}"
-sudo cp /scripts/compile.sh /usr/local/bin/compile
-sudo cp /scripts/imu.sh /usr/local/bin/imu
-sudo cp /scripts/control.sh /usr/local/bin/control
-sudo cp /scripts/vision.sh /usr/local/bin/vision
-sudo cp /scripts/decision.sh /usr/local/bin/decision
-sudo cp /scripts/gamecontroller.sh /usr/local/bin/gamecontroller
-sudo cp /scripts/motors.sh /usr/local/bin/motors
+sudo cp ./scripts/compile.sh /usr/local/bin/compile
+sudo cp ./scripts/imu.sh /usr/local/bin/imu
+sudo cp ./scripts/control.sh /usr/local/bin/control
+sudo cp ./scripts/vision.sh /usr/local/bin/vision
+sudo cp ./scripts/decision.sh /usr/local/bin/decision
+sudo cp ./scripts/gamecontroller.sh /usr/local/bin/gamecontroller
+sudo cp ./scripts/motors.sh /usr/local/bin/motors
 
 sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 sudo chmod 755 /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
