@@ -4,8 +4,7 @@
 // $ ros2 launch control action.launch.py
 
 
-// ros2 topic pub -1 /decision custom_interfaces/Decision "{decision: 1}"
-// ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: 1}"
+// ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: 17}"
 
 #include <chrono>
 #include <memory>
@@ -67,15 +66,16 @@ int turn = 0;
 int ender = 0;
 int value = 0;
 int number_of_mov = 0;
-std::string address_name = "address0";
-std::string id_name = "id0";
-std::string vel_name = "velocity0";
-std::string position_name = "position0";
-std::string sleep_name = "sleep0";
+int address_value = 116;
+std::string address_name = "address";
+std::string id_name = "id";
+std::string vel_name = "velocity";
+std::string position_name = "position";
+std::string sleep_name = "sleep";
 std::string section = "Stand Still";
 
 
-ifstream fJson("/home/robo/RoboFEI-HT_2022_SOFTWARE/src/control/Data/motion.json");
+ifstream fJson("./src/control/Data/motion.json");
 json j = json::parse(fJson);
 
 #define INI_FILE_PATH       "src/control/Data/motion.json"
@@ -151,7 +151,8 @@ private:
 
         auto message_walk = custom_interfaces::msg::Walk();  
         auto message = custom_interfaces::msg::SetPosition();   
-        auto message_single = custom_interfaces::msg::SetPositionOriginal();  
+        auto message_single = custom_interfaces::msg::SetPositionOriginal();
+        
         
         const auto goal = goal_handle->get_goal();
         movement = goal->action_number;
@@ -167,12 +168,69 @@ private:
 
         switch (movement) {
           case 1: // Parado
+            RCLCPP_INFO(this->get_logger(), "Stand Still");
             parameters = false;
             section = "Stand Still";
             break;
-          case 4: // Left kick OK
-            RCLCPP_INFO(this->get_logger(), "Left kick");
+          case 2: // 
+            RCLCPP_INFO(this->get_logger(), "Greeting");
             parameters = false;
+            section = "Greeting";
+            break;
+          case 3: // 
+            RCLCPP_INFO(this->get_logger(), "Right kick");
+            parameters = false;
+            section = "Right Kick";
+            break;
+          case 4: // Left kick OK
+            RCLCPP_INFO(this->get_logger(), "Left Kick");
+            parameters = false;
+            section = "Left Kick";
+            break;
+          case 5: //
+            RCLCPP_INFO(this->get_logger(), "Turn Right");
+            parameters = true;
+            parameter_number = 11;  
+            break;
+          case 6: //
+            RCLCPP_INFO(this->get_logger(), "Turn Left");
+            parameters = true;
+            parameter_number = 12;  
+            break;
+          case 7: //
+            RCLCPP_INFO(this->get_logger(), "Goodbye");
+            parameters = false;
+            section = "Goodbye";
+            break;
+          case 8: // não está em sessão nenhuma
+            RCLCPP_INFO(this->get_logger(), "Mooving Head");
+            parameters = false;
+            section = "Mooving Head";
+            break;
+          case 9: //
+            RCLCPP_INFO(this->get_logger(), "Turn Around Ball Clockwise");
+            parameters = true;
+            parameter_number = 5;  
+            break;
+          case 10: //
+            RCLCPP_INFO(this->get_logger(), "Turn Around Ball Anticlockwise");
+            parameters = true;
+            parameter_number = 6;  
+            break;
+          case 11: //
+            RCLCPP_INFO(this->get_logger(), "Fall Left");
+            parameters = false;
+            section = "Fall Left";
+            break;
+          case 12: //
+            RCLCPP_INFO(this->get_logger(), "Fall Right");
+            parameters = false;
+            section = "Fall Right";
+            break;
+          case 13: //
+            RCLCPP_INFO(this->get_logger(), "Agachando");
+            parameters = false;
+            section = "Agachando";
             break;
           case 14: // Walking
             parameters = true;
@@ -184,12 +242,50 @@ private:
             RCLCPP_INFO(this->get_logger(), "Gait"); 
             parameter_number = 2;  
             break;
-          case 17: // Stand up Front
+          case 16: // Stand up Back
+            RCLCPP_INFO(this->get_logger(), "Stand Up Back");
             parameters = false;
+            section = "Stand Up Back";
             break;
-          case 18:
+          case 17: // Stand up Front
+            RCLCPP_INFO(this->get_logger(), "Stand Up Front");
             parameters = false;
             section = "Stand Up Front";
+            break;
+          case 18: // Fallen Side
+            RCLCPP_INFO(this->get_logger(), "Fallen Side");
+            parameters = false;
+            section = "Fallen Side";
+            break;
+          case 19: //
+            RCLCPP_INFO(this->get_logger(), "Andar esquerda");
+            parameters = true;
+            parameter_number = 8;  
+            break;
+          case 20: //
+            RCLCPP_INFO(this->get_logger(), "Andar direita");
+            parameters = true;
+            parameter_number = 7;  
+            break;
+          case 21: //
+            RCLCPP_INFO(this->get_logger(), "Centralizando bola à esquerda");
+            parameters = true;
+            parameter_number = 1;  
+            break;
+          case 22: //
+            RCLCPP_INFO(this->get_logger(), "Centralizando bola à direita");
+            parameters = true;
+            parameter_number = 1;  
+            break;
+          case 23: //
+            RCLCPP_INFO(this->get_logger(), "Centralizando bola no pé");
+            parameters = true;
+            parameter_number = 1;  
+            break;
+          case 24: // Trial Case
+            RCLCPP_INFO(this->get_logger(), "Trial Case");
+            parameters = false;
+            section = "Trial Case";
             break;
         }
 
@@ -212,36 +308,39 @@ private:
           number_of_mov = j[section]["number of movements"];
 
           for (int i = 1; i <= number_of_mov; i++){
+            address_name = "address";
+            id_name = "id";
+            vel_name = "velocity";
+            position_name = "position";
+            sleep_name = "sleep";
+            RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
             if (goal_handle->is_canceling()) {
                 result->finished = false;
                 goal_handle->canceled(result);
                 RCLCPP_INFO(this->get_logger(), "Goal canceled");
                 return;
             }
-            address_name.pop_back();
             address_name = address_name + std::to_string(i);
             if (j[section][address_name] == 112){
-              RCLCPP_INFO(this->get_logger(), "AQUI");
-              id_name.pop_back();
+              RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
               id_name = id_name + std::to_string(i);
               message_single.id = j[section][id_name];
-              vel_name.pop_back();
               vel_name = vel_name + std::to_string(i);
               message_single.position = j[section][vel_name];
               message_single.address = j[section][address_name];
               publisher_single->publish(message_single);
             }
             else if (j[section][address_name] == 116){
-              position_name.pop_back();
               position_name = position_name + std::to_string(i);
               position.push_back(j[section][position_name]);
               message.position = position.front();
+              RCLCPP_INFO(this->get_logger(), "POSIÇÃO");
               publisher_->publish(message);
-              sleep_name.pop_back();
               sleep_name = sleep_name + std::to_string(i);
               sleep_sec = j[section][sleep_name];
               RCLCPP_INFO(this->get_logger(), "Sleep: %d ", sleep_sec);
               usleep(sleep_sec*1000000);
+              position.clear();
             }
           
             movements_remaining = number_of_mov - i;
