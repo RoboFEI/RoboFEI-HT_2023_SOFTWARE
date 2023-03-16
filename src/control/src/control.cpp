@@ -101,7 +101,7 @@ public:
 
     }
   vector<int> motors { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 };
-  vector<int> position, velocity, id;
+  vector<vector<int>> position;
   
     
 
@@ -301,11 +301,17 @@ private:
           number_of_mov = j[section]["number of movements"];
           
           for (int i = 1; i <= number_of_mov; i++){
+
+            address_name = "address";
+            id_name = "id";
+            vel_name = "velocity";
+            position_name = "position";
+            sleep_name = "sleep";
             
-            position_name = "position" + std::to_string(i);
-            id_name = "id" + std::to_string(i);
-            vel_name = "velocity" + std::to_string(i);
-            sleep_name = "sleep"+ std::to_string(i);
+            // position_name = "position" + std::to_string(i);
+            // id_name = "id" + std::to_string(i);
+            // vel_name = "velocity" + std::to_string(i);
+            // sleep_name = "sleep"+ std::to_string(i);
 
             RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
             if (goal_handle->is_canceling()) {

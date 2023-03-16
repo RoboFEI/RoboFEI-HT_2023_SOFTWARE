@@ -168,6 +168,9 @@ class DecisionNode(Node):
                 self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
                 self._send_goal_future.add_done_callback(self.goal_response_callback)
                 self.last_movement = order
+                self.get_logger().info(f'Last movement {self.last_movement}')
+                sleep(4)
+
             
 
             else: # Robô não caído: espera ele terminar o que ele tava fazendo
