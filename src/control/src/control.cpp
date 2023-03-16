@@ -64,7 +64,7 @@ int sidle = 0;
 int turn = 0;
 int number_of_mov = 0;
 int address_value = 116;
-//std::string address_name = "address";
+std::string address_name = "address";
 std::string id_name = "id";
 std::string vel_name = "velocity";
 std::string position_name = "position";
@@ -199,9 +199,9 @@ private:
             section = "Goodbye";
             break;
           case 8: // não está em sessão nenhuma
-            RCLCPP_INFO(this->get_logger(), "Moving Head");
+            RCLCPP_INFO(this->get_logger(), "Search Ball");
             parameters = false;
-            section = "Mooving Head";
+            section = "Search Ball";
             break;
           case 9: //
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Clockwise");
@@ -301,45 +301,11 @@ private:
           number_of_mov = j[section]["number of movements"];
           
           for (int i = 1; i <= number_of_mov; i++){
-            // address_name = "address";
-
+            
             position_name = "position" + std::to_string(i);
             id_name = "id" + std::to_string(i);
             vel_name = "velocity" + std::to_string(i);
             sleep_name = "sleep"+ std::to_string(i);
-
-            //passing .json information for vectors
-            for(int i=0; i<j[section][position_name].size(); i++) position.push_back(j[section][position_name][i]);
-            for(int i=0; i < j[section][id_name].size(); i++)
-            {
-              id.push_back(j[section][id_name][i]);
-              velocity.push_back(j[section][vel_name][i]);
-            }
-
-            //defining the motors velocity
-            for(int i=0; i<velocity.size(); i++)
-            {
-              RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
-              message_single.id = id[i];
-              message_single.position = velocity[i];
-              message_single.address = 112;
-              publisher_single->publish(message_single);
-            }
-
-
-            usleep(1000); //delay for have time to motors established with the correct velocity
-
-            //send the positions for motors and wait the sleep time
-            RCLCPP_INFO(this->get_logger(), "POSIÇÃO");
-            message.position = position;
-            sleep_sec = j[section][sleep_name];
-            RCLCPP_INFO(this->get_logger(), "Sleep: %d ", sleep_sec);
-            usleep(sleep_sec*1000000);
-
-            //Clear vectors for new data
-            position.clear();
-            id.clear();
-            velocity.clear();
 
             RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
             if (goal_handle->is_canceling()) {
@@ -350,28 +316,28 @@ private:
             }
 
 
-            // address_name = address_name + std::to_string(i);
-            // if (j[section][address_name] == 112){
-            //   RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
-            //   id_name = id_name + std::to_string(i);
-            //   message_single.id = j[section][id_name];
-            //   vel_name = vel_name + std::to_string(i);
-            //   message_single.position = j[section][vel_name];
-            //   message_single.address = j[section][address_name];
-            //   publisher_single->publish(message_single);
-            // }
-            // else if (j[section][address_name] == 116){
-            //   position_name = position_name + std::to_string(i);
-            //   position.push_back(j[section][position_name]);
-            //   message.position = position.front();
-            //   RCLCPP_INFO(this->get_logger(), "POSIÇÃO");
-            //   publisher_->publish(message);
-            //   sleep_name = sleep_name + std::to_string(i);
-            //   sleep_sec = j[section][sleep_name];
-            //   RCLCPP_INFO(this->get_logger(), "Sleep: %d ", sleep_sec);
-            //   usleep(sleep_sec*1000000);
-            //   position.clear();
-            // }
+            address_name = address_name + std::to_string(i);
+            if (j[section][address_name] == 112){
+              RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
+              id_name = id_name + std::to_string(i);
+              message_single.id = j[section][id_name];
+              vel_name = vel_name + std::to_string(i);
+              message_single.position = j[section][vel_name];
+              message_single.address = j[section][address_name];
+              publisher_single->publish(message_single);
+            }
+            else if (j[section][address_name] == 116){
+              position_name = position_name + std::to_string(i);
+              position.push_back(j[section][position_name]);
+              message.position = position.front();
+              RCLCPP_INFO(this->get_logger(), "POSIÇÃO");
+              publisher_->publish(message);
+              sleep_name = sleep_name + std::to_string(i);
+              sleep_sec = j[section][sleep_name];
+              RCLCPP_INFO(this->get_logger(), "Sleep: %d ", sleep_sec);
+              usleep(sleep_sec*1000000);
+              position.clear();
+            }
           
             movements_remaining = number_of_mov - i;
             // Publish feedback
