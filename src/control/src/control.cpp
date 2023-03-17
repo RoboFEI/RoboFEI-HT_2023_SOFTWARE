@@ -199,9 +199,9 @@ private:
             section = "Goodbye";
             break;
           case 8: // não está em sessão nenhuma
-            RCLCPP_INFO(this->get_logger(), "Moving Head");
+            RCLCPP_INFO(this->get_logger(), "Search Ball");
             parameters = false;
-            section = "Mooving Head";
+            section = "Search Ball";
             break;
           case 9: //
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Clockwise");
@@ -299,13 +299,20 @@ private:
           message.id = motors;
 
           number_of_mov = j[section]["number of movements"];
-
+          
           for (int i = 1; i <= number_of_mov; i++){
+
             address_name = "address";
             id_name = "id";
             vel_name = "velocity";
             position_name = "position";
             sleep_name = "sleep";
+            
+            // position_name = "position" + std::to_string(i);
+            // id_name = "id" + std::to_string(i);
+            // vel_name = "velocity" + std::to_string(i);
+            // sleep_name = "sleep"+ std::to_string(i);
+
             RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
             if (goal_handle->is_canceling()) {
                 result->finished = false;
@@ -313,6 +320,8 @@ private:
                 RCLCPP_INFO(this->get_logger(), "Goal canceled");
                 return;
             }
+
+
             address_name = address_name + std::to_string(i);
             if (j[section][address_name] == 112){
               RCLCPP_INFO(this->get_logger(), "VELOCIDADE");

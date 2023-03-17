@@ -162,12 +162,16 @@ class DecisionNode(Node):
         self._action_client.wait_for_server()
 
         if order != self.last_movement: # Se tiver que mudar o movimento
-            if (order == 16 or order == 17 or order == 23): # Robô caído: prioridade é levantar, por isso ele cancela o que estiver fazendo
+            if (order == 16 or order == 17 or order == 23 or self.last_movement == 8): # Robô caído: prioridade é levantar, por isso ele cancela o que estiver fazendo
                 self._send_goal_future = self.goal_handle.cancel_goal_async()
                 self._send_goal_future.add_done_callback(self.cancel_done)
                 self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
                 self._send_goal_future.add_done_callback(self.goal_response_callback)
                 self.last_movement = order
+                self.get_logger().info(f'Last movement {self.last_movement}')
+                sleep(4)
+
+            
 
             else: # Robô não caído: espera ele terminar o que ele tava fazendo
                 if self.finished == True:
