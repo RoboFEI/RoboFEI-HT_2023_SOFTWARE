@@ -24,8 +24,7 @@ sudo apt install python3-colcon-common-extensions
 echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
 sudo apt install python3-pip
 sudo pip3 install opencv-python
-cd src/vision_test/vision_test
-pip install -r requirements.txt 
+pip install -r src/vision_yolov7/vision_yolov7/requirements.txt
 sudo pip install construct
 
 echo -e "${blue} setup new rules for usb names${NC}"
@@ -44,7 +43,3 @@ sudo cp scripts/motors.sh /usr/local/bin/motors
 
 sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 sudo chmod 755 /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
-
-
-
-
