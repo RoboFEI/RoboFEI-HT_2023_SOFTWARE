@@ -49,14 +49,13 @@ int robot_number = 1;
 
 int movement = 1;
 int contador = 0;
-int cont_vision = 2047;
-int cont_vision_up = 1300;
+int cont_vision_sides = 40;
+int cont_vision_up = 40;
 bool stop_gait = true;
 uint32_t valor = 246;
 uint32_t valor_up = 250;
-int neck_sides = 2048;
-int neck_up = 2048;
-int sleep_sec = 0;
+int neck_sides = 1500;
+int neck_up = 1500;
 int parameters = false;
 int parameter_number = 0;
 int walk = 0;
@@ -64,6 +63,9 @@ int sidle = 0;
 int turn = 0;
 int number_of_mov = 0;
 int address_value = 116;
+float sleep_sec = 0;
+
+
 std::string address_name = "address";
 std::string id_name = "id";
 std::string vel_name = "velocity";
@@ -266,20 +268,32 @@ private:
           case 21: //
             RCLCPP_INFO(this->get_logger(), "Centralizando bola à esquerda");
             parameters = false;
+            neck_sides += cont_vision_sides;
+            section = "Stand Still";
             break;
           case 22: //
             RCLCPP_INFO(this->get_logger(), "Centralizando bola à direita");
             parameters = false;
+            
+            neck_sides -= cont_vision_sides;
+            section = "Stand Still";
             break;
           case 23: //
             RCLCPP_INFO(this->get_logger(), "Centralizando bola no pé");
             parameters = false; 
+            neck_up -= cont_vision_up;
+            section = "Stand Still";
+            RCLCPP_INFO(this->get_logger(), "%d", neck_up);
             break;
-          case 24: // Trial Case
-            RCLCPP_INFO(this->get_logger(), "Trial Case");
+          case 24: // Centralizar bola acima
+            RCLCPP_INFO(this->get_logger(), "Centralizando bola acima");
             parameters = false;
-            section = "Trial Case";
+            neck_up += cont_vision_up;
+            section = "Stand Still";
             break;
+          
+          
+
         }
 
         if (parameters){
@@ -333,10 +347,14 @@ private:
               publisher_single->publish(message_single);
             }
             else if (j[section][address_name] == 116){
+
               position_name = position_name + std::to_string(i);
               position.push_back(j[section][position_name]);
+              position[0][18] = neck_sides;
+              position[0][19] = neck_up;
               message.position = position.front();
-              RCLCPP_INFO(this->get_logger(), "POSIÇÃO");
+
+              RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
               publisher_->publish(message);
               sleep_name = sleep_name + std::to_string(i);
               sleep_sec = j[section][sleep_name];
