@@ -291,6 +291,21 @@ private:
             neck_up += cont_vision_up;
             section = "Stand Still";
             break;
+          case 25: // dança
+            RCLCPP_INFO(this->get_logger(), "Dance");
+            parameters = false;
+            section = "Dance";
+            break;
+          case 26: // chute direito angulado
+            RCLCPP_INFO(this->get_logger(), "Open Right Kick");
+            parameters = false;
+            section = "Open Right Kick";
+            break;  
+          case 27: // chute esquerdo angulado
+            RCLCPP_INFO(this->get_logger(), "Open Left Kick");
+            parameters = false;
+            section = "Open Left Kick";
+            break; 
           
           
 
