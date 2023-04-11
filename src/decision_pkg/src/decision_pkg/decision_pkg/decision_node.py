@@ -17,6 +17,7 @@ from custom_interfaces.action import Control
 
 
 # ros2 run decision_pkg decision_action
+# ros2 run decision_pkg decision_node
 # ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 3}"
 # ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 1, secondary_state_mode: 2}"
 # ros2 topic pub -1 /ball_position std_msgs/Bool "data: True"
@@ -26,6 +27,8 @@ TEAM_ROBOFEI = 7
 ROBOT_NUMBER = 0 # Goleiro = 1, jogadores != 1
 LADO = 0 # 0 vira para o lado DIREITO e 1 para o lado ESQUERDO, depende de que lado o nosso time vai começar
 
+# ros2 topic echo /imu/data
+# ros2 topic echo /imu/rpy
 
 
 class DecisionNode(Node):
