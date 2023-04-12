@@ -49,13 +49,14 @@ int robot_number = 1;
 
 int movement = 1;
 int contador = 0;
-int cont_vision_sides = 40;
-int cont_vision_up = 40;
+int cont_vision = 2047;
+int cont_vision_up = 1300;
 bool stop_gait = true;
 uint32_t valor = 246;
 uint32_t valor_up = 250;
-int neck_sides = 1500;
-int neck_up = 1500;
+int neck_sides = 2048;
+int neck_up = 2048;
+float sleep_sec = 0;
 int parameters = false;
 int parameter_number = 0;
 int walk = 0;
@@ -63,7 +64,6 @@ int sidle = 0;
 int turn = 0;
 int number_of_mov = 0;
 int address_value = 116;
-float sleep_sec = 0;
 
 
 std::string address_name = "address";
@@ -291,9 +291,21 @@ private:
             neck_up += cont_vision_up;
             section = "Stand Still";
             break;
-          
-          
-
+          case 25: // dança
+            RCLCPP_INFO(this->get_logger(), "Dance");
+            parameters = false;
+            section = "Dance";
+            break;
+          case 26: // chute direito angulado
+            RCLCPP_INFO(this->get_logger(), "Open Right Kick");
+            parameters = false;
+            section = "Open Right Kick";
+            break;  
+          case 27: // chute esquerdo angulado
+            RCLCPP_INFO(this->get_logger(), "Open Left Kick");
+            parameters = false;
+            section = "Open Left Kick";
+            break;    
         }
 
         if (parameters){
