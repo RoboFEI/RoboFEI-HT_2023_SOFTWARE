@@ -1,10 +1,5 @@
 ####################################################################################################################################
-# ros2 run vision_pkg vision
-#
-# Para ver o que a camera esta vendo:
-# ros2 run vision_yolov7 detect --source 2 
-#
-# ros2 topic pub -1 /neck_position custom_interfaces/NeckPosition "{position19: 2047, position20: 1050}"
+# ros2 run vision_yolov7 detect
 ####################################################################################################################################
 from telnetlib import NOP
 import rclpy
@@ -50,7 +45,7 @@ from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 from models import *
 
-PATH_TO_WEIGHTS = 'src/vision_yolov7/vision_yolov7/peso_padrao/best.pt'
+PATH_TO_WEIGHTS = 'src/vision_yolov7/vision_yolov7/peso_tiny/best.pt'
 THRESHOLD = 0.45
 
 parser = argparse.ArgumentParser()
@@ -122,8 +117,6 @@ class ballStatus(Node):
         view_img = check_imshow()
         cudnn.benchmark = True  # set True to speed up constant image size inference
         dataset = LoadStreams(source, img_size=imgsz, stride=stride)
-        # else:
-        #     dataset = LoadImages(source, img_size=imgsz, stride=stride)
 
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names
@@ -165,26 +158,34 @@ class ballStatus(Node):
             if classify:
                 pred = apply_classifier(pred, modelc, img, im0s)
 
-            # Process detections
-            #for i, det in enumerate(pred):  # detections per image
-            # if webcam:  # batch_size >= 1
             im0, frame = im0s[0].copy(), dataset.count
-            # else:
-            #     p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
             
             det = pred[0]
             # Directories
             p = path[0]
             p = Path(p)  # to Path
-            # save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
-            # (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
-            # save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
             save_img = False
             save_txt = False
             # txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # img.txt
 
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             s=0
+            msg_ball.detected =False
+            msg_ball.left = False
+            msg_ball.center_left = False
+            msg_ball.center_right = False
+            msg_ball.right = False
+            msg_ball.med = False
+            msg_ball.far = False
+            msg_ball.close = False
+            msg_robot.detected =False
+            msg_robot.left = False
+            msg_robot.center_left = False
+            msg_robot.center_right = False
+            msg_robot.right = False
+            msg_robot.med = False
+            msg_robot.far = False
+            msg_robot.close = False
             if len(det): # Entra aqui se detectou a bola ou robô
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
@@ -226,53 +227,36 @@ class ballStatus(Node):
                                     #Bola a esquerda
                                 if (int(c1_ball) <= self.config.x_left):
                                     msg_ball.left = True
-                                    msg_ball.center_left = False
-                                    msg_ball.center_right = False
-                                    msg_ball.right = False
                                     self.publisher_.publish(msg_ball)
                                     print("Bola à Esquerda")
 
                                 #Bola centro esquerda
                                 elif (int(c1_ball) > self.config.x_left and int(c1_ball) < self.config.x_center):
                                     msg_ball.center_left = True
-                                    msg_ball.left = False
-                                    msg_ball.center_right = False
-                                    msg_ball.right = False
                                     self.publisher_.publish(msg_ball)
                                     print("Bola Centralizada a Esquerda")
 
                                 #Bola centro direita
                                 elif (int(c1_ball) < self.config.x_right and int(c1_ball) > self.config.x_center):
                                     msg_ball.center_right = True
-                                    msg_ball.center_left = False
-                                    msg_ball.left = False
-                                    msg_ball.right = False
                                     self.publisher_.publish(msg_ball)
                                     print("Bola Centralizada a Direita")
 
                                 #Bola a direita
                                 else:
                                     msg_ball.right = True
-                                    msg_ball.center_right = False
-                                    msg_ball.center_left = False
-                                    msg_ball.left = False
                                     self.publisher_.publish(msg_ball)
                                     print("Bola à Direita")
-                                    self.config.max_count_lost_frame
                                 
                                 #Bola Perto
                                 if (int(c2_ball) > self.config.y_chute):
                                     msg_ball.close = True
-                                    msg_ball.far = False
-                                    msg_ball.med = False
                                     self.publisher_.publish(msg_ball)
                                     print("Bola Perto")
 
                                 #Bola Longe
                                 elif (int(c2_ball) <= self.config.y_longe):
                                     msg_ball.far = True
-                                    msg_ball.close = False
-                                    msg_ball.med = False
                                     self.publisher_.publish(msg_ball)
                                     print("Bola Longe")
                                     self.config.max_count_lost_frame
@@ -281,21 +265,9 @@ class ballStatus(Node):
                                 # elif (int(c2) > self.config.y_longe and int(c2) < self.config.y_chute):
                                 else:
                                     msg_ball.med = True
-                                    msg_ball.far = False
-                                    msg_ball.close = False
                                     self.publisher_.publish(msg_ball)
                                     print("Bola ao Centro")
 
-                            else: 
-                                msg_ball.detected =False
-                                msg_ball.left = False
-                                msg_ball.center_left = False
-                                msg_ball.center_right = False
-                                msg_ball.right = False
-                                msg_ball.med = False
-                                msg_ball.far = False
-                                msg_ball.close = False
-                                self.publisher_.publish(msg_ball)
 
                             if self.robot:
                                 msg_robot.detected = True
@@ -303,116 +275,58 @@ class ballStatus(Node):
                                     #Bola a esquerda
                                 if (int(c1_robot) <= self.config.x_left):
                                     msg_robot.left = True
-                                    msg_robot.center_left = False
-                                    msg_robot.center_right = False
-                                    msg_robot.right = False
                                     self.publisher_robot.publish(msg_robot)
                                     print("Robô à Esquerda")
 
                                 #Bola centro esquerda
                                 elif (int(c1_robot) > self.config.x_left and int(c1_robot) < self.config.x_center):
                                     msg_robot.center_left = True
-                                    msg_robot.left = False
-                                    msg_robot.center_right = False
-                                    msg_robot.right = False
                                     self.publisher_robot.publish(msg_robot)
                                     print("Robô Centralizada a Esquerda")
 
                                 #Bola centro direita
                                 elif (int(c1_robot) < self.config.x_right and int(c1_robot) > self.config.x_center):
                                     msg_robot.center_right = True
-                                    msg_robot.center_left = False
-                                    msg_robot.left = False
-                                    msg_robot.right = False
                                     self.publisher_robot.publish(msg_robot)
                                     print("Robô Centralizada a Direita")
 
                                 #Bola a direita
                                 else:
                                     msg_robot.right = True
-                                    msg_robot.center_right = False
-                                    msg_robot.center_left = False
-                                    msg_robot.left = False
                                     self.publisher_robot.publish(msg_robot)
                                     print("Robô à Direita")
-                                    self.config.max_count_lost_frame
                                 
                                 #Bola Perto
                                 if (int(c2_robot) > self.config.y_chute):
                                     msg_robot.close = True
-                                    msg_robot.far = False
-                                    msg_robot.med = False
                                     self.publisher_robot.publish(msg_robot)
                                     print("Robô Perto")
 
                                 #Bola Longe
                                 elif (int(c2_robot) <= self.config.y_longe):
                                     msg_robot.far = True
-                                    msg_robot.close = False
-                                    msg_robot.med = False
                                     self.publisher_robot.publish(msg_robot)
                                     print("Robô Longe")
-                                    self.config.max_count_lost_frame
 
                                 #Bola ao centro
                                 # elif (int(c2) > self.config.y_longe and int(c2) < self.config.y_chute):
                                 else:
                                     msg_robot.med = True
-                                    msg_robot.far = False
-                                    msg_robot.close = False
                                     self.publisher_robot.publish(msg_robot)
                                     print("Robô ao Centro")
 
-                            else: # Não achou robo
-                                msg_robot.detected =False
-                                msg_robot.left = False
-                                msg_robot.center_left = False
-                                msg_robot.center_right = False
-                                msg_robot.right = False
-                                msg_robot.med = False
-                                msg_robot.far = False
-                                msg_robot.close = False
-                                self.publisher_robot.publish(msg_robot)
-
-            else:
-                msg_ball.detected =False
-                msg_ball.left = False
-                msg_ball.center_left = False
-                msg_ball.center_right = False
-                msg_ball.right = False
-                msg_ball.med = False
-                msg_ball.far = False
-                msg_ball.close = False
-                self.publisher_.publish(msg_ball)
-                msg_robot.detected =False
-                msg_robot.left = False
-                msg_robot.center_left = False
-                msg_robot.center_right = False
-                msg_robot.right = False
-                msg_robot.med = False
-                msg_robot.far = False
-                msg_robot.close = False
-                self.publisher_robot.publish(msg_robot)
+            self.publisher_.publish(msg_ball)
+            self.publisher_robot.publish(msg_robot)
                                 
-
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
             # Stream results
-            # winName = 'Prometheus'
-            # cv2.namedWindow(winName, cv2.WINDOW_NORMAL)
-            # cv2.setWindowProperty(winName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             if view_img:
-                im0 = cv2.resize(im0, (700, 900)) 
                 cv2.imshow("RoboFEI", im0)
                 if cv2.waitKey(25) & 0xFF == ord('q'):
                     NOP
-                    
-            # print(self.status)
 
-            #print(f'Done. ({time.time() - t0:.3f}s)')
-
-            
 
 
 def main(args=None):
