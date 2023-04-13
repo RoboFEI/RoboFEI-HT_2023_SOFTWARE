@@ -1,10 +1,5 @@
 ####################################################################################################################################
-# ros2 run vision_pkg vision
-#
-# Para ver o que a camera esta vendo:
-# ros2 run vision_yolov7 detect --source 2 
-#
-# ros2 topic pub -1 /neck_position custom_interfaces/NeckPosition "{position19: 2047, position20: 1050}"
+# ros2 run vision_yolov7 detect
 ####################################################################################################################################
 from telnetlib import NOP
 import rclpy
@@ -163,7 +158,6 @@ class ballStatus(Node):
             if classify:
                 pred = apply_classifier(pred, modelc, img, im0s)
 
-            # Process detections
             im0, frame = im0s[0].copy(), dataset.count
             
             det = pred[0]
@@ -176,14 +170,6 @@ class ballStatus(Node):
 
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             s=0
-            msg_robot.detected =False
-            self.robot_left = 0
-            self.robot_center_left = 0
-            self.robot_center_right = 0
-            self.robot_right = 0
-            self.robot_med = 0
-            self.robot_far = 0
-            self.robot_close = 0
             msg_ball.detected =False
             msg_ball.left = False
             msg_ball.center_left = False
@@ -192,7 +178,14 @@ class ballStatus(Node):
             msg_ball.med = False
             msg_ball.far = False
             msg_ball.close = False
-
+            msg_robot.detected =False
+            msg_robot.left = False
+            msg_robot.center_left = False
+            msg_robot.center_right = False
+            msg_robot.right = False
+            msg_robot.med = False
+            msg_robot.far = False
+            msg_robot.close = False
             if len(det): # Entra aqui se detectou a bola ou robô
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
@@ -223,37 +216,44 @@ class ballStatus(Node):
                                     #Bola a esquerda
                                 if (int(c1_ball) <= self.config.x_left):
                                     msg_ball.left = True
+                                    self.publisher_.publish(msg_ball)
                                     print("Bola à Esquerda")
 
                                 #Bola centro esquerda
                                 elif (int(c1_ball) > self.config.x_left and int(c1_ball) < self.config.x_center):
                                     msg_ball.center_left = True
+                                    self.publisher_.publish(msg_ball)
                                     print("Bola Centralizada a Esquerda")
 
                                 #Bola centro direita
                                 elif (int(c1_ball) < self.config.x_right and int(c1_ball) > self.config.x_center):
                                     msg_ball.center_right = True
+                                    self.publisher_.publish(msg_ball)
                                     print("Bola Centralizada a Direita")
 
                                 #Bola a direita
                                 else:
                                     msg_ball.right = True
+                                    self.publisher_.publish(msg_ball)
                                     print("Bola à Direita")
                                 
                                 #Bola Perto
                                 if (int(c2_ball) > self.config.y_chute):
                                     msg_ball.close = True
+                                    self.publisher_.publish(msg_ball)
                                     print("Bola Perto")
 
                                 #Bola Longe
                                 elif (int(c2_ball) <= self.config.y_longe):
                                     msg_ball.far = True
+                                    self.publisher_.publish(msg_ball)
                                     print("Bola Longe")
 
                                 #Bola ao centro
                                 # elif (int(c2) > self.config.y_longe and int(c2) < self.config.y_chute):
                                 else:
                                     msg_ball.med = True
+                                    self.publisher_.publish(msg_ball)
                                     print("Bola ao Centro")
 
 
@@ -267,71 +267,59 @@ class ballStatus(Node):
                                 print("Robô detectada '%s'" % msg_robot.detected)
                                     #Bola a esquerda
                                 if (int(c1_robot) <= self.config.x_left):
-                                    self.robot_left+=1
+                                    msg_robot.left = True
+                                    self.publisher_robot.publish(msg_robot)
                                     print("Robô à Esquerda")
 
                                 #Bola centro esquerda
                                 elif (int(c1_robot) > self.config.x_left and int(c1_robot) < self.config.x_center):
-                                    self.robot_center_left+=1
-                                    print("Robô Centralizada à Esquerda")
+                                    msg_robot.center_left = True
+                                    self.publisher_robot.publish(msg_robot)
+                                    print("Robô Centralizada a Esquerda")
 
                                 #Bola centro direita
                                 elif (int(c1_robot) < self.config.x_right and int(c1_robot) > self.config.x_center):
-                                    self.robot_center_right+=1
-                                    print("Robô Centralizada à Direita")
+                                    msg_robot.center_right = True
+                                    self.publisher_robot.publish(msg_robot)
+                                    print("Robô Centralizada a Direita")
 
                                 #Bola a direita
                                 else:
-                                    self.robot_right+=1
+                                    msg_robot.right = True
+                                    self.publisher_robot.publish(msg_robot)
                                     print("Robô à Direita")
                                 
                                 #Bola Perto
                                 if (int(c2_robot) > self.config.y_chute):
-                                    self.robot_close+=1
+                                    msg_robot.close = True
+                                    self.publisher_robot.publish(msg_robot)
                                     print("Robô Perto")
 
                                 #Bola Longe
                                 elif (int(c2_robot) <= self.config.y_longe):
-                                    self.robot_far+=1
+                                    msg_robot.far = True
+                                    self.publisher_robot.publish(msg_robot)
                                     print("Robô Longe")
 
                                 #Bola ao centro
                                 # elif (int(c2) > self.config.y_longe and int(c2) < self.config.y_chute):
                                 else:
-                                    self.robot_med+=1
+                                    msg_robot.med = True
+                                    self.publisher_robot.publish(msg_robot)
                                     print("Robô ao Centro")
 
-                                
             self.publisher_.publish(msg_ball)
-                
-            msg_robot.left = self.robot_left
-            msg_robot.center_left = self.robot_center_left
-            msg_robot.center_right = self.robot_center_right
-            msg_robot.right = self.robot_right
-            msg_robot.med = self.robot_med
-            msg_robot.far = self.robot_far
-            msg_robot.close = self.robot_close
             self.publisher_robot.publish(msg_robot)
                                 
-
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
             # Stream results
-            # winName = 'Prometheus'
-            # cv2.namedWindow(winName, cv2.WINDOW_NORMAL)
-            # cv2.setWindowProperty(winName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             if view_img:
-                # im0 = cv2.resize(im0, (700, 900)) 
                 cv2.imshow("RoboFEI", im0)
                 if cv2.waitKey(25) & 0xFF == ord('q'):
                     NOP
-                    
-            # print(self.status)
 
-            #print(f'Done. ({time.time() - t0:.3f}s)')
-
-            
 
 def main(args=None):
     rclpy.init(args=args)
