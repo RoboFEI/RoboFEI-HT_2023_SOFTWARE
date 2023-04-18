@@ -52,7 +52,7 @@ from models import *
 
 PATH_TO_WEIGHTS = 'src/vision_yolov7/vision_yolov7/peso_tiny/best.pt'
 THRESHOLD = 0.45
-OUR_ROBOT_COLOR = "R" # B para azul
+OUR_ROBOT_COLOR = "B" # B para azul
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--weights', nargs='+', type=str, default='yolov7.pt', help='model.pt path(s)')
@@ -186,6 +186,14 @@ class ballStatus(Node):
             msg_robot_friend.med = 0
             msg_robot_friend.far = 0
             msg_robot_friend.close = 0
+            msg_robot_enemy.detected =False
+            msg_robot_enemy.left = 0
+            msg_robot_enemy.center_left = 0
+            msg_robot_enemy.center_right = 0
+            msg_robot_enemy.right = 0
+            msg_robot_enemy.med = 0
+            msg_robot_enemy.far = 0
+            msg_robot_enemy.close = 0
             msg_ball.detected = False
             msg_ball.left = False
             msg_ball.center_left = False
@@ -343,14 +351,52 @@ class ballStatus(Node):
                                         msg_robot_friend.med+=1
                                         print("Robô Amigo ao Centro")
                                 else:
+                                    msg_robot_enemy.detected = True
+                                    
                                     label_list['robot'].append([xyxy,im0, f'enemy robot {conf:.2f}'])
+
+                                    print("Robô Inimigo detectado '%s'" % msg_robot_enemy.detected)
+                                        #Bola a esquerda
+                                    if (int(c1_robot) <= self.config.x_left):
+                                        msg_robot_enemy.left+=1
+                                        print("Robô Inimigo à Esquerda")
+
+                                    #Bola centro esquerda
+                                    elif (int(c1_robot) > self.config.x_left and int(c1_robot) < self.config.x_center):
+                                        msg_robot_enemy.center_left+=1
+                                        print("Robô Inimigo Centralizada à Esquerda")
+
+                                    #Bola centro direita
+                                    elif (int(c1_robot) < self.config.x_right and int(c1_robot) > self.config.x_center):
+                                        msg_robot_enemy.center_right+=1
+                                        print("Robô Inimigo Centralizada à Direita")
+
+                                    #Bola a direita
+                                    else:
+                                        msg_robot_enemy.right+=1
+                                        print("Robô Inimigo à Direita")
+                                    
+                                    #Bola Perto
+                                    if (int(c2_robot) > self.config.y_chute):
+                                        msg_robot_enemy.close+=1
+                                        print("Robô Inimigo Perto")
+
+                                    #Bola Longe
+                                    elif (int(c2_robot) <= self.config.y_longe):
+                                        msg_robot_enemy.far+=1
+                                        print("Robô Inimigo Longe")
+
+                                    #Bola ao centro
+                                    else:
+                                        msg_robot_enemy.med+=1
+                                        print("Robô Inimigo ao Centro")
                                     
 
                                 
             self.publisher_.publish(msg_ball)
                 
-            self.publisher_robot_enemy.publish(msg_robot_friend)
-                                
+            self.publisher_robot_enemy.publish(msg_robot_enemy)
+            self.publisher_robot_friend.publish(msg_robot_friend)
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
@@ -367,14 +413,14 @@ class ballStatus(Node):
                     for i in range(len(label_list["robot"])):
                         plot_one_box(label_list["robot"][i][0], label_list["robot"][i][1], label=label_list["robot"][i][2], color=colors[int(cls)], line_thickness=1)
                 cv2.imshow("RoboFEI", im0)
-                if len(img_robots) > 0:
-                    for i in range(len(img_robots)):
-                        print("BLUE AREA : " + str(np.sum(img_robots[i][0])) + "CONF: " + str(conf_list[i]))
-                        print("RED AREA: " + str(np.sum(img_robots[i][1])) + "CONF: " + str(conf_list[i]))
-                        name_blue = 'BLUE ' + str(i+1)
-                        name_red = 'RED ' + str(i+1)
-                        cv2.imshow(name_blue, img_robots[i][0])
-                        cv2.imshow(name_red, img_robots[i][1])
+                # if len(img_robots) > 0:
+                #     for i in range(len(img_robots)):
+                #         print("BLUE AREA : " + str(np.sum(img_robots[i][0])) + "CONF: " + str(conf_list[i]))
+                #         print("RED AREA: " + str(np.sum(img_robots[i][1])) + "CONF: " + str(conf_list[i]))
+                #         name_blue = 'BLUE ' + str(i+1)
+                #         name_red = 'RED ' + str(i+1)
+                #         cv2.imshow(name_blue, img_robots[i][0])
+                #         cv2.imshow(name_red, img_robots[i][1])
 
                 if cv2.waitKey(25) & 0xFF == ord('q'):
                     NOP
