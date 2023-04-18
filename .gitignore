@@ -6,7 +6,3 @@ runs
 .vscode
 src/vision_yolov7/vision_yolov7/peso_padrao
 src/vision_yolov7/vision_yolov7/peso_yolox
-src/vision_vitdet/vision_vitdet/detectron2/model_final_cascade.pth
-src/vision_vitdet/vision_vitdet/detectron2/model_final_mask.pth
-src/vision_vitdet/vision_vitdet/detectron2/model_final_mask_rcnn.pth
-src/vision_vitdet/vision_vitdet/detectron2/Telstar_Mechta
