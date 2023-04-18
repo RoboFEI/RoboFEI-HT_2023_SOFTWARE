@@ -27,6 +27,14 @@ sudo pip3 install opencv-python
 pip install -r src/vision_yolov7/vision_yolov7/requirements.txt
 sudo pip install construct
 
+echo -e "${blue} Instalação das bibliotecas para a ViTDet${NC}"
+pip3 install timm
+python3 install torch torchvision
+pyhton3 -m pip3 install -e ./RoboFEI-HT_2023_SOFTWARE/src/vision_vitdet/vision_vitdet/detectron2
+pip3 install opencv-python-headless
+pip3 install -U scikit-learn
+
+
 echo -e "${blue} setup new rules for usb names${NC}"
 sudo cp robot-usb-ports.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules

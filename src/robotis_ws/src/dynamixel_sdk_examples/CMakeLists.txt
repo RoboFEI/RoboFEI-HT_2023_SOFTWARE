@@ -38,17 +38,23 @@ ament_target_dependencies(only_one_motor
   rclcpp
 )
 
+<<<<<<< HEAD
 add_executable(minimal_pub src/minimal_pub.cpp)
 ament_target_dependencies(minimal_pub
   custom_interfaces
   rclcpp
 )
+=======
+>>>>>>> IC_Luana
 
 # Install
 install(TARGETS
   read_write_node
   only_one_motor
+<<<<<<< HEAD
   minimal_pub
+=======
+>>>>>>> IC_Luana
   DESTINATION lib/${PROJECT_NAME}
 )
 

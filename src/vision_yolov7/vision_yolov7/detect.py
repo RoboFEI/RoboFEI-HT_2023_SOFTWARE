@@ -12,6 +12,7 @@ from rclpy.node import Node
 
 #from std_msgs.msg import String
 from custom_interfaces.msg import Vision
+from custom_interfaces.msg import VisionRobot
 
 
 import sys
@@ -36,7 +37,6 @@ import argparse
 import time
 from pathlib import Path
 
-import cv2
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
@@ -50,7 +50,9 @@ from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 from models import *
 
-PATH_TO_WEIGHTS = 'src/vision_yolov7/vision_yolov7/best.pt'
+PATH_TO_WEIGHTS = 'src/vision_yolov7/vision_yolov7/peso_tiny/best.pt'
+THRESHOLD = 0.45
+OUR_ROBOT_COLOR = "B" # B para azul
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--weights', nargs='+', type=str, default='yolov7.pt', help='model.pt path(s)')
@@ -58,7 +60,7 @@ parser.add_argument('--source', type=str, default='/dev/camera', help='source') 
 parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
 parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
 parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
-parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
 parser.add_argument('--view-img', action='store_true', help='display results')
 parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
 parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
@@ -81,16 +83,19 @@ class ballStatus(Node):
         super().__init__('detect')
         self.config = config
         self.publisher_ = self.create_publisher(Vision, '/ball_position', 10)
+        self.publisher_robot_enemy = self.create_publisher(VisionRobot, '/robot_position_enemy', 10)
+        self.publisher_robot_friend = self.create_publisher(VisionRobot, '/robot_position_friend', 10)
         timer_period = 0.008  # seconds
         self.cont_vision = 0
-        self.status = 0
         self.weights = PATH_TO_WEIGHTS
         self.timer = self.create_timer(timer_period, self.detect())
         self.update = True
 
 
     def detect(self):
-        msg=Vision()
+        msg_ball = Vision()
+        msg_robot_friend = VisionRobot()
+        msg_robot_enemy = VisionRobot()
         source, weights, view_img, save_txt, imgsz, trace = opt.source, self.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
 
         set_logging()
@@ -118,8 +123,6 @@ class ballStatus(Node):
         view_img = check_imshow()
         cudnn.benchmark = True  # set True to speed up constant image size inference
         dataset = LoadStreams(source, img_size=imgsz, stride=stride)
-        # else:
-        #     dataset = LoadImages(source, img_size=imgsz, stride=stride)
 
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names
@@ -134,6 +137,7 @@ class ballStatus(Node):
         t0 = time.time()
 
         for path, img, im0s, vid_cap in dataset:
+            self.left = []
             img = torch.from_numpy(img).to(device)
             img = img.half() if half else img.float()  # uint8 to fp16/32
             img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -162,33 +166,54 @@ class ballStatus(Node):
                 pred = apply_classifier(pred, modelc, img, im0s)
 
             # Process detections
-            #for i, det in enumerate(pred):  # detections per image
-            # if webcam:  # batch_size >= 1
             im0, frame = im0s[0].copy(), dataset.count
-            # else:
-            #     p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
             
             det = pred[0]
             # Directories
             p = path[0]
             p = Path(p)  # to Path
-            # save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
-            # (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
-            # save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
             save_img = False
             save_txt = False
             # txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # img.txt
 
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-            if len(det): # Entra nessa função se detectou a bola
+            s=0
+            msg_robot_friend.detected =False
+            msg_robot_friend.left = 0
+            msg_robot_friend.center_left = 0
+            msg_robot_friend.center_right = 0
+            msg_robot_friend.right = 0
+            msg_robot_friend.med = 0
+            msg_robot_friend.far = 0
+            msg_robot_friend.close = 0
+            msg_robot_enemy.detected =False
+            msg_robot_enemy.left = 0
+            msg_robot_enemy.center_left = 0
+            msg_robot_enemy.center_right = 0
+            msg_robot_enemy.right = 0
+            msg_robot_enemy.med = 0
+            msg_robot_enemy.far = 0
+            msg_robot_enemy.close = 0
+            msg_ball.detected = False
+            msg_ball.left = False
+            msg_ball.center_left = False
+            msg_ball.center_right = False
+            msg_ball.right = False
+            msg_ball.med = False
+            msg_ball.far = False
+            msg_ball.close = False
+            img_robots = list()
+            conf_list = list()
+            label_list = dict()
+
+            if len(det): # Entra aqui se detectou a bola ou robô
                 # Rescale boxes from img_size to im0 size
-                #print("Tensor det:" + str(det))
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-                BallFound = True
-                self.status = 1
                 s=1
                 # Write results
+                print("AAAAAAAAAAAAAAAAAAA")
                 for *xyxy, conf, cls in reversed(det):
+                    print("BBBBBBBBBBBBBBBBB")
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if opt.save_conf else (cls, *xywh)  # label format
@@ -197,16 +222,181 @@ class ballStatus(Node):
 
                     if save_img or view_img:  # Add bbox to image
                         label = f'{names[int(cls)]} {conf:.2f}'
-                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
-                        c1= (xyxy[0] + xyxy[2]) / 2
-                        c2 = (xyxy[1] +  xyxy[3]) / 2
-                        raio = (xyxy[2] - xyxy[0]) / 2
-                        cv2.circle(im0, (int(c1), int(c2)), int(abs(raio)), (255, 0, 0), 4)
+                        label_name = names[int(cls)]
+                        
+                        if conf>THRESHOLD:
+                            if label_name == "ball":
+                                # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
 
-            else:
-                self.status = 0
-                self.cont_vision = 0
-                s=0
+                                label_list['ball'] = [xyxy, im0]
+
+                                c1_ball = (xyxy[0] + xyxy[2]) / 2
+                                c2_ball = (xyxy[1] +  xyxy[3]) / 2
+                                raio_ball = (xyxy[2] - xyxy[0]) / 2
+                                cv2.circle(im0, (int(c1_ball), int(c2_ball)), int(abs(raio_ball)), (255, 0, 0), 2)
+
+                                msg_ball.detected = True
+                                print("Bola detectada '%s'" % msg_ball.detected)
+                                    #Bola a esquerda
+                                if (int(c1_ball) <= self.config.x_left):
+                                    msg_ball.left = True
+                                    print("Bola à Esquerda")
+
+                                #Bola centro esquerda
+                                elif (int(c1_ball) > self.config.x_left and int(c1_ball) < self.config.x_center):
+                                    msg_ball.center_left = True
+                                    print("Bola Centralizada a Esquerda")
+
+                                #Bola centro direita
+                                elif (int(c1_ball) < self.config.x_right and int(c1_ball) > self.config.x_center):
+                                    msg_ball.center_right = True
+                                    print("Bola Centralizada a Direita")
+
+                                #Bola a direita
+                                else:
+                                    msg_ball.right = True
+                                    print("Bola à Direita")
+                                
+                                #Bola Perto
+                                if (int(c2_ball) > self.config.y_chute):
+                                    msg_ball.close = True
+                                    print("Bola Perto")
+
+                                #Bola Longe
+                                elif (int(c2_ball) <= self.config.y_longe):
+                                    msg_ball.far = True
+                                    print("Bola Longe")
+
+                                #Bola ao centro
+                                # elif (int(c2) > self.config.y_longe and int(c2) < self.config.y_chute):
+                                else:
+                                    msg_ball.med = True
+                                    print("Bola ao Centro")
+
+
+                            if label_name == "robot":
+                                print("OOOOOOOOOOOO")
+                                label_list.setdefault("robot", [])
+                                # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1) 
+                                c1_robot = (xyxy[0] + xyxy[2]) / 2
+                                c2_robot = (xyxy[1] +  xyxy[3]) / 2
+                                raio_robot = (xyxy[2] - xyxy[0]) / 2
+
+                                robot_img = im0[int(xyxy[1]):int(xyxy[3]), int(xyxy[0]):int(xyxy[2])]
+
+                                hsv = cv2.cvtColor(robot_img, cv2.COLOR_BGR2HSV) 
+                                lower_blue = np.array([85, 100, 100])
+                                upper_blue = np.array([130, 255, 255])
+                                lower_red = np.array([160, 100, 100])
+                                upper_red = np.array([179, 255, 255])
+
+                                mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
+                                mask_red = cv2.inRange(hsv, lower_red, upper_red)
+                                
+                                mask_blue = np.array(mask_blue/mask_blue.max())
+                                mask_red = np.array(mask_red/mask_red.max())
+
+                                mask_blue[np.isnan(mask_blue)] = 0
+                                mask_red[np.isnan(mask_red)] = 0 
+
+                                blue_sum = np.sum(mask_blue) 
+                                red_sum = np.sum(mask_red)
+
+                                img_robots.append([mask_blue, mask_red])
+                                conf_list.append(conf)
+                                
+                                print("BLUE: " + str(blue_sum) + "CONF: " + str(conf))
+                                print("RED: " + str(red_sum) + "CONF: " + str(conf))
+                                
+
+                                if (blue_sum > red_sum and OUR_ROBOT_COLOR.upper() == "B") or (red_sum>blue_sum and OUR_ROBOT_COLOR.upper() != "B"):
+                                    msg_robot_friend.detected = True
+                                    
+                                    label_list['robot'].append([xyxy,im0, f'friend robot {conf:.2f}'])
+
+                                    print("Robô Amigo detectado '%s'" % msg_robot_friend.detected)
+                                        #Bola a esquerda
+                                    if (int(c1_robot) <= self.config.x_left):
+                                        msg_robot_friend.left+=1
+                                        print("Robô Amigo à Esquerda")
+
+                                    #Bola centro esquerda
+                                    elif (int(c1_robot) > self.config.x_left and int(c1_robot) < self.config.x_center):
+                                        msg_robot_friend.center_left+=1
+                                        print("Robô Amigo Centralizada à Esquerda")
+
+                                    #Bola centro direita
+                                    elif (int(c1_robot) < self.config.x_right and int(c1_robot) > self.config.x_center):
+                                        msg_robot_friend.center_right+=1
+                                        print("Robô Amigo Centralizada à Direita")
+
+                                    #Bola a direita
+                                    else:
+                                        msg_robot_friend.right+=1
+                                        print("Robô Amigo à Direita")
+                                    
+                                    #Bola Perto
+                                    if (int(c2_robot) > self.config.y_chute):
+                                        msg_robot_friend.close+=1
+                                        print("Robô Amigo Perto")
+
+                                    #Bola Longe
+                                    elif (int(c2_robot) <= self.config.y_longe):
+                                        msg_robot_friend.far+=1
+                                        print("Robô Amigo Longe")
+
+                                    #Bola ao centro
+                                    # elif (int(c2) > self.config.y_longe and int(c2) < self.config.y_chute):
+                                    else:
+                                        msg_robot_friend.med+=1
+                                        print("Robô Amigo ao Centro")
+                                else:
+                                    msg_robot_enemy.detected = True
+                                    
+                                    label_list['robot'].append([xyxy,im0, f'enemy robot {conf:.2f}'])
+
+                                    print("Robô Inimigo detectado '%s'" % msg_robot_enemy.detected)
+                                        #Bola a esquerda
+                                    if (int(c1_robot) <= self.config.x_left):
+                                        msg_robot_enemy.left+=1
+                                        print("Robô Inimigo à Esquerda")
+
+                                    #Bola centro esquerda
+                                    elif (int(c1_robot) > self.config.x_left and int(c1_robot) < self.config.x_center):
+                                        msg_robot_enemy.center_left+=1
+                                        print("Robô Inimigo Centralizada à Esquerda")
+
+                                    #Bola centro direita
+                                    elif (int(c1_robot) < self.config.x_right and int(c1_robot) > self.config.x_center):
+                                        msg_robot_enemy.center_right+=1
+                                        print("Robô Inimigo Centralizada à Direita")
+
+                                    #Bola a direita
+                                    else:
+                                        msg_robot_enemy.right+=1
+                                        print("Robô Inimigo à Direita")
+                                    
+                                    #Bola Perto
+                                    if (int(c2_robot) > self.config.y_chute):
+                                        msg_robot_enemy.close+=1
+                                        print("Robô Inimigo Perto")
+
+                                    #Bola Longe
+                                    elif (int(c2_robot) <= self.config.y_longe):
+                                        msg_robot_enemy.far+=1
+                                        print("Robô Inimigo Longe")
+
+                                    #Bola ao centro
+                                    else:
+                                        msg_robot_enemy.med+=1
+                                        print("Robô Inimigo ao Centro")
+                                    
+
+                                
+            self.publisher_.publish(msg_ball)
+                
+            self.publisher_robot_enemy.publish(msg_robot_enemy)
+            self.publisher_robot_friend.publish(msg_robot_friend)
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
@@ -216,7 +406,22 @@ class ballStatus(Node):
             # cv2.namedWindow(winName, cv2.WINDOW_NORMAL)
             # cv2.setWindowProperty(winName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             if view_img:
-                cv2.imshow(str(0), im0)
+                # im0 = cv2.resize(im0, (700, 900))
+                if 'ball' in label_list:
+                    plot_one_box(label_list["ball"][0], label_list["ball"][1], label='ball', color=colors[int(cls)], line_thickness=1)
+                if 'robot' in label_list:
+                    for i in range(len(label_list["robot"])):
+                        plot_one_box(label_list["robot"][i][0], label_list["robot"][i][1], label=label_list["robot"][i][2], color=colors[int(cls)], line_thickness=1)
+                cv2.imshow("RoboFEI", im0)
+                # if len(img_robots) > 0:
+                #     for i in range(len(img_robots)):
+                #         print("BLUE AREA : " + str(np.sum(img_robots[i][0])) + "CONF: " + str(conf_list[i]))
+                #         print("RED AREA: " + str(np.sum(img_robots[i][1])) + "CONF: " + str(conf_list[i]))
+                #         name_blue = 'BLUE ' + str(i+1)
+                #         name_red = 'RED ' + str(i+1)
+                #         cv2.imshow(name_blue, img_robots[i][0])
+                #         cv2.imshow(name_red, img_robots[i][1])
+
                 if cv2.waitKey(25) & 0xFF == ord('q'):
                     NOP
                     
@@ -224,86 +429,7 @@ class ballStatus(Node):
 
             #print(f'Done. ({time.time() - t0:.3f}s)')
 
-            if self.status:
-                msg.ball_detected = True
-                self.publisher_.publish(msg)
-                print("Bola detectada '%s'" % msg.ball_detected)
-                #print("Y: " + str(c2))
-                    #Bola a esquerda
-                if (int(c1) <= self.config.x_left):
-                    msg.ball_left = True
-                    msg.ball_center_left = False
-                    msg.ball_center_right = False
-                    msg.ball_right = False
-                    self.publisher_.publish(msg)
-                    print("Bola à Esquerda")
-
-                #Bola centro esquerda
-                elif (int(c1) > self.config.x_left and int(c1) < self.config.x_center):
-                    msg.ball_center_left = True
-                    msg.ball_left = False
-                    msg.ball_center_right = False
-                    msg.ball_right = False
-                    self.publisher_.publish(msg)
-                    print("Bola Centralizada a esquerda")
-
-                #Bola centro direita
-                elif (int(c1) < self.config.x_right and int(c1) > self.config.x_center):
-                    msg.ball_center_right = True
-                    msg.ball_center_left = False
-                    msg.ball_left = False
-                    msg.ball_right = False
-                    self.publisher_.publish(msg)
-                    print("Bola Centralizada a direita")
-
-                #Bola a direita
-                else:
-                    msg.ball_right = True
-                    msg.ball_center_right = False
-                    msg.ball_center_left = False
-                    msg.ball_left = False
-                    self.publisher_.publish(msg)
-                    print("Bola à Direita")
-                    self.config.max_count_lost_frame
-                
-                #Bola Perto
-                if (int(c2) > self.config.y_chute):
-                    msg.ball_close = True
-                    msg.ball_far = False
-                    msg.ball_med = False
-                    self.publisher_.publish(msg)
-                    print("Bola Perto")
-
-                #Bola Longe
-                elif (int(c2) <= self.config.y_longe):
-                    msg.ball_far = True
-                    msg.ball_close = False
-                    msg.ball_med = False
-                    self.publisher_.publish(msg)
-                    print("Bola Longe")
-                    self.config.max_count_lost_frame
-
-                #Bola ao centro
-                # elif (int(c2) > self.config.y_longe and int(c2) < self.config.y_chute):
-                else:
-                    msg.ball_med = True
-                    msg.ball_far = False
-                    msg.ball_close = False
-                    self.publisher_.publish(msg)
-                    print("Bola ao Centro")
-
-            else:
-                msg.ball_detected =False
-                msg.ball_left = False
-                msg.ball_center_left = False
-                msg.ball_center_right = False
-                msg.ball_right = False
-                msg.ball_med = False
-                msg.ball_far = False
-                msg.ball_close = False
-                self.publisher_.publish(msg)
-                print("Não achei")
-
+            
 
 def main(args=None):
     rclpy.init(args=args)
@@ -312,7 +438,6 @@ def main(args=None):
     
     ballS = ballStatus(config)
     
-
     rclpy.spin(ballS)
 
     # Destroy the node explicitly

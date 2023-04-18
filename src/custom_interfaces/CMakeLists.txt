@@ -24,6 +24,7 @@ find_package(std_msgs REQUIRED)
 set(msg_files
   "msg/SetPosition.msg"
   "msg/Vision.msg"
+  "msg/VisionRobot.msg"
   "msg/HumanoidLeagueMsgs.msg"
   "msg/Localization.msg"
   "msg/SetPositionOriginal.msg"

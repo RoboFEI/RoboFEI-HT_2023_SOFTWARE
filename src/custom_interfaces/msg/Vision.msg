@@ -1,9 +1,9 @@
 # Messages
-bool ball_detected
-bool ball_left
-bool ball_center_left
-bool ball_right
-bool ball_center_right
-bool ball_far
-bool ball_med
-bool ball_close
+bool detected
+bool left
+bool center_left
+bool right
+bool center_right
+bool far
+bool med
+bool close
