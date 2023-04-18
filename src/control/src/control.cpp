@@ -358,7 +358,7 @@ private:
               publisher_->publish(message);
               sleep_name = sleep_name + std::to_string(i);
               sleep_sec = j[section][sleep_name];
-              RCLCPP_INFO(this->get_logger(), "Sleep: %d ", sleep_sec);
+              RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
               usleep(sleep_sec*1000000);
               position.clear();
             }
