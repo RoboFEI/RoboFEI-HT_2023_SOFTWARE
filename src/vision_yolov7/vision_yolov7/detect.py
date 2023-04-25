@@ -211,9 +211,7 @@ class ballStatus(Node):
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
                 s=1
                 # Write results
-                print("AAAAAAAAAAAAAAAAAAA")
                 for *xyxy, conf, cls in reversed(det):
-                    print("BBBBBBBBBBBBBBBBB")
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if opt.save_conf else (cls, *xywh)  # label format

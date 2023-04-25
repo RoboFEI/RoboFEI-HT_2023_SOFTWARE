@@ -49,13 +49,15 @@ int robot_number = 1;
 
 int movement = 1;
 int contador = 0;
-int cont_vision_sides = 40;
+int cont_vision = 40;
 int cont_vision_up = 40;
+int cont_vision_sides = 40;
 bool stop_gait = true;
 uint32_t valor = 246;
 uint32_t valor_up = 250;
-int neck_sides = 1500;
-int neck_up = 1500;
+int neck_sides = 2048;
+int neck_up = 2048;
+float sleep_sec = 0;
 int parameters = false;
 int parameter_number = 0;
 int walk = 0;
@@ -63,7 +65,6 @@ int sidle = 0;
 int turn = 0;
 int number_of_mov = 0;
 int address_value = 116;
-float sleep_sec = 0;
 
 
 std::string address_name = "address";
@@ -185,12 +186,12 @@ private:
             parameters = false;
             section = "Left Kick";
             break;
-          case 5: //
+          case 5: //girando no sentido horário
             RCLCPP_INFO(this->get_logger(), "Turn Right");
             parameters = true;
             parameter_number = 11;  
             break;
-          case 6: //
+          case 6: //girando no sentido antihorário,porém de costas
             RCLCPP_INFO(this->get_logger(), "Turn Left");
             parameters = true;
             parameter_number = 12;  
@@ -205,22 +206,22 @@ private:
             parameters = false;
             section = "Search Ball";
             break;
-          case 9: //
+          case 9: //terrível
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Clockwise");
             parameters = true;
             parameter_number = 5;  
             break;
-          case 10: //
+          case 10: //terrível
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Anticlockwise");
             parameters = true;
             parameter_number = 6;  
             break;
-          case 11: //
+          case 11: //funcionando
             RCLCPP_INFO(this->get_logger(), "Fall Left");
             parameters = false;
             section = "Fall Left";
             break;
-          case 12: //
+          case 12: //muito lento
             RCLCPP_INFO(this->get_logger(), "Fall Right");
             parameters = false;
             section = "Fall Right";
@@ -255,12 +256,12 @@ private:
             parameters = false;
             section = "Fallen Side";
             break;
-          case 19: //
+          case 19: //funcionando,porém ele está andando muito para frente
             RCLCPP_INFO(this->get_logger(), "Andar esquerda");
             parameters = true;
             parameter_number = 8;  
             break;
-          case 20: //
+          case 20: // OK
             RCLCPP_INFO(this->get_logger(), "Andar direita");
             parameters = true;
             parameter_number = 7;  
@@ -274,7 +275,6 @@ private:
           case 22: //
             RCLCPP_INFO(this->get_logger(), "Centralizando bola à direita");
             parameters = false;
-            
             neck_sides -= cont_vision_sides;
             section = "Stand Still";
             break;
@@ -291,9 +291,21 @@ private:
             neck_up += cont_vision_up;
             section = "Stand Still";
             break;
-          
-          
-
+          case 25: // dança
+            RCLCPP_INFO(this->get_logger(), "Dance");
+            parameters = false;
+            section = "Dance";
+            break;
+          case 26: // chute direito angulado
+            RCLCPP_INFO(this->get_logger(), "Open Right Kick");
+            parameters = false;
+            section = "Open Right Kick";
+            break;  
+          case 27: // chute esquerdo angulado
+            RCLCPP_INFO(this->get_logger(), "Open Left Kick");
+            parameters = false;
+            section = "Open Left Kick";
+            break;    
         }
 
         if (parameters){
@@ -345,20 +357,23 @@ private:
               message_single.position = j[section][vel_name];
               message_single.address = j[section][address_name];
               publisher_single->publish(message_single);
+              usleep(500000);
             }
             else if (j[section][address_name] == 116){
 
               position_name = position_name + std::to_string(i);
               position.push_back(j[section][position_name]);
-              position[0][18] = neck_sides;
-              position[0][19] = neck_up;
+              if (movement == 21 or movement == 22 or movement == 23 or movement == 24){
+                position[0][18] = neck_sides;
+                position[0][19] = neck_up;
+              }
               message.position = position.front();
 
               RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
               publisher_->publish(message);
               sleep_name = sleep_name + std::to_string(i);
               sleep_sec = j[section][sleep_name];
-              RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
+              RCLCPP_INFO(this->get_logger(), "Sleep: %d ", sleep_sec);
               usleep(sleep_sec*1000000);
               position.clear();
             }

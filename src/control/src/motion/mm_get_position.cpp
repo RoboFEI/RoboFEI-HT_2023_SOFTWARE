@@ -48,7 +48,7 @@ using std::placeholders::_1;
 // Torque adaption every second
 const int TORQUE_ADAPTION_CYCLES = 1000 / MotionModule::TIME_UNIT;
 const int DEST_TORQUE = 1023;
-int position[20];
+int[20] position;
 
 #define BROADCAST_ID        0xFE    // 254
 
@@ -78,7 +78,6 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	
 	subscription_imu = this->create_subscription<sensor_msgs::msg::Imu>("imu/data", 10, std::bind(&MotionManager::topic_callback, this, _1));
 	subscription_walk = this->create_subscription<custom_interfaces::msg::Walk>("walking", 10, std::bind(&MotionManager::topic_callback_walk, this, _1));
-	subscription_positions = this->create_subscription<custom_interfaces::msg::SetPosition>("set_position", 10, std::bind(&MotionManager::topic_callback_positions, this, _1));
 	subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>("/neck_position", 10, std::bind(&MotionManager::topic_callback_neck, this, _1));
 	publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
 	publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
@@ -118,10 +117,9 @@ void MotionManager::topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> 
         float IMU_GYRO_Y  = -imu_msg_->angular_velocity.y/10;
 	}
 
-void MotionManager::topic_callback_positions(const std::shared_ptr<custom_interfaces::msg::SetPosition> position_msg_) const
+void MotionManager::topic_callback_positions(const std::shared_ptr<sensor_msgs::msg::SetPosition> position_msg_) const
     {
-		for (int i=0; i<20; i++)
-        	position[i] = position_msg_->position[i];
+        position = position_msg_->position;
 	}
 
 
@@ -253,11 +251,9 @@ bool MotionManager::Initialize(bool fadeIn)
 	{
 		if(DEBUG_PRINT == true)
 			fprintf(stderr, "ID:%d initializing...", id);
-		MotionStatus::m_CurrentJoints.SetValue(id, position[id]);
-		std::cout << position[id] << std::endl;
 	}
 
-	
+	MotionStatus::m_CurrentJoints.SetValue(id, position);
 
 	if(fadeIn)
 	{

@@ -50,6 +50,7 @@ namespace Robot
 		float IMU_GYRO_Y;
 		rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr subscription_imu;
 		rclcpp::Subscription<custom_interfaces::msg::Walk>::SharedPtr subscription_walk;
+		rclcpp::Subscription<custom_interfaces::msg::SetPosition>::SharedPtr subscription_positions;
 		rclcpp::Subscription<custom_interfaces::msg::NeckPosition>::SharedPtr subscription_neck;
 rclcpp::Publisher<custom_interfaces::msg::SetPosition>::SharedPtr publisher_;  
 rclcpp::Publisher<custom_interfaces::msg::SetPositionOriginal>::SharedPtr publisher_single; 
@@ -68,6 +69,7 @@ rclcpp::Client<custom_interfaces::srv::GetPosition>::SharedPtr client;
 	
 	void topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_) const;
 	void topic_callback_walk(const std::shared_ptr<custom_interfaces::msg::Walk> walk_msg_) const;
+	void topic_callback_positions(const std::shared_ptr<custom_interfaces::msg::SetPosition> position_msg_) const;
 	void topic_callback_neck(const std::shared_ptr<custom_interfaces::msg::NeckPosition> neck_msg_) const;
 	unsigned int m_torqueAdaptionCounter;
 	double m_voltageAdaptionFactor;

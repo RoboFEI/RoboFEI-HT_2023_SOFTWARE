@@ -60,7 +60,7 @@
 
 // Default setting
 #define BAUDRATE 1000000  // Default Baudrate of DYNAMIXEL X series
-#define DEVICE_NAME "/dev/ttyUSB0"  // [Linux]: "/dev/ttyUSB*", [Windows]: "COM*"
+#define DEVICE_NAME "/dev/ttyUSB1"  // [Linux]: "/dev/ttyUSB*", [Windows]: "COM*"
 
 using namespace dynamixel;
 
@@ -89,9 +89,10 @@ ReadWriteNode::ReadWriteNode()
     rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
   
   //Create a publisher to send the neck position for vision.py
-  neck_position_publisher = this->create_publisher<custom_interfaces::msg::NeckPosition>("neck_position", 10);
+  neck_position_publisher = this->create_publisher<NeckPosition>("neck_position", 10);
   timer_ = this->create_wall_timer(
   8ms, std::bind(&ReadWriteNode::timer_callback, this));
+   
 
   set_position_subscriber_ =
     this->create_subscription<SetPosition>(
@@ -99,7 +100,6 @@ ReadWriteNode::ReadWriteNode()
     QOS_RKL10V,
     [this](const std::shared_ptr<SetPosition> msg) -> void 
     {
-
       RCLCPP_INFO(this->get_logger(), "Entrou na funcao");
       
       uint8_t dxl_error = 0;
@@ -136,7 +136,8 @@ ReadWriteNode::ReadWriteNode()
       else {
         RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d,%d,%d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d, %d,%d}]", 
         msg->id[0], msg->id[1], msg->id[2], msg->id[3], msg->id[4], msg->id[5], msg->id[6], msg->id[7], msg->id[8], msg->id[9], msg->id[10], msg->id[11], msg->id[12], msg->id[13], msg->id[14], msg->id[15], msg->id[16], msg->id[17], msg->id[18], msg->id[19],
-        msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11], msg->position[12], msg->position[13], msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
+        msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11], msg->position[12], msg->position[13], 
+        msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
       }
 
       RCLCPP_INFO(this->get_logger(), "Terminou");
@@ -251,13 +252,6 @@ void ReadWriteNode::timer_callback(){
     neck_position_publisher->publish(message);
 
   }
-
-// RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d}]", 
-//          msg->id[0], msg->id[1], msg->id[3], msg->id[4], msg->id[5], msg->id[6], msg->id[7], msg->id[8], msg->id[9], msg->id[10],
-//          msg->id[11], msg->id[12], msg->id[13], msg->id[14], msg->id[15], msg->id[16], msg->id[17], msg->id[18],
-//          msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], 
-//          msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11],
-//          msg->position[12], msg->position[13], msg->position[14], msg->position[15], msg->position[16], msg->position[17], msg->position[18]);
 
 ReadWriteNode::~ReadWriteNode()
 {

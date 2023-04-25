@@ -106,6 +106,12 @@ ament_target_dependencies(client
   rclcpp_components
 )
 
+add_executable(server src/teste.cpp)
+ament_target_dependencies(server
+  custom_interfaces
+  rclcpp
+)
+
 # Build
 add_executable(decision src/dec.cpp)
 ament_target_dependencies(decision
@@ -119,6 +125,7 @@ install(TARGETS
   control
   decision
   client
+  server
   DESTINATION lib/${PROJECT_NAME}
 )
 

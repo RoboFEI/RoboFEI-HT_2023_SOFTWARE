@@ -421,7 +421,6 @@ void Walking::Process()
             }
             else
             {
-                printf("ZEROU");
                 X_MOVE_AMPLITUDE = 0;
                 Y_MOVE_AMPLITUDE = 0;
                 A_MOVE_AMPLITUDE = 0;
@@ -446,7 +445,6 @@ void Walking::Process()
             }
             else
             {
-                printf("ZEROU 2");
                 X_MOVE_AMPLITUDE = 0;
                 Y_MOVE_AMPLITUDE = 0;
                 A_MOVE_AMPLITUDE = 0;

@@ -12,20 +12,22 @@ from custom_interfaces.msg import NeckPosition
 from std_msgs.msg import Bool
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3Stamped
-from sensor_msgs.msg import Imu
 from custom_interfaces.action import Control
 
 
 # ros2 run decision_pkg decision_action
+# ros2 run decision_pkg decision_node
 # ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 3}"
 # ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 1, secondary_state_mode: 2}"
-# ros2 topic pub -1 /ball_position std_msgs/Bool "data: True"
+# ros2 topic pub -1 /position std_msgs/Bool "data: True"
 # ros2 topic pub -1 /neck_position custom_interfaces/msg/NeckPosition "{position19: 2048, position20: 2048}"
 
 TEAM_ROBOFEI = 7
 ROBOT_NUMBER = 0 # Goleiro = 1, jogadores != 1
 LADO = 0 # 0 vira para o lado DIREITO e 1 para o lado ESQUERDO, depende de que lado o nosso time vai começar
 
+# ros2 topic echo /imu/data
+# ros2 topic echo /imu/rpy
 
 
 class DecisionNode(Node):
@@ -68,14 +70,14 @@ class DecisionNode(Node):
         self.subscription_neck
         self.subscription_imu_gyro
         self.subscription_imu_accel
-        self.BALL_DETECTED = False
-        self.BALL_LEFT = False
-        self.BALL_CENTER_LEFT = False
-        self.BALL_RIGHT = False
-        self.BALL_CENTER_RIGHT = False
-        self.BALL_FAR = False # Bola longe, usada no callback da visão para atualizar aonde a bola se encontra
-        self.BALL_CLOSE = False # Bola perto, usada no callback da visão para atualizar aonde a bola se encontra
-        self.BALL_MED = False # Bola centralizada, usada no callback da visão para atualizar aonde a bola se encontra
+        self.DETECTED = False
+        self.LEFT = False
+        self.CENTER_LEFT = False
+        self.RIGHT = False
+        self.CENTER_RIGHT = False
+        self.FAR = False # Bola longe, usada no callback da visão para atualizar aonde a bola se encontra
+        self.CLOSE = False # Bola perto, usada no callback da visão para atualizar aonde a bola se encontra
+        self.MED = False # Bola centralizada, usada no callback da visão para atualizar aonde a bola se encontra
         self.ready_robot=False
         self.gamestate = 0 # Initial state - Robô parado em pé esperando mudar de estado
         self.secstate = 0
@@ -131,20 +133,21 @@ class DecisionNode(Node):
         self.get_logger().info('Contador IMU fall side: "%d"' % self.cont_fall_side)
       
         if(self.cont_fall_side>=30):
-            self.get_logger().info('Caido de lado')
             self.fallen_side = True # Robô caido
+            self.get_logger().info('Caido de lado')
+            
 
     def listener_callback_vision(self, msg):
         # print("Vision Callback")
-        self.BALL_DETECTED = msg.ball_detected
-        self.get_logger().info('BALL "%s"' % self.BALL_DETECTED)
-        self.BALL_LEFT = msg.ball_left
-        self.BALL_CENTER_LEFT = msg.ball_center_left
-        self.BALL_RIGHT = msg.ball_right
-        self.BALL_CENTER_RIGHT = msg.ball_center_right
-        self.BALL_FAR = msg.ball_far
-        self.BALL_MED = msg.ball_med
-        self.BALL_CLOSE = msg.ball_close
+        self.DETECTED = msg.detected
+        self.get_logger().info('BALL "%s"' % self.DETECTED)
+        self.LEFT = msg.left
+        self.CENTER_LEFT = msg.center_left
+        self.RIGHT = msg.right
+        self.CENTER_RIGHT = msg.center_right
+        self.FAR = msg.far
+        self.MED = msg.med
+        self.CLOSE = msg.close
 
     def listener_callback(self, msg):
         self.get_logger().info('GAME STATE: "%s"' % msg.game_state)
@@ -162,14 +165,13 @@ class DecisionNode(Node):
         self._action_client.wait_for_server()
 
         if order != self.last_movement: # Se tiver que mudar o movimento
-            if (order == 16 or order == 17 or order == 23 or self.last_movement == 8): # Robô caído: prioridade é levantar, por isso ele cancela o que estiver fazendo
+            if (order == 16 or order == 17 or order == 18 or self.last_movement == 8): # Robô caído: prioridade é levantar, por isso ele cancela o que estiver fazendo
                 self._send_goal_future = self.goal_handle.cancel_goal_async()
                 self._send_goal_future.add_done_callback(self.cancel_done)
                 self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
                 self._send_goal_future.add_done_callback(self.goal_response_callback)
                 self.last_movement = order
                 self.get_logger().info(f'Last movement {self.last_movement}')
-                sleep(4)
 
             
 
@@ -235,8 +237,8 @@ class DecisionNode(Node):
 
                 elif(self.gamestate == 1 and not self.ready_robot): # Robô vai para a posição inicial    
                     self.gait()
-                    # if(self.BALL_DETECTED == False):
-                    #         #print(self.contador)# if(self.BALL_DETECTED == False):
+                    # if(self.DETECTED == False):
+                    #         #print(self.contador)# if(self.DETECTED == False):
                     #         #print(self.contador)
                     #         if (self.contador >= 250):
                     #             if(self.go_ball==7):
@@ -293,23 +295,7 @@ class DecisionNode(Node):
                     self.gait()
 
 
-                elif(self.gamestate == 3): # Jogo começou
-                    # self.get_logger().info('Sec state: %d' %self.secstate)
-                    # self.get_logger().info('Sec state: %d' %self.has_kick_off)
-                    # if (self.has_kick_off and self.game_already_started):
-                    #     if(not self.BALL_DETECTED):
-                    #         self.cont_falses += 1
-                    #         if(self.cont_falses >= 500):
-                    #             self.search_ball() # Procura a bola
-                    #             self.get_logger().info('PROCURANDOOOO ')
-                            
-                    #     else:
-                    #         self.stand_still()
-                    #         self.cont_falses = 0
-                    #         self.get_logger().info('ACHEEEEEI' )
-                    #         #IMPLEMENTAR COMEÇO DO JOGO PARA CHUTAR A BOLA
-
-                    #         self.game_already_started = False
+                elif(self.gamestate == 3):
 
                     if(self.secstate == 6): # Penalti do oponente
                         self.gait()
@@ -319,13 +305,13 @@ class DecisionNode(Node):
                     
                     elif(self.secstate == 1 and self.has_kick_off == True): # Penalti nosso 
                         self.get_logger().info('PENALTI NOSSO')      
-                        if (self.BALL_DETECTED == False):
+                        if (self.DETECTED == False):
                             self.walking()
                         else:
-                            if (self.BALL_CLOSE):
-                                if(self.BALL_CENTER_RIGHT):
+                            if (self.CLOSE):
+                                if(self.CENTER_RIGHT):
                                     self.kick_right()
-                                elif(self.BALL_CENTER_LEFT):
+                                elif(self.CENTER_LEFT):
                                     self.kick_left()
                             else:
                                 self.walking()
@@ -353,7 +339,7 @@ class DecisionNode(Node):
                         self.gait()
 
                     else: 
-                        if(self.BALL_DETECTED == False):
+                        if(self.DETECTED == False):
                             self.get_logger().info('BALL NOT FOUND')
                             # print(self.contador)
                             if (self.contador >= 250):
@@ -376,30 +362,30 @@ class DecisionNode(Node):
                                 
                         else:
                             self.get_logger().info('BALL DETECTED')
-                            if(self.BALL_LEFT):
+                            if(self.LEFT):
                                 self.get_logger().info('BALL LEFT: turning left')
                                 self.turn_left()
-                            elif(self.BALL_RIGHT):
+                            elif(self.RIGHT):
                                 self.get_logger().info('BALL RIGHT - turning right')
                                 self.turn_right()
-                            elif(self.BALL_FAR or self.BALL_MED):
+                            elif(self.FAR or self.MED):
                                 self.get_logger().info('BALL RIGHT - turning right')
                                 self.walking()
-                            elif (self.BALL_CLOSE):
+                            elif (self.CLOSE):
                                 if(self.neck_position[1]>1345):
                                     self.get_logger().info("BALL CLOSE AND CENTERED - turning head down to be sure it's close")
                                     self.turn_head_down()
                                 else:
                                     if (self.gyro_z < 1.57 and self.gyro_z > -1.57): 
                                         self.get_logger().info('FACING THE OPPONENT GOAL')
-                                        if (self.BALL_CENTER_LEFT==True):
+                                        if (self.CENTER_LEFT==True):
                                             self.get_logger().info('LEFT KICK!!!')
                                             self.kick_left()
-                                        elif (self.BALL_CENTER_RIGHT==True):
+                                        elif (self.CENTER_RIGHT==True):
                                             self.get_logger().info('RIGHT KICK!!!')
                                             self.kick_right()
                                     else: 
-                                        self.turn_around_ball_clockwise()
+                                        self.turn_around_clockwise()
 
 
                 elif(self.gamestate == 4): # Jogo terminou, robô sai do campo
@@ -419,9 +405,9 @@ class DecisionNode(Node):
                     self.stand_still()
 
                 elif(self.gamestate == 3): # Jogo começou
-                    if(self.BALL_DETECTED):
-                        if (self.BALL_CLOSE or self.BALL_MED):
-                            if(self.BALL_CENTER_LEFT or self.BALL_LEFT):
+                    if(self.DETECTED):
+                        if (self.CLOSE or self.MED):
+                            if(self.CENTER_LEFT or self.LEFT):
                                 self.goalkeeper_fall_left()
                             else:
                                 self.goalkeeper_fall_right()
@@ -438,12 +424,15 @@ class DecisionNode(Node):
 
     def stand_up_front(self):
         self.send_goal(17)
+        self.get_logger().info('Caído de frente')
 
     def stand_up_back(self):
         self.send_goal(16)
+        self.get_logger().info('Caído de costas')
 
     def stand_up_side(self):
-        self.send_goal(23)
+        self.send_goal(18)
+        self.get_logger().info('Caído de lado')
 
     def kick_right(self):
         self.send_goal(3)
@@ -465,19 +454,19 @@ class DecisionNode(Node):
         self.send_goal(8)
         self.get_logger().info('Searching ball')
 
-    def turn_right(self): # gira no seu próprio eixo
+    def turn_right(self): # gira no seu próprio eixo (direita)
         self.send_goal(5)
         self.get_logger().info('Turn right')
 
-    def turn_left(self): # gira no seu próprio eixo
+    def turn_left(self): # gira no seu próprio eixo (esquerda)
         self.send_goal(6)
         self.get_logger().info('Turn left')
 
-    def turn_around_ball_clockwise(self): # gira em torno da bola
+    def turn_around_clockwise(self): # gira em torno da bola sentido horário
         self.send_goal(9)
         self.get_logger().info('Turning around ball clockwise')
             
-    def turn_around_ball_anti_clockwise(self): # gira em torno da bola
+    def turn_around_anti_clockwise(self): # gira em torno da bola sentido antihorário
         self.send_goal(10)
         self.get_logger().info('Turning around ball anti-clockwise')
 
