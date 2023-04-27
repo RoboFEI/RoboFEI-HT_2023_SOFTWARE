@@ -334,10 +334,6 @@ private:
             position_name = "position";
             sleep_name = "sleep";
             
-            // position_name = "position" + std::to_string(i);
-            // id_name = "id" + std::to_string(i);
-            // vel_name = "velocity" + std::to_string(i);
-            // sleep_name = "sleep"+ std::to_string(i);
 
             RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
             if (goal_handle->is_canceling()) {

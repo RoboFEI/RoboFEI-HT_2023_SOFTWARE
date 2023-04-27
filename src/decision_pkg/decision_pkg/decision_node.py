@@ -139,15 +139,15 @@ class DecisionNode(Node):
 
     def listener_callback_vision(self, msg):
         # print("Vision Callback")
-        self.DETECTED = msg.detected
+        self.BALL_DETECTED = msg.detected
         self.get_logger().info('BALL "%s"' % self.DETECTED)
-        self.LEFT = msg.left
-        self.CENTER_LEFT = msg.center_left
-        self.RIGHT = msg.right
-        self.CENTER_RIGHT = msg.center_right
-        self.FAR = msg.far
-        self.MED = msg.med
-        self.CLOSE = msg.close
+        self.BALL_LEFT = msg.left
+        self.BALL_CENTER_LEFT = msg.center_left
+        self.BALL_RIGHT = msg.right
+        self.BALL_CENTER_RIGHT = msg.center_right
+        self.BALL_FAR = msg.far
+        self.BALL_MED = msg.med
+        self.BALL_CLOSE = msg.close
 
     def listener_callback(self, msg):
         self.get_logger().info('GAME STATE: "%s"' % msg.game_state)
@@ -339,53 +339,57 @@ class DecisionNode(Node):
                         self.gait()
 
                     else: 
-                        if(self.DETECTED == False):
-                            self.get_logger().info('BALL NOT FOUND')
-                            # print(self.contador)
-                            if (self.contador >= 250):
-                                if(self.cont_falses>=4):
-                                    self.gait()
-                                    sleep(3)
-                                    self.walking()
-                                    sleep(3)
+                        if(self.BALL_DETECTED == False):
+                            self.get_logger().info('BALL NOT FOUND %d' %self.contador)
+                            self.get_logger().info('CONT FALSES %d' %self.cont_falses)
+                            if (self.contador >= 150):
+                                if (self.cont_falses >=2900 ):
                                     self.cont_falses = 0
-                                    self.go_ball += 1
+                                # elif (self.cont_falses >=2700 and (self.gyro_z < 1.57 and self.gyro_z > -1.57)):
+                                elif (self.cont_falses >=2700):
+                                    self.walking()
+                                    self.cont_falses += 1
+                                    self.get_logger().info('WALKING INSIDE SEARCH BALL')
+                                elif(self.cont_falses>=1800):
+                                    self.turn_left()
+                                    self.cont_falses += 1
+                                    self.get_logger().info('TURNING INSIDE SEARCH BALL')
                                 else:
                                     self.get_logger().info('PROCURANDOOOO')
                                     self.cont_falses += 1
                                     self.search_ball() # Procura a bola
-                                    sleep(1)
-                                    #print(self.cont_falses)
-                                self.contador = 0
                             else:
                                 self.contador += 1
                                 
                         else:
+                            self.contador = 0
+                            self.cont_falses = 0
                             self.get_logger().info('BALL DETECTED')
-                            if(self.LEFT):
-                                self.get_logger().info('BALL LEFT: turning left')
-                                self.turn_left()
-                            elif(self.RIGHT):
-                                self.get_logger().info('BALL RIGHT - turning right')
+                            if(self.BALL_LEFT):
+                                self.turn_head_left()
+                            elif(self.BALL_RIGHT):
+                                self.turn_head_right()
+                            elif (self.neck_position[0] < 1700):
                                 self.turn_right()
-                            elif(self.FAR or self.MED):
-                                self.get_logger().info('BALL RIGHT - turning right')
+                            elif (self.neck_position[0] > 2300):
+                                self.turn_left()
+                            elif(self.BALL_FAR or self.BALL_MED):
                                 self.walking()
-                            elif (self.CLOSE):
+                            elif (self.BALL_CLOSE):
+                                self.get_logger().info('BALL CLOSE')
                                 if(self.neck_position[1]>1345):
-                                    self.get_logger().info("BALL CLOSE AND CENTERED - turning head down to be sure it's close")
                                     self.turn_head_down()
                                 else:
-                                    if (self.gyro_z < 1.57 and self.gyro_z > -1.57): 
-                                        self.get_logger().info('FACING THE OPPONENT GOAL')
-                                        if (self.CENTER_LEFT==True):
-                                            self.get_logger().info('LEFT KICK!!!')
-                                            self.kick_left()
-                                        elif (self.CENTER_RIGHT==True):
-                                            self.get_logger().info('RIGHT KICK!!!')
-                                            self.kick_right()
-                                    else: 
-                                        self.turn_around_clockwise()
+                                    self.get_logger().info('BALL KICK')
+                                    # if (self.gyro_z < 1.57 and self.gyro_z > -1.57): 
+                                        # self.get_logger().info('FACING THE OPPONENT GOAL')
+                                    if (self.BALL_CENTER_LEFT):
+                                        self.kick_left()
+                                    else:
+                                        self.kick_right()
+                                    # else: 
+                                        # self.get_logger().info('FACING THE OUR GOAL: TURNING')
+                                        # self.turn_around_clockwise()
 
 
                 elif(self.gamestate == 4): # Jogo terminou, robô sai do campo
@@ -483,15 +487,15 @@ class DecisionNode(Node):
         self.get_logger().info('Falling right')
 
     def turn_head_left(self):
-        self.send_goal(20)
+        self.send_goal(21)
         self.get_logger().info('Turning head left')
         
     def turn_head_right(self):
-        self.send_goal(21)
+        self.send_goal(22)
         self.get_logger().info('Turning head right')
 
     def turn_head_down(self):
-        self.send_goal(22)
+        self.send_goal(23)
         self.get_logger().info('Turning head down')
 
 

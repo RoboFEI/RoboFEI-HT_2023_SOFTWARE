@@ -273,7 +273,6 @@ class ballStatus(Node):
 
 
                             if label_name == "robot":
-                                print("OOOOOOOOOOOO")
                                 label_list.setdefault("robot", [])
                                 # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1) 
                                 c1_robot = (xyxy[0] + xyxy[2]) / 2
