@@ -9,16 +9,16 @@ from custom_interfaces.msg import Decision
 from custom_interfaces.msg import Vision
 from custom_interfaces.msg import HumanoidLeagueMsgs as GC
 from custom_interfaces.msg import NeckPosition
+from custom_interfaces.msg import VisionRobot
 from std_msgs.msg import Bool
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3Stamped
 from custom_interfaces.action import Control
 
 
-# ros2 run decision_pkg decision_action
 # ros2 run decision_pkg decision_node
 # ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 3}"
-# ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 1, secondary_state_mode: 2}"
+# ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 3, secondary_state_mode: 1, has_kick_off: True}"
 # ros2 topic pub -1 /position std_msgs/Bool "data: True"
 # ros2 topic pub -1 /neck_position custom_interfaces/msg/NeckPosition "{position19: 2048, position20: 2048}"
 
@@ -47,6 +47,12 @@ class DecisionNode(Node):
             '/ball_position',
             self.listener_callback_vision,
             10)
+        # Subscriber da visão para detecção de robôs inimigos
+        self.subscription_robot = self.create_subscription(
+            VisionRobot, 
+            '/robot_position_enemy',
+            self.listener_callback_robot,
+            10)
         # Subscriber da posição dos motores do pescoço
         self.subscription_neck = self.create_subscription(
             NeckPosition, 
@@ -70,14 +76,22 @@ class DecisionNode(Node):
         self.subscription_neck
         self.subscription_imu_gyro
         self.subscription_imu_accel
-        self.DETECTED = False
-        self.LEFT = False
-        self.CENTER_LEFT = False
-        self.RIGHT = False
-        self.CENTER_RIGHT = False
-        self.FAR = False # Bola longe, usada no callback da visão para atualizar aonde a bola se encontra
-        self.CLOSE = False # Bola perto, usada no callback da visão para atualizar aonde a bola se encontra
-        self.MED = False # Bola centralizada, usada no callback da visão para atualizar aonde a bola se encontra
+        self.BALL_DETECTED = False
+        self.BALL_LEFT = False
+        self.BALL_CENTER_LEFT = False
+        self.BALL_RIGHT = False
+        self.BALL_CENTER_RIGHT = False
+        self.BALL_FAR = False # Bola longe, usada no callback da visão para atualizar aonde a bola se encontra
+        self.BALL_CLOSE = False # Bola perto, usada no callback da visão para atualizar aonde a bola se encontra
+        self.BALL_MED = False # Bola centralizada, usada no callback da visão para atualizar aonde a bola se encontra
+        self.ENEMY_DETECTED = False
+        self.ENEMY_LEFT = False
+        self.ENEMY_CENTER_LEFT = False
+        self.ENEMY_RIGHT = False
+        self.ENEMY_CENTER_RIGHT = False
+        self.ENEMY_FAR = False
+        self.ENEMY_CLOSE = False 
+        self.ENEMY_MED = False 
         self.ready_robot=False
         self.gamestate = 0 # Initial state - Robô parado em pé esperando mudar de estado
         self.secstate = 0
@@ -140,7 +154,7 @@ class DecisionNode(Node):
     def listener_callback_vision(self, msg):
         # print("Vision Callback")
         self.BALL_DETECTED = msg.detected
-        self.get_logger().info('BALL "%s"' % self.DETECTED)
+        self.get_logger().info('BALL "%s"' % self.BALL_DETECTED)
         self.BALL_LEFT = msg.left
         self.BALL_CENTER_LEFT = msg.center_left
         self.BALL_RIGHT = msg.right
@@ -148,6 +162,17 @@ class DecisionNode(Node):
         self.BALL_FAR = msg.far
         self.BALL_MED = msg.med
         self.BALL_CLOSE = msg.close
+
+    def listener_callback_robot(self, msg):
+        self.ROBOT_DETECTED = msg.detected
+        self.get_logger().info('ROBOT "%s"' % self.ROBOT_DETECTED)
+        self.ROBOT_LEFT = msg.left
+        self.ROBOT_CENTER_LEFT = msg.center_left
+        self.ROBOT_RIGHT = msg.right
+        self.ROBOT_CENTER_RIGHT = msg.center_right
+        self.ROBOT_FAR = msg.far
+        self.ROBOT_MED = msg.med
+        self.ROBOT_CLOSE = msg.close
 
     def listener_callback(self, msg):
         self.get_logger().info('GAME STATE: "%s"' % msg.game_state)
@@ -308,13 +333,26 @@ class DecisionNode(Node):
                         if (self.DETECTED == False):
                             self.walking()
                         else:
-                            if (self.CLOSE):
-                                if(self.CENTER_RIGHT):
-                                    self.kick_right()
-                                elif(self.CENTER_LEFT):
-                                    self.kick_left()
-                            else:
+                            if(self.BALL_LEFT):
+                                self.turn_head_left()
+                            elif(self.BALL_RIGHT):
+                                self.turn_head_right()
+                            elif (self.neck_position[0] < 1700):
+                                self.turn_right()
+                            elif (self.neck_position[0] > 2300):
+                                self.turn_left()
+                            elif(self.BALL_FAR or self.BALL_MED):
                                 self.walking()
+                            elif (self.BALL_CLOSE):
+                                if(self.BALL_CENTER_RIGHT and (self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT)):
+                                    self.Open_Right_Kick()
+                                elif(self.BALL_CENTER_LEFT and (self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT)):
+                                    self.Open_Left_Kick()
+                                elif(self.BALL_CENTER_LEFT):
+                                    self.Open_Left_Kick()
+                                elif(self.BALL_CENTER_RIGHT):
+                                    self.Open_Right_Kick
+                                
 
                             
                     elif(self.secstate == 1 and self.has_kick_off == False): # Penalti do outro time
@@ -383,7 +421,7 @@ class DecisionNode(Node):
                                     self.get_logger().info('BALL KICK')
                                     # if (self.gyro_z < 1.57 and self.gyro_z > -1.57): 
                                         # self.get_logger().info('FACING THE OPPONENT GOAL')
-                                    if (self.BALL_CENTER_LEFT):
+                                    if (self.BALL_CENTER_LEFT or self.BALL_LEFT):
                                         self.kick_left()
                                     else:
                                         self.kick_right()
@@ -497,6 +535,14 @@ class DecisionNode(Node):
     def turn_head_down(self):
         self.send_goal(23)
         self.get_logger().info('Turning head down')
+
+    def Open_Right_Kick(self):
+        self.send_goal(26)
+        self.get_logger().info('Chute direito angulado')
+
+    def Open_Left_Kick(self):
+        self.send_goal(27)
+        self.get_logger().info('Chute esquerdo angulado')
 
 
 def main(args=None):

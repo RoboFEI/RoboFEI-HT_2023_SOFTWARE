@@ -328,6 +328,8 @@ private:
           
           for (int i = 1; i <= number_of_mov; i++){
 
+            message_walk.walk_number = 0; 
+            publisher_walk->publish(message_walk);
             address_name = "address";
             id_name = "id";
             vel_name = "velocity";
