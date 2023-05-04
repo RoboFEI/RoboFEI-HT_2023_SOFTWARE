@@ -113,6 +113,8 @@ class DecisionNode(Node):
         self.finished = True # Variável usada na action para verificar se o controle terminou a ação que estava fazendo
         self.cont_turn = 0.0
         self.cont_walk = 0.0
+        self.BALL_CENTER = False
+        
         
 
     def listener_callback_neck(self, msg):
@@ -330,8 +332,14 @@ class DecisionNode(Node):
                     
                     elif(self.secstate == 1 and self.has_kick_off == True): # Penalti nosso 
                         self.get_logger().info('PENALTI NOSSO')      
-                        if (self.DETECTED == False):
-                            self.walking()
+                        if (self.BALL_DETECTED == False):
+                            if(self.BALL_CENTER == True): #teste 
+                                if(self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT):
+                                    self.Open_Right_Kick()
+                                elif(self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT):
+                                    self.Open_Left_Kick()
+                            else:
+                                self.walking()
                         else:
                             if(self.BALL_LEFT):
                                 self.turn_head_left()
@@ -342,18 +350,20 @@ class DecisionNode(Node):
                             elif (self.neck_position[0] > 2300):
                                 self.turn_left()
                             elif(self.BALL_FAR or self.BALL_MED):
-                                self.walking()
-                            elif (self.BALL_CLOSE):
-                                if(self.BALL_CENTER_RIGHT and (self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT)):
-                                    self.Open_Right_Kick()
-                                elif(self.BALL_CENTER_LEFT and (self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT)):
-                                    self.Open_Left_Kick()
-                                elif(self.BALL_CENTER_LEFT):
+                                self.walking
+                            elif(self.BALL_CLOSE):
+                                if(self.BALL_CENTER_RIGHT or (self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT)):
+                                    self.Open_Right_Kick
+                                elif(self.BALL_CENTER_LEFT or (self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT)):
+                                    self.Open_Left_Kick
+                                elif(self.BALL_CENTER):
                                     self.Open_Left_Kick()
                                 elif(self.BALL_CENTER_RIGHT):
                                     self.Open_Right_Kick
-                                
+                                elif(self.BALL_CENTER_LEFT):
+                                    self.Open_Left_Kick
 
+                              
                             
                     elif(self.secstate == 1 and self.has_kick_off == False): # Penalti do outro time
                         self.gait()
@@ -543,6 +553,10 @@ class DecisionNode(Node):
     def Open_Left_Kick(self):
         self.send_goal(27)
         self.get_logger().info('Chute esquerdo angulado')
+
+    def search_goalkeeper(self): #centralizando acima da bola
+        self.send_goal(24)
+        self.get_logger().info('Procurando o goleiro')
 
 
 def main(args=None):

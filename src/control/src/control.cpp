@@ -305,7 +305,12 @@ private:
             RCLCPP_INFO(this->get_logger(), "Open Left Kick");
             parameters = false;
             section = "Open Left Kick";
-            break;    
+            break;
+          case 28: // Andar pra trás
+            RCLCPP_INFO(this->get_logger(), "Walking Backward");
+            parameters = true;
+            parameter_number = 9;
+            break;     
         }
 
         if (parameters){
