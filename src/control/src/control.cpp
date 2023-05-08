@@ -341,7 +341,6 @@ private:
             position_name = "position";
             sleep_name = "sleep";
             
-
             RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
             if (goal_handle->is_canceling()) {
                 result->finished = false;
@@ -349,7 +348,6 @@ private:
                 RCLCPP_INFO(this->get_logger(), "Goal canceled");
                 return;
             }
-
 
             address_name = address_name + std::to_string(i);
             if (j[section][address_name] == 112){
@@ -363,7 +361,6 @@ private:
               usleep(500000);
             }
             else if (j[section][address_name] == 116){
-
               position_name = position_name + std::to_string(i);
               position.push_back(j[section][position_name]);
               if (movement == 21 or movement == 22 or movement == 23 or movement == 24){
@@ -376,7 +373,7 @@ private:
               publisher_->publish(message);
               sleep_name = sleep_name + std::to_string(i);
               sleep_sec = j[section][sleep_name];
-              RCLCPP_INFO(this->get_logger(), "Sleep: %d ", sleep_sec);
+              RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
               usleep(sleep_sec*1000000);
               position.clear();
             }

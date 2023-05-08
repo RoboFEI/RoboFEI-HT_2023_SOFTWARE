@@ -200,8 +200,6 @@ class DecisionNode(Node):
                 self.last_movement = order
                 self.get_logger().info(f'Last movement {self.last_movement}')
 
-            
-
             else: # Robô não caído: espera ele terminar o que ele tava fazendo
                 if self.finished == True:
                     self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
@@ -333,13 +331,22 @@ class DecisionNode(Node):
                     elif(self.secstate == 1 and self.has_kick_off == True): # Penalti nosso 
                         self.get_logger().info('PENALTI NOSSO')      
                         if (self.BALL_DETECTED == False):
-                            if(self.BALL_CENTER == True): #teste 
-                                if(self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT):
-                                    self.Open_Right_Kick()
-                                elif(self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT):
-                                    self.Open_Left_Kick()
+                            if(self.BALL_CENTER == True):
+                                if(self.BALL_CENTER_RIGHT):
+                                    self.kick_right()
+                                elif(self.BALL_CENTER_LEFT):
+                                    self.kick_left()
+                                elif(self.BALL_RIGHT):
+                                    self.search_goalkeeper()
+                                    if(self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT):
+                                        self.Open_Right_Kick()
+                                elif(self.BALL_LEFT):
+                                    self.search_goalkeeper()
+                                    if(self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT):
+                                        self.Open_Left_Kick()
                             else:
                                 self.walking()
+                               
                         else:
                             if(self.BALL_LEFT):
                                 self.turn_head_left()
@@ -350,20 +357,54 @@ class DecisionNode(Node):
                             elif (self.neck_position[0] > 2300):
                                 self.turn_left()
                             elif(self.BALL_FAR or self.BALL_MED):
-                                self.walking
+                                self.walking()
                             elif(self.BALL_CLOSE):
-                                if(self.BALL_CENTER_RIGHT or (self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT)):
-                                    self.Open_Right_Kick
-                                elif(self.BALL_CENTER_LEFT or (self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT)):
-                                    self.Open_Left_Kick
-                                elif(self.BALL_CENTER):
-                                    self.Open_Left_Kick()
-                                elif(self.BALL_CENTER_RIGHT):
-                                    self.Open_Right_Kick
-                                elif(self.BALL_CENTER_LEFT):
-                                    self.Open_Left_Kick
-
-                              
+                                print("Ball CLose")
+                                if(self.neck_position[1]>1300):
+                                    self.turn_head_down()
+                                    self.BALL_CENTER = True
+                                    if(self.BALL_CENTER == True):
+                                        if(self.BALL_CENTER_RIGHT):
+                                            self.kick_right()
+                                        elif(self.BALL_CENTER_LEFT):
+                                            self.kick_left()
+                                        elif(self.BALL_RIGHT):
+                                            self.search_goalkeeper()
+                                            if(self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT):
+                                                self.Open_Right_Kick()
+                                        elif(self.BALL_LEFT):
+                                            self.search_goalkeeper()
+                                            if(self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT):
+                                                self.Open_Left_Kick()
+                                else:
+                                    self.BALL_CENTER = True
+                                    if(self.BALL_CENTER == True):
+                                        if(self.BALL_CENTER_RIGHT):
+                                            self.kick_right()
+                                        elif(self.BALL_CENTER_LEFT):
+                                            self.kick_left()
+                                        elif(self.BALL_RIGHT):
+                                            self.search_goalkeeper()
+                                            if(self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT):
+                                                self.Open_Right_Kick()
+                                        elif(self.BALL_LEFT):
+                                            self.search_goalkeeper()
+                                            if(self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT):
+                                                self.Open_Left_Kick()
+                                 
+                                #if(self.BALL_CENTER_RIGHT or (self.ROBOT_CENTER_LEFT or self.ROBOT_LEFT)):
+                                #    self.Open_Left_Kick
+                                #elif(self.BALL_CENTER_LEFT or (self.ROBOT_CENTER_RIGHT or self.ROBOT_RIGHT)):
+                                #    self.Open_Left_Kick
+                                #elif(self.BALL_CENTER):
+                                #    self.Open_Left_Kick()
+                                #elif(self.BALL_CENTER_RIGHT):
+                                #    self.Open_Right_Kick
+                                #elif(self.BALL_CENTER_LEFT):
+                                #    self.Open_Left_Kick
+                            else:
+                                print("ERROO")
+                    
                             
                     elif(self.secstate == 1 and self.has_kick_off == False): # Penalti do outro time
                         self.gait()
@@ -424,8 +465,9 @@ class DecisionNode(Node):
                             elif(self.BALL_FAR or self.BALL_MED):
                                 self.walking()
                             elif (self.BALL_CLOSE):
+                                self.BALL_CENTER = True
                                 self.get_logger().info('BALL CLOSE')
-                                if(self.neck_position[1]>1345):
+                                if(self.neck_position[1]>1300):
                                     self.turn_head_down()
                                 else:
                                     self.get_logger().info('BALL KICK')
