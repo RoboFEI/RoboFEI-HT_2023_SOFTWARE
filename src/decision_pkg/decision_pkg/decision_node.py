@@ -23,7 +23,7 @@ from custom_interfaces.action import Control
 # ros2 topic pub -1 /neck_position custom_interfaces/msg/NeckPosition "{position19: 2048, position20: 2048}"
 
 TEAM_ROBOFEI = 7
-ROBOT_NUMBER = 0 # Goleiro = 1, jogadores != 1
+ROBOT_NUMBER = 1 # Goleiro = 1, jogadores != 1
 LADO = 0 # 0 vira para o lado DIREITO e 1 para o lado ESQUERDO, depende de que lado o nosso time vai começar
 
 # ros2 topic echo /imu/data
@@ -499,14 +499,16 @@ class DecisionNode(Node):
                     self.stand_still()
 
                 elif(self.gamestate == 3): # Jogo começou
-                    if(self.DETECTED):
-                        if (self.CLOSE or self.MED):
-                            if(self.CENTER_LEFT or self.LEFT):
-                                self.goalkeeper_fall_left()
-                            else:
-                                self.goalkeeper_fall_right()
-                    else:
+                    # if(self.secstate == 1 and self.has_kick_off == False):
+                    print("Contador %d " %self.contador)
+                    if (self.contador < 30):
+                        self.sidle_left()
+                        self.contador+=1
+                    elif (self.contador < 35):
                         self.stand_still()
+                        self.contador+=1
+                    else:
+                        self.goalkeeper_fall_right()
 
                 elif(self.gamestate == 4): # Jogo terminou, robô sai do campo
                     self.stand_still()
@@ -599,6 +601,19 @@ class DecisionNode(Node):
     def search_goalkeeper(self): #centralizando acima da bola
         self.send_goal(24)
         self.get_logger().info('Procurando o goleiro')
+
+    def sidle_left(self):
+        self.send_goal(19)
+        self.get_logger().info('Andando pra esquerda')
+
+    def sidle_right(self):
+        self.send_goal(20)
+        self.get_logger().info('Andando pra direita')
+
+    def goalkeeper_penalty(self):
+        self.send_goal(29)
+        self.get_logger().info('Goalkeeper Penalty')
+
 
 
 def main(args=None):

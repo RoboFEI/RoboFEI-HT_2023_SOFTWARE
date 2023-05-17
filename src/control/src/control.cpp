@@ -166,42 +166,42 @@ private:
         publisher_single->publish(message_single);
 
         switch (movement) {
-          case 1: // Parado
+          case 1: 
             RCLCPP_INFO(this->get_logger(), "Stand Still");
             parameters = false;
             section = "Stand Still";
             break;
-          case 2: // 
+          case 2: 
             RCLCPP_INFO(this->get_logger(), "Greeting");
             parameters = false;
             section = "Greeting";
             break;
-          case 3: // 
+          case 3: 
             RCLCPP_INFO(this->get_logger(), "Right kick");
             parameters = false;
             section = "Right Kick";
             break;
-          case 4: // Left kick OK
+          case 4: 
             RCLCPP_INFO(this->get_logger(), "Left Kick");
             parameters = false;
             section = "Left Kick";
             break;
-          case 5: //girando no sentido horário
+          case 5: 
             RCLCPP_INFO(this->get_logger(), "Turn Right");
             parameters = true;
             parameter_number = 11;  
             break;
-          case 6: //girando no sentido antihorário,porém de costas
+          case 6: 
             RCLCPP_INFO(this->get_logger(), "Turn Left");
             parameters = true;
             parameter_number = 12;  
             break;
-          case 7: //
+          case 7: 
             RCLCPP_INFO(this->get_logger(), "Goodbye");
             parameters = false;
             section = "Goodbye";
             break;
-          case 8: // não está em sessão nenhuma
+          case 8: 
             RCLCPP_INFO(this->get_logger(), "Search Ball");
             parameters = false;
             section = "Search Ball";
@@ -216,12 +216,12 @@ private:
             parameters = true;
             parameter_number = 6;  
             break;
-          case 11: //funcionando
+          case 11: 
             RCLCPP_INFO(this->get_logger(), "Fall Left");
             parameters = false;
             section = "Fall Left";
             break;
-          case 12: //muito lento
+          case 12: 
             RCLCPP_INFO(this->get_logger(), "Fall Right");
             parameters = false;
             section = "Fall Right";
@@ -231,32 +231,32 @@ private:
             parameters = false;
             section = "Agachando";
             break;
-          case 14: // Walking
+          case 14: 
             parameters = true;
             RCLCPP_INFO(this->get_logger(), "Walking"); 
             parameter_number = 1;  
             break;
-          case 15: // Gait
+          case 15: 
             parameters = true;
             RCLCPP_INFO(this->get_logger(), "Gait"); 
             parameter_number = 2;  
             break;
-          case 16: // Stand up Back
+          case 16: 
             RCLCPP_INFO(this->get_logger(), "Stand Up Back");
             parameters = false;
             section = "Stand Up Back";
             break;
-          case 17: // Stand up Front
+          case 17: 
             RCLCPP_INFO(this->get_logger(), "Stand Up Front");
             parameters = false;
             section = "Stand Up Front";
             break;
-          case 18: // Fallen Side
+          case 18:
             RCLCPP_INFO(this->get_logger(), "Fallen Side");
             parameters = false;
             section = "Fallen Side";
             break;
-          case 19: //funcionando,porém ele está andando muito para frente
+          case 19: 
             RCLCPP_INFO(this->get_logger(), "Andar esquerda");
             parameters = true;
             parameter_number = 8;  
@@ -310,7 +310,16 @@ private:
             RCLCPP_INFO(this->get_logger(), "Walking Backward");
             parameters = true;
             parameter_number = 9;
-            break;     
+            break; 
+          case 29: // goleiro penalty
+            RCLCPP_INFO(this->get_logger(), "Goalkeeper Penalty");
+            parameters = false;
+            section = "Goalkeeper Penalty";  
+          case 30: 
+            RCLCPP_INFO(this->get_logger(), "Feather Falling Right");
+            parameters = false;
+            section = "Feather Falling Right";
+            break;  
         }
 
         if (parameters){
