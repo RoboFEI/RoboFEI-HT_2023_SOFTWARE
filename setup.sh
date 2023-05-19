@@ -39,6 +39,7 @@ echo -e "${blue} setup new rules for usb names${NC}"
 sudo cp robot-usb-ports.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
+# udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}
 
 echo -e "${blue} setup commands${NC}"
 sudo cp scripts/compile.sh /usr/local/bin/compile
