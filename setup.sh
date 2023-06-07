@@ -91,6 +91,6 @@ sudo apt install terminator -y
 sudo apt install filezilla -y
 
 #Fortclient
-wget -P ~/Downloads https://fei.edu.br/vpn/Sslvpn_linux.tar.gz
-sudo tar xzvf ~/Downloads/Sslvpn_linux.tar.gz
-~/Downloads/forticlientsslvpn/64bit/forticlientsslvpn
+wget -O ~/Downloads/forticlient.deb https://filestore.fortinet.com/forticlient/forticlient_vpn_7.0.7.0246_amd64.deb
+sudo dpkg -i ~/Downloads/forticlient.deb
+sudo apt install -f -y
