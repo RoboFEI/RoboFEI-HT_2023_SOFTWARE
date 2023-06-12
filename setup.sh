@@ -34,7 +34,6 @@ echo -e "${blue} Instalação das bibliotecas para a ViTDet${NC}"
 pip3 install timm
 python3 install torch torchvision
 pyhton3 -m pip3 install -e ./RoboFEI-HT_2023_SOFTWARE/src/vision_vitdet/vision_vitdet/detectron2
-pip3 install opencv-python-headless
 pip3 install -U scikit-learn
 
 
