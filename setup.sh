@@ -10,6 +10,9 @@ NC='\e[0m' # No Color
 #Brown/Orange 0;33     Yellow        1;33
 #Light Gray   0;37     White         1;37
 
+echo -e "${blue} Remove Sudo password${NC}"
+echo 'robo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
+
 echo -e "${blue} Instalação do ROS2...${NC}"
 apt-cache policy | grep universe
 sudo apt update && sudo apt install curl gnupg lsb-release
@@ -52,3 +55,42 @@ sudo cp scripts/motors.sh /usr/local/bin/motors
 
 sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 sudo chmod 755 /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
+
+echo -e "${blue} Instaling Softwares${NC}"
+sudo apt update && sudo apt upgrade && sudo apt install snapd -y
+
+#Git
+sudo apt install git -y
+
+#VS Code
+sudo snap install --classic code
+
+#Google Chrome
+sudo apt install wget -y
+wget -O ~/Downloads/chrome-stable.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo dpkg -i ~/Downloads/chrome-stable.deb
+
+#Telegran Desktop
+sudo snap install telegram-desktop
+
+#Dynamixel Wizard
+wget -P ~/Downloads https://www.dropbox.com/s/dl/csawv9qzl8m8e0d/DynamixelWizard2Setup-x86_64
+sudo chmod 755 ~/Downloads/DynamixelWizard2Setup-x86_64
+~/Downloads/DynamixelWizard2Setup-x86_64
+
+#VLC
+sudo apt install vlc -y
+
+#Remmina
+sudo apt install remmina remmina-plugin-rdp remmina-plugin-secret remmina-plugin-spice -y
+
+#Terminator
+sudo apt install terminator -y
+
+#Filezila
+sudo apt install filezilla -y
+
+#Fortclient
+wget -O ~/Downloads/forticlient.deb https://filestore.fortinet.com/forticlient/forticlient_vpn_7.0.7.0246_amd64.deb
+sudo dpkg -i ~/Downloads/forticlient.deb
+sudo apt install -f -y
