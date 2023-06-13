@@ -15,18 +15,18 @@ echo 'robo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
 echo -e "${blue} Instalação do ROS2...${NC}"
 apt-cache policy | grep universe
-sudo apt update && sudo apt install curl gnupg lsb-release
+sudo apt update && sudo apt install curl gnupg lsb-release -y
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-sudo apt update
-sudo apt upgrade
-sudo apt install ros-humble-desktop
+sudo apt update 
+sudo apt upgrade -y
+sudo apt install ros-humble-desktop -y
 echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-sudo apt install python3-colcon-common-extensions
+sudo apt install python3-colcon-common-extensions -y
 
 echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
-sudo apt install python3-pip
-sudo pip3 install opencv-python
+sudo apt install python3-pip -y
+sudo pip3 install opencv-python 
 pip install -r src/vision_yolov7/vision_yolov7/requirements.txt
 sudo pip install construct
 
