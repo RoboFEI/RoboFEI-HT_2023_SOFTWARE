@@ -12,6 +12,7 @@ NC='\e[0m' # No Color
 
 echo -e "${blue} Remove Sudo password${NC}"
 echo 'robo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
+echo 'robofei ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
 
 echo -e "${blue} Instalação do ROS2...${NC}"
 apt-cache policy | grep universe
@@ -57,9 +58,6 @@ sudo chmod 755 /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control 
 
 echo -e "${blue} Instaling Softwares${NC}"
 sudo apt update && sudo apt upgrade && sudo apt install snapd -y
-
-#Git
-sudo apt install git -y
 
 #VS Code
 sudo snap install --classic code
