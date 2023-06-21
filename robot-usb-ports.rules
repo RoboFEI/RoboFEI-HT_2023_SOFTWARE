@@ -1,0 +1,7 @@
+KERNEL=="ttyUSB*", ATTRS{serial}=="A9QPHRFN", SYMLINK+="imu"
+
+
+KERNEL=="ttyUSB*", ATTRS{serial}=="A50285BI", SYMLINK+="motors"
+
+
+KERNEL=="video*", ATTRS{product}=="HD Pro Webcam C920",ATTR{index}=="0", SYMLINK+="camera"
