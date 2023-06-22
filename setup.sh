@@ -11,8 +11,8 @@ NC='\e[0m' # No Color
 #Light Gray   0;37     White         1;37
 
 echo -e "${blue} Remove Sudo password${NC}"
-echo 'robo ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
-echo 'robofei ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
+username=$(whoami)
+echo "$username ALL=(ALL) NOPASSWD:ALL" | sudo EDITOR='tee -a' visudo
 
 echo -e "${blue} Instalação do ROS2...${NC}"
 apt-cache policy | grep universe
@@ -62,11 +62,6 @@ sudo apt update && sudo apt upgrade && sudo apt install snapd -y
 #VS Code
 sudo snap install --classic code
 
-#Google Chrome
-sudo apt install wget -y
-wget -O ~/Downloads/chrome-stable.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i ~/Downloads/chrome-stable.deb
-
 #Telegran Desktop
 sudo snap install telegram-desktop
 
@@ -91,3 +86,6 @@ sudo apt install filezilla -y
 wget -O ~/Downloads/forticlient.deb https://filestore.fortinet.com/forticlient/forticlient_vpn_7.0.7.0246_amd64.deb
 sudo dpkg -i ~/Downloads/forticlient.deb
 sudo apt install -f -y
+
+#Dependence for GameController
+sudo apt  install ant
