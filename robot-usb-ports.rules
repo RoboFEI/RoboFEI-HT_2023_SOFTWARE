@@ -1,4 +1,4 @@
-KERNEL=="ttyUSB*", ATTRS{serial}=="A9QPHRFN", SYMLINK+="imu"
+KERNEL=="ttyUSB*", ATTRS{product}=="USB-Serial Controller", SYMLINK+="imu"
 
 
 KERNEL=="ttyUSB*", ATTRS{serial}=="A50285BI", SYMLINK+="motors"
