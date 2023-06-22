@@ -1,5 +1,7 @@
 blue='\e[0;34m'
-NC='\e[0m' # No Color
+NC='\e[0m'
+bashshel='#!/bin/bash'
+# No Color
 #font colors:
 #Black        0;30     Dark Gray     1;30
 #Blue         0;34     Light Blue    1;34
@@ -56,6 +58,10 @@ sudo cp scripts/motors.sh /usr/local/bin/motors
 sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 sudo chmod 755 /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 
+#fast conection
+sudo touch /usr/local/bin/gol && sudo chmod 777 /usr/local/bin/gol
+echo -e "${bashshel}\n\nssh -X robo@192.168.7.2" >> /usr/local/bin/gol 
+
 echo -e "${blue} Instaling Softwares${NC}"
 sudo apt update && sudo apt upgrade && sudo apt install snapd -y
 
@@ -89,3 +95,6 @@ sudo apt install -f -y
 
 #Dependence for GameController
 sudo apt  install ant
+
+
+
