@@ -46,21 +46,48 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}
 
-echo -e "${blue} setup commands${NC}"
-sudo cp scripts/compile.sh /usr/local/bin/compile
-sudo cp scripts/imu.sh /usr/local/bin/imu
-sudo cp scripts/control.sh /usr/local/bin/control
-sudo cp scripts/vision.sh /usr/local/bin/vision
-sudo cp scripts/decision.sh /usr/local/bin/decision
-sudo cp scripts/gamecontroller.sh /usr/local/bin/gamecontroller
-sudo cp scripts/motors.sh /usr/local/bin/motors
-
-sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
-sudo chmod 755 /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
-
-#fast conection
+echo -e "${blue} commands setup${NC}"
+#goalkeeper fast conection 
+sudo rm /usr/local/bin/gol
 sudo touch /usr/local/bin/gol && sudo chmod 777 /usr/local/bin/gol
 echo -e "${bashshel}\n\nssh -X robo@192.168.7.2" >> /usr/local/bin/gol 
+
+#Comand for compile 
+sudo rm /usr/local/bin/compile
+sudo touch /usr/local/bin/compile && sudo chmod 777 /usr/local/bin/compile
+echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \ncolcon build --symlink-install \nsource install/setup.bash" >> /usr/local/bin/compile 
+
+#Comand for run IMU
+sudo rm /usr/local/bin/imu
+sudo touch /usr/local/bin/imu && sudo chmod 777 /usr/local/bin/imu
+echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run um7 um7_node" >> /usr/local/bin/imu 
+
+#Comand for run control
+sudo rm /usr/local/bin/control
+sudo touch /usr/local/bin/control && sudo chmod 777 /usr/local/bin/control
+echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 launch control action.launch.py" >> /usr/local/bin/control
+
+#Comand for run vision
+sudo rm /usr/local/bin/vision
+sudo touch /usr/local/bin/vision && sudo chmod 777 /usr/local/bin/vision
+echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run vision_yolov7 detect" >> /usr/local/bin/vision
+
+#Comand for run decision
+sudo rm /usr/local/bin/decision
+sudo touch /usr/local/bin/decision && sudo chmod 777 /usr/local/bin/decision
+echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run decision_pkg decision_node" >> /usr/local/bin/decision
+
+#Comand for run Gamecontroller
+sudo rm /usr/local/bin/gamecontroller
+sudo touch /usr/local/bin/gamecontroller && sudo chmod 777 /usr/local/bin/gamecontroller
+echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run controller talker" >> /usr/local/bin/gamecontroller
+
+#Comand for run motors
+sudo rm /usr/local/bin/motors
+sudo touch /usr/local/bin/motors && sudo chmod 777 /usr/local/bin/motors
+echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run dynamixel_sdk_examples read_write_node" >> /usr/local/bin/motors
+
+sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 
 echo -e "${blue} Instaling Softwares${NC}"
 sudo apt update && sudo apt upgrade && sudo apt install snapd -y
