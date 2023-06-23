@@ -4,7 +4,7 @@
 // $ ros2 launch control action.launch.py
 
 
-// ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: 17}"
+// ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: 1}"
 
 #include <chrono>
 #include <memory>
@@ -206,12 +206,12 @@ private:
             parameters = false;
             section = "Search Ball";
             break;
-          case 9: //terrível
+          case 9: //melhor que o 10
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Clockwise");
             parameters = true;
             parameter_number = 5;  
             break;
-          case 10: //terrível
+          case 10: 
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Anticlockwise");
             parameters = true;
             parameter_number = 6;  
@@ -330,6 +330,26 @@ private:
             RCLCPP_INFO(this->get_logger(), "Cheering Up");
             parameters = false;
             section = "Cheering Up";
+            break; 
+          case 33: // quando o robo ta caido de lado
+            RCLCPP_INFO(this->get_logger(), "Fallen Side Left");
+            parameters = false;
+            section = "Fallen Side Left";
+            break; 
+          case 34: // quando o robo ta caido de lado
+            RCLCPP_INFO(this->get_logger(), "Fallen Side Right");
+            parameters = false;
+            section = "Fallen Side Right";
+            break;
+          case 35:
+            RCLCPP_INFO(this->get_logger(), "Goalkeeper Searching Ball");
+            parameters = false;
+            section = "Goalkeeper Searching Ball";
+            break;
+          case 36: 
+            RCLCPP_INFO(this->get_logger(), "Feather Falling Left");
+            parameters = false;
+            section = "Feather Falling Left";
             break; 
         }
 
