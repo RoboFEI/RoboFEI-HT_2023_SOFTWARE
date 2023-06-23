@@ -4,7 +4,7 @@
 // $ ros2 launch control action.launch.py
 
 
-// ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: 17}"
+// ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: 1}"
 
 #include <chrono>
 #include <memory>
@@ -57,7 +57,7 @@ uint32_t valor = 246;
 uint32_t valor_up = 250;
 int neck_sides = 2048;
 int neck_up = 2048;
-float sleep_sec = 0;
+float sleep_sec = 0.0;
 int parameters = false;
 int parameter_number = 0;
 int walk = 0;
@@ -206,12 +206,12 @@ private:
             parameters = false;
             section = "Search Ball";
             break;
-          case 9: //terrível
+          case 9: //melhor que o 10
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Clockwise");
             parameters = true;
             parameter_number = 5;  
             break;
-          case 10: //terrível
+          case 10: 
             RCLCPP_INFO(this->get_logger(), "Turn Around Ball Anticlockwise");
             parameters = true;
             parameter_number = 6;  
@@ -315,11 +315,42 @@ private:
             RCLCPP_INFO(this->get_logger(), "Goalkeeper Penalty");
             parameters = false;
             section = "Goalkeeper Penalty";  
+            break; 
           case 30: 
             RCLCPP_INFO(this->get_logger(), "Feather Falling Right");
             parameters = false;
             section = "Feather Falling Right";
-            break;  
+            break; 
+          case 31: 
+            RCLCPP_INFO(this->get_logger(), "Goodbye Loop");
+            parameters = false;
+            section = "Goodbye Loop";
+            break; 
+          case 32:
+            RCLCPP_INFO(this->get_logger(), "Cheering Up");
+            parameters = false;
+            section = "Cheering Up";
+            break; 
+          case 33: // quando o robo ta caido de lado
+            RCLCPP_INFO(this->get_logger(), "Fallen Side Left");
+            parameters = false;
+            section = "Fallen Side Left";
+            break; 
+          case 34: // quando o robo ta caido de lado
+            RCLCPP_INFO(this->get_logger(), "Fallen Side Right");
+            parameters = false;
+            section = "Fallen Side Right";
+            break;
+          case 35:
+            RCLCPP_INFO(this->get_logger(), "Goalkeeper Searching Ball");
+            parameters = false;
+            section = "Goalkeeper Searching Ball";
+            break;
+          case 36: 
+            RCLCPP_INFO(this->get_logger(), "Feather Falling Left");
+            parameters = false;
+            section = "Feather Falling Left";
+            break; 
         }
 
         if (parameters){
