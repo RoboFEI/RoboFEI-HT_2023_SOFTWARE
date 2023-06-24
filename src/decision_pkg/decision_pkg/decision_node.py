@@ -15,9 +15,6 @@ from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3Stamped
 from custom_interfaces.action import Control
 
-#"address1" : 116,
-#"position1" : [1733,2383,2219,1877,926,3170,2050,2052,2010,2139,1784,2331,2860,1281,2622,1485,1986,2129,2048,1586],
-#"sleep1" : 0
 # ros2 run decision_pkg decision_node
 # ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 3}"
 # ros2 topic pub -1 /gamestate custom_interfaces/msg/HumanoidLeagueMsgs "{game_state: 3, secondary_state: 1, has_kick_off: True}"
@@ -103,14 +100,14 @@ class DecisionNode(Node):
         self.fallen = False
         self.fallenFront = False
         self.fallen_side = False
+        self.fallenRight = False
         self.cont_fall_side = 0
         self.cancel = False
         self.finished = True # Variável usada na action para verificar se o controle terminou a ação que estava fazendo
-        self.cont_turn = 0.0
-        self.cont_walk = 0.0
         self.save_ball_left = False
         self.save_ball_right = False
         self.save_need_stand_still = False
+        self.cont_turn = 0
         
 
     def listener_callback_neck(self, msg):
@@ -146,6 +143,12 @@ class DecisionNode(Node):
       
         if(self.cont_fall_side>=30):
             self.fallen_side = True # Robô caido
+            if(self.accel_x < 0):  # Robô caido de frente
+                self.fallenRight = False
+                self.get_logger().info('Caido para a direita')
+            else: # Robô caido de costas
+                self.fallenRight = True
+                self.get_logger().info('Caido para a esquerda')
             self.get_logger().info('Caido de lado')
             
 
@@ -247,7 +250,11 @@ class DecisionNode(Node):
                 self.stand_up_back()
             self.fallen = False
         elif self.fallen_side:
-            self.stand_up_side()
+            if self.fallenRight:
+                self.stand_right()
+                self.fallenRight = False
+            else:
+                self.stand_left()
             self.fallen_side = False
         else:
             if(ROBOT_NUMBER != 1): # JOGADOR
@@ -333,7 +340,13 @@ class DecisionNode(Node):
                         if(self.BALL_DETECTED == False):
                             self.get_logger().info('BALL NOT FOUND %d' %self.contador)
                             self.get_logger().info('CONT FALSES %d' %self.cont_falses)
-                            if (self.contador >= 150):
+                            if (self.save_ball_left and self.cont_turn < 150):
+                                self.turn_left()
+                                self.cont_turn += 1
+                            elif (self.save_ball_right and self.cont_turn < 150):
+                                self.turn_right()
+                                self.cont_turn += 1
+                            elif (self.contador >= 150):
                                 if (self.cont_falses >=2900 ):
                                     self.cont_falses = 0
                                 # elif (self.cont_falses >=2700 and (self.gyro_z < 1.57 and self.gyro_z > -1.57)):
@@ -355,21 +368,16 @@ class DecisionNode(Node):
                         else:
                             self.contador = 0
                             self.cont_falses = 0
+                            self.cont_turn = 0
+                            self.save_ball_left = False
+                            self.save_ball_right = False
                             self.get_logger().info('BALL DETECTED')
-                            if (self.BALL_LEFT and self.BALL_FAR and self.neck_position[0] < 2650 and self.neck_position[1]<1700):
+                            if(self.BALL_LEFT and self.neck_position[0] < 2650):
                                 self.turn_head_left()
-                                self.search_goalkeeper()
-                                self.save_need_stand_still = True
-                            elif (self.BALL_RIGHT and self.BALL_FAR and self.neck_position[0] > 1350 and self.neck_position[1]<1700):
-                                self.turn_head_right()
-                                self.search_goalkeeper()
-                                self.save_need_stand_still = True
-                            elif(self.BALL_LEFT and self.neck_position[0] < 2650):
-                                self.turn_head_left()
-                                self.save_need_stand_still = True
+                                self.save_ball_left = True
                             elif(self.BALL_RIGHT and self.neck_position[0] > 1350):
                                 self.turn_head_right()
-                                self.save_need_stand_still = True
+                                self.save_ball_right = True
                             elif (self.neck_position[0] < 1700):
                                 self.turn_right()
                             elif (self.neck_position[0] > 2300):
@@ -377,22 +385,20 @@ class DecisionNode(Node):
                             elif(self.BALL_FAR or self.BALL_MED):
                                 self.walking()
                             elif (self.BALL_CLOSE):
-                                if (self.save_need_stand_still):
-                                    self.stand_still()
-                                    self.get_logger().info('BALL CLOSE')
-                                    if(self.neck_position[1]>1300):
-                                        self.turn_head_down()
+                                self.get_logger().info('BALL CLOSE')
+                                if(self.neck_position[1]>1300):
+                                    self.turn_head_down()
+                                else:
+                                    self.get_logger().info('BALL KICK')
+                                    # if (self.gyro_z < 1.57 and self.gyro_z > -1.57): 
+                                        # self.get_logger().info('FACING THE OPPONENT GOAL')
+                                    if (self.BALL_CENTER_LEFT or self.BALL_LEFT):
+                                        self.kick_left()
                                     else:
-                                        self.get_logger().info('BALL KICK')
-                                        # if (self.gyro_z < 1.57 and self.gyro_z > -1.57): 
-                                            # self.get_logger().info('FACING THE OPPONENT GOAL')
-                                        if (self.BALL_CENTER_LEFT or self.BALL_LEFT):
-                                            self.kick_left()
-                                        else:
-                                            self.kick_right()
-                                        # else: 
-                                            # self.get_logger().info('FACING THE OUR GOAL: TURNING')
-                                            # self.turn_around_clockwise()
+                                        self.kick_right()
+                                    # else: 
+                                        # self.get_logger().info('FACING THE OUR GOAL: TURNING')
+                                        # self.turn_around_clockwise()
 
 
                 elif(self.gamestate == 4): # Jogo terminou, robô sai do campo
@@ -457,7 +463,6 @@ class DecisionNode(Node):
 
     def walking(self):
         self.send_goal(14) 
-        self.save_need_stand_still = True
         self.get_logger().info('Walking')
 
     def gait(self):
@@ -470,12 +475,10 @@ class DecisionNode(Node):
 
     def turn_right(self): # gira no seu próprio eixo (direita)
         self.send_goal(5)
-        self.save_need_stand_still = True
         self.get_logger().info('Turn right')
 
     def turn_left(self): # gira no seu próprio eixo (esquerda)
         self.send_goal(6)
-        self.save_need_stand_still = True
         self.get_logger().info('Turn left')
 
     def turn_around_clockwise(self): # gira em torno da bola sentido horário
@@ -539,12 +542,20 @@ class DecisionNode(Node):
         self.get_logger().info('Goalkeeper Feather Falling Left')
 
     def goalkeeper_search_ball(self):
-        self.send_goal(34)
+        self.send_goal(38)
         self.get_logger().info('Goalkeeper Feather Falling Left')
     
     def goalkeeper_centralize(self):
-        self.send_goal(34)
+        self.send_goal(39)
         self.get_logger().info('Goalkeeper Feather Falling Left')
+
+    def stand_left(self):
+        self.send_goal(33)
+        self.get_logger().info('Stand up left')
+
+    def stand_right(self):
+        self.send_goal(34)
+        self.get_logger().info('Stand up right')
 
 
 
