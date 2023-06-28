@@ -119,7 +119,6 @@ private:
     void topic_callback_fase(const std::shared_ptr<std_msgs::msg::Bool> fase_msg) const
     {
       fase_zero = fase_msg->data;
-      RCLCPP_INFO(this->get_logger(), "Fase zero control %d", fase_zero);
     }
 
     // handle new goals, accept or rejects them 
@@ -382,7 +381,6 @@ private:
         
         else{
           if (fase_zero) {
-            RCLCPP_INFO(this->get_logger(), "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             message_walk.walk_number = 0; 
             publisher_walk->publish(message_walk);
             message.id = motors;
