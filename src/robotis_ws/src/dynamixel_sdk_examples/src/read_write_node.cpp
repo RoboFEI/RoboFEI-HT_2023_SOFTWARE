@@ -54,6 +54,8 @@
 #define ADDR_TORQUE_ENABLE 64
 #define ADDR_GOAL_POSITION 116
 #define ADDR_PRESENT_POSITION 132
+#define MAX_POSITION_LIMIT 48
+#define MIN_POSITION_LIMIT 52
 
 // Protocol version
 #define PROTOCOL_VERSION 2.0  // Default Protocol version of DYNAMIXEL X series.
@@ -108,6 +110,30 @@ ReadWriteNode::ReadWriteNode()
 
       for (int i=0; i<20; i++){
         uint32_t position = (unsigned int)msg->position[i]; // Convert int32 -> uint32
+
+        // dxl_comm_result = packetHandler->read4ByteTxRx(
+        //   portHandler,
+        //   (uint8_t) i,
+        //   MAX_POSITION_LIMIT,
+        //   reinterpret_cast<uint32_t *>(&max_limit_position),
+        //   &dxl_error
+        // );
+
+        // RCLCPP_INFO(this->get_logger(), "ID %d MAX LIMIT %d", msg->id[i], max_limit_position);
+
+        // if (position > max_limit_position)
+        //   position = max_limit_position;
+
+        // dxl_comm_result = packetHandler->read4ByteTxRx(
+        //   portHandler,
+        //   (uint8_t) i,
+        //   MIN_POSITION_LIMIT,
+        //   reinterpret_cast<uint32_t *>(&min_limit_position),
+        //   &dxl_error
+        // );
+
+        // if (position < min_limit_position)
+        //   position = min_limit_position;
                 
         motors[i][0] = DXL_LOBYTE(DXL_LOWORD(position));
         motors[i][1] = DXL_HIBYTE(DXL_LOWORD(position));

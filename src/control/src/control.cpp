@@ -29,6 +29,7 @@
 #include "custom_interfaces/msg/vision.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "GaitMove.hpp"
 #include "custom_interfaces/msg/set_position_original.hpp"
 #include "custom_interfaces/srv/reset.hpp"
@@ -52,13 +53,13 @@ int contador = 0;
 int cont_vision = 40;
 int cont_vision_up = 40;
 int cont_vision_sides = 40;
-bool stop_gait = true;
+bool fase_zero = true;
 uint32_t valor = 246;
 uint32_t valor_up = 250;
 int neck_sides = 2048;
 int neck_up = 2048;
 float sleep_sec = 0.0;
-int parameters = false;
+int parameters = true;
 int parameter_number = 0;
 int walk = 0;
 int sidle = 0;
@@ -88,11 +89,11 @@ public:
     RCLCPP_INFO(this->get_logger(), "Running action node");
     subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>(
       "/neck_position", 10, std::bind(&Control::topic_callback_neck, this, _1));
+    subscriber_fase_zero = this->create_subscription<std_msgs::msg::Bool>("/fase_zero", 10, std::bind(&Control::topic_callback_fase, this, _1));
     publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
     publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
     publisher_walk = this->create_publisher<custom_interfaces::msg::Walk>("walking", 10); 
 
-    
     using namespace std::placeholders;
 
     this->action_server_ = rclcpp_action::create_server<Control_action>(
@@ -103,17 +104,22 @@ public:
     std::bind(&Control::handle_accepted, this, _1));
 
     }
+
   vector<int> motors { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 };
   vector<vector<int>> position;
   
-    
-
 private:
 
     void topic_callback_neck(const std::shared_ptr<custom_interfaces::msg::NeckPosition> neck_msg) const
     {
       neck_sides = neck_msg->position19;
       neck_up = neck_msg->position20;
+    }
+    
+    void topic_callback_fase(const std::shared_ptr<std_msgs::msg::Bool> fase_msg) const
+    {
+      fase_zero = fase_msg->data;
+      RCLCPP_INFO(this->get_logger(), "Fase zero control %d", fase_zero);
     }
 
     // handle new goals, accept or rejects them 
@@ -151,7 +157,6 @@ private:
         auto message_walk = custom_interfaces::msg::Walk();  
         auto message = custom_interfaces::msg::SetPosition();   
         auto message_single = custom_interfaces::msg::SetPositionOriginal();
-        
         
         const auto goal = goal_handle->get_goal();
         movement = goal->action_number;
@@ -297,14 +302,14 @@ private:
             section = "Dance";
             break;
           case 26: // chute direito angulado
-            RCLCPP_INFO(this->get_logger(), "Open Right Kick");
+            RCLCPP_INFO(this->get_logger(), "Left Leg Right Kick");
             parameters = false;
-            section = "Open Right Kick";
+            section = "Left Leg Right Kick";
             break;  
           case 27: // chute esquerdo angulado
-            RCLCPP_INFO(this->get_logger(), "Open Left Kick");
+            RCLCPP_INFO(this->get_logger(), "Left Leg Left Kick");
             parameters = false;
-            section = "Open Left Kick";
+            section = "Left Leg Left Kick";
             break;
           case 28: // Andar pra trás
             RCLCPP_INFO(this->get_logger(), "Walking Backward");
@@ -351,7 +356,18 @@ private:
             parameters = false;
             section = "Feather Falling Left";
             break; 
+          case 37: 
+            RCLCPP_INFO(this->get_logger(), "Quick Left Kick");
+            parameters = false;
+            section = "Quick Left Kick";
+            break;
+          case 38: 
+            RCLCPP_INFO(this->get_logger(), "Quick Right Kick");
+            parameters = false;
+            section = "Quick Right Kick";
+            break;
         }
+        RCLCPP_INFO(this->get_logger(), "FASE ZERO %d", fase_zero);
 
         if (parameters){
           if (goal_handle->is_canceling()) {
@@ -365,63 +381,66 @@ private:
         }
         
         else{
-          message_walk.walk_number = 0; 
-          publisher_walk->publish(message_walk);
-          message.id = motors;
-
-          number_of_mov = j[section]["number of movements"];
-          
-          for (int i = 1; i <= number_of_mov; i++){
-
+          if (fase_zero) {
+            RCLCPP_INFO(this->get_logger(), "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             message_walk.walk_number = 0; 
             publisher_walk->publish(message_walk);
-            address_name = "address";
-            id_name = "id";
-            vel_name = "velocity";
-            position_name = "position";
-            sleep_name = "sleep";
+            message.id = motors;
+
+            number_of_mov = j[section]["number of movements"];
             
-            RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
-            if (goal_handle->is_canceling()) {
-                result->finished = false;
-                goal_handle->canceled(result);
-                RCLCPP_INFO(this->get_logger(), "Goal canceled");
-                return;
-            }
-
-            address_name = address_name + std::to_string(i);
-            if (j[section][address_name] == 112){
-              RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
-              id_name = id_name + std::to_string(i);
-              message_single.id = j[section][id_name];
-              vel_name = vel_name + std::to_string(i);
-              message_single.position = j[section][vel_name];
-              message_single.address = j[section][address_name];
-              publisher_single->publish(message_single);
-              usleep(500000);
-            }
-            else if (j[section][address_name] == 116){
-              position_name = position_name + std::to_string(i);
-              position.push_back(j[section][position_name]);
-              if (movement == 21 or movement == 22 or movement == 23 or movement == 24){
-                position[0][18] = neck_sides;
-                position[0][19] = neck_up;
+            for (int i = 1; i <= number_of_mov; i++){
+              
+              message_walk.walk_number = 0; 
+              publisher_walk->publish(message_walk);
+              address_name = "address";
+              id_name = "id";
+              vel_name = "velocity";
+              position_name = "position";
+              sleep_name = "sleep";
+              
+              RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
+              if (goal_handle->is_canceling()) {
+                  result->finished = false;
+                  goal_handle->canceled(result);
+                  RCLCPP_INFO(this->get_logger(), "Goal canceled");
+                  return;
               }
-              message.position = position.front();
 
-              RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
-              publisher_->publish(message);
-              sleep_name = sleep_name + std::to_string(i);
-              sleep_sec = j[section][sleep_name];
-              RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
-              usleep(sleep_sec*1000000);
-              position.clear();
+              address_name = address_name + std::to_string(i);
+              if (j[section][address_name] == 112){
+                RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
+                id_name = id_name + std::to_string(i);
+                message_single.id = j[section][id_name];
+                vel_name = vel_name + std::to_string(i);
+                message_single.position = j[section][vel_name];
+                message_single.address = j[section][address_name];
+                publisher_single->publish(message_single);
+                usleep(500000);
+              }
+              else if (j[section][address_name] == 116){
+                position_name = position_name + std::to_string(i);
+                position.push_back(j[section][position_name]);
+                if (movement == 21 or movement == 22 or movement == 23 or movement == 24){
+                  position[0][18] = neck_sides;
+                  position[0][19] = neck_up;
+                }
+                message.position = position.front();
+
+                RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
+                publisher_->publish(message);
+                sleep_name = sleep_name + std::to_string(i);
+                sleep_sec = j[section][sleep_name];
+                RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
+                usleep(sleep_sec*1000000);
+                position.clear();
+              }
+            
+              movements_remaining = number_of_mov - i;
+              // Publish feedback
+              goal_handle->publish_feedback(feedback);
+              RCLCPP_INFO(this->get_logger(), "Feedback: %d movements remaining", movements_remaining);
             }
-          
-            movements_remaining = number_of_mov - i;
-            // Publish feedback
-            goal_handle->publish_feedback(feedback);
-            RCLCPP_INFO(this->get_logger(), "Feedback: %d movements remaining", movements_remaining);
           }
         }
       
@@ -431,6 +450,7 @@ private:
     }
 
     rclcpp::Subscription<custom_interfaces::msg::NeckPosition>::SharedPtr subscription_neck;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscriber_fase_zero;
     rclcpp::Publisher<custom_interfaces::msg::SetPosition>::SharedPtr publisher_; 
     rclcpp::Publisher<custom_interfaces::msg::SetPositionOriginal>::SharedPtr publisher_single; 
     rclcpp::Publisher<custom_interfaces::msg::Walk>::SharedPtr publisher_walk;      

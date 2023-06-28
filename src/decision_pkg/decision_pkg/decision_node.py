@@ -339,17 +339,17 @@ class DecisionNode(Node):
                     else: 
                         if(self.BALL_DETECTED == False):
                             self.get_logger().info('BALL NOT FOUND %d' %self.contador)
-                            self.get_logger().info('CONT FALSES %d' %self.cont_falses)
-                            if (self.save_ball_left and self.cont_turn < 150):
+                            self.get_logger().info('CONT SEARCH BALL %d' %self.cont_falses)
+                            self.get_logger().info('CONT SAVE BALL %d' %self.cont_falses)
+                            if (self.save_ball_left and self.cont_turn < 1000):
                                 self.turn_left()
                                 self.cont_turn += 1
-                            elif (self.save_ball_right and self.cont_turn < 150):
+                            elif (self.save_ball_right and self.cont_turn < 1000):
                                 self.turn_right()
                                 self.cont_turn += 1
                             elif (self.contador >= 150):
                                 if (self.cont_falses >=2900 ):
                                     self.cont_falses = 0
-                                # elif (self.cont_falses >=2700 and (self.gyro_z < 1.57 and self.gyro_z > -1.57)):
                                 elif (self.cont_falses >=2700):
                                     self.walking()
                                     self.cont_falses += 1

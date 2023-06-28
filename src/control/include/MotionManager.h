@@ -25,6 +25,7 @@
 #include "custom_interfaces/srv/get_position.hpp"
 #include "custom_interfaces/msg/walk.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 #define OFFSET_SECTION "Offset"
 #define INVALID_VALUE   -1024.0
@@ -52,9 +53,10 @@ namespace Robot
 		rclcpp::Subscription<custom_interfaces::msg::Walk>::SharedPtr subscription_walk;
 		rclcpp::Subscription<custom_interfaces::msg::SetPosition>::SharedPtr subscription_positions;
 		rclcpp::Subscription<custom_interfaces::msg::NeckPosition>::SharedPtr subscription_neck;
-rclcpp::Publisher<custom_interfaces::msg::SetPosition>::SharedPtr publisher_;  
-rclcpp::Publisher<custom_interfaces::msg::SetPositionOriginal>::SharedPtr publisher_single; 
-rclcpp::Client<custom_interfaces::srv::GetPosition>::SharedPtr client;
+		rclcpp::Publisher<custom_interfaces::msg::SetPosition>::SharedPtr publisher_;  
+		rclcpp::Publisher<custom_interfaces::msg::SetPositionOriginal>::SharedPtr publisher_single;
+		rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_fase_zero; 
+		rclcpp::Client<custom_interfaces::srv::GetPosition>::SharedPtr client;
  
 		
 	rclcpp::TimerBase::SharedPtr timer_;
@@ -76,7 +78,7 @@ rclcpp::Client<custom_interfaces::srv::GetPosition>::SharedPtr client;
 	std::thread update_thread_;
 	void update_loop(void);
 
-	
+	void GetIniParameter();
 	
 	//void adaptTorqueToVoltage();
 	
@@ -114,6 +116,8 @@ rclcpp::Client<custom_interfaces::srv::GetPosition>::SharedPtr client;
 
 		void StartLogging();
 		void StopLogging();
+
+		
 
         void LoadINISettings(minIni* ini);
         void LoadINISettings(minIni* ini, const std::string &section);

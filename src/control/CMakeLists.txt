@@ -79,6 +79,7 @@ ament_target_dependencies(motion
   rclcpp_components
   custom_interfaces
   sensor_msgs
+  std_msgs
 )
 
 # rosidl_target_interfaces(motion ${PROJECT_NAME} "rosidl_typesupport_cpp")
@@ -94,6 +95,7 @@ ament_target_dependencies(control
   custom_interfaces
   rclcpp
   sensor_msgs
+  std_msgs
   rclcpp_action
 )
 

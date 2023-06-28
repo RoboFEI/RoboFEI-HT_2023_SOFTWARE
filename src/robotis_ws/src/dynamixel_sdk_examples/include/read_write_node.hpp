@@ -50,6 +50,8 @@ private:
   rclcpp::TimerBase::SharedPtr timer_; // declaration of timer to publish the neck position
 
   int present_position;
+  int max_limit_position;
+  int min_limit_position;
   int motor[2];
 };
 

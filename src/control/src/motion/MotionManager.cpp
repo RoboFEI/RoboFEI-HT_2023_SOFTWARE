@@ -33,6 +33,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "custom_interfaces/msg/set_position.hpp"
 #include "custom_interfaces/msg/set_position_original.hpp"
 #include "custom_interfaces/srv/get_position.hpp"
@@ -81,6 +82,7 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	subscription_positions = this->create_subscription<custom_interfaces::msg::SetPosition>("set_position", 10, std::bind(&MotionManager::topic_callback_positions, this, _1));
 	subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>("/neck_position", 10, std::bind(&MotionManager::topic_callback_neck, this, _1));
 	publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
+	publisher_fase_zero = this->create_publisher<std_msgs::msg::Bool>("/fase_zero", 10); 
 	publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
 	client = this->create_client<custom_interfaces::srv::GetPosition>("get_position");
     timer_ = this->create_wall_timer(4ms, std::bind(&MotionManager::Process, this));
@@ -124,104 +126,96 @@ void MotionManager::topic_callback_positions(const std::shared_ptr<custom_interf
         	position[i] = position_msg_->position[i];
 	}
 
+void MotionManager::GetIniParameter()
+{
+	if (Walking::GetInstance()->GetCurrentPhase()==0 || Walking::GetInstance()->GetCurrentPhase()==2){
+		if (walk != last_movement){
+			if (walk == 1){
+				printf("CALLBACK WALK\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Walking Config");
+			}
+			else if (walk == 2){
+				printf("CALLBACK GAIT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Gait");
+			}
+			else if (walk == 3){
+				printf("CALLBACK TURN\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Turn Robot");
+			}
+			else if (walk == 4){
+				printf("CALLBACK WALK SLOW\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Walk Slow");
+			}
+			else if (walk == 5){
+				printf("CALLBACK TURN BALL RIGHT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Turn Ball Right");
+			}
+			else if (walk == 6){
+				printf("CALLBACK TURN BALL LEFT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Turn Ball Left");
+			}
+			else if (walk == 7){
+				printf("CALLBACK SIDLE RIGHT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Sidle Right");
+			}
+			else if (walk == 8){
+				printf("CALLBACK SIDLE LEFT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Sidle Left");
+			}
+			else if (walk == 9){
+				printf("CALLBACK WALK BACKWARD\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Walking Backward");
+			}
+			else if (walk == 10){
+				printf("CALLBACK WALK BACKWARD SLOW\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Walking Backward Slow");
+			}
+			else if (walk == 11){
+				printf("CALLBACK TURN ROBOT RIGHT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Turn Robot Right");
+			}
+			else if (walk == 12){
+				printf("CALLBACK TURN ROBOT LEFT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Turn Robot Left");
+			}
+			else if (walk == 13){
+				printf("CALLBACK TURN ROBOT LEFT\n");
+				Walking::GetInstance()->LoadINISettings(ini, "Turn Robot Left slow");
+			}
+			last_movement = walk;
+			MotionManager::GetInstance()->LoadINISettings(ini);
+			Action::GetInstance()->Stop();
+
+			//MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
+			MotionManager::GetInstance()->Initialize();
+			Walking::GetInstance()->m_Joint.SetEnableBody(true);
+			Action::GetInstance()->m_Joint.SetEnableBody(false);
+			MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);
+			MotionManager::GetInstance()->SetEnable(true);
+			printf("%d\n", MotionManager::GetInstance()->GetEnable());
+			Walking::GetInstance()->Start();
+			// printf("WALKING %d\n", Walking::GetInstance()->IsRunning());
+			// printf("ACTION %d\n", Action::GetInstance()->IsRunning());
+			MotionManager::GetInstance()->keep_walking=true;
+			//printf("KEEP WALKING DEPOIS %d\n", MotionManager::GetInstance()->keep_walking);
+		}
+	}
+}
 
 void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces::msg::Walk> walk_msg_) const
     {
+		RCLCPP_INFO(this->get_logger(), "CALLBACK WALK MM");
+		auto message_fase = std_msgs::msg::Bool();
+		message_fase.data = false;
         walk = walk_msg_->walk_number;
-		printf("MOVEMENT %d\n", walk);
-		printf("FASE %d\n", Walking::GetInstance()->GetCurrentPhase());
-		
 		if (walk!=0){
-			if (Walking::GetInstance()->m_Phase==0){
-				if (walk != last_movement){
-					if (walk == 1){
-						printf("CALLBACK WALK\n");
-						last_movement = walk;
-						Walking::GetInstance()->LoadINISettings(ini, "Walking Config");
-					}
-					else if (walk == 2){
-						printf("CALLBACK GAIT\n");
-						last_movement = walk;
-						Walking::GetInstance()->LoadINISettings(ini, "Gait");
-					}
-					else if (walk == 3){
-						last_movement = walk;
-						printf("CALLBACK TURN\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Turn Robot");
-					}
-					else if (walk == 4){
-						last_movement = walk;
-						printf("CALLBACK WALK SLOW\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Walk Slow");
-					}
-					else if (walk == 5){
-						last_movement = walk;
-						printf("CALLBACK TURN BALL RIGHT\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Turn Ball Right");
-					}
-					else if (walk == 6){
-						last_movement = walk;
-						printf("CALLBACK TURN BALL LEFT\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Turn Ball Left");
-					}
-					else if (walk == 7){
-						last_movement = walk;
-						printf("CALLBACK SIDLE RIGHT\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Sidle Right");
-					}
-					else if (walk == 8){
-						last_movement = walk;
-						printf("CALLBACK SIDLE LEFT\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Sidle Left");
-					}
-					else if (walk == 9){
-						last_movement = walk;
-						printf("CALLBACK WALK BACKWARD\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Walking Backward");
-					}
-					else if (walk == 10){
-						last_movement = walk;
-						printf("CALLBACK WALK BACKWARD SLOW\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Walking Backward Slow");
-					}
-					else if (walk == 11){
-						last_movement = walk;
-						printf("CALLBACK TURN ROBOT RIGHT\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Turn Robot Right");
-					}
-					else if (walk == 12){
-						last_movement = walk;
-						printf("CALLBACK TURN ROBOT LEFT\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Turn Robot Left");
-						
-					}
-					else if (walk == 13){
-						last_movement = walk;
-						printf("CALLBACK TURN ROBOT LEFT\n");
-						Walking::GetInstance()->LoadINISettings(ini, "Turn Robot Left slow");
-					}
-					MotionManager::GetInstance()->LoadINISettings(ini);
-					Action::GetInstance()->Stop();
-
-					//MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
-					MotionManager::GetInstance()->Initialize();
-					Walking::GetInstance()->m_Joint.SetEnableBody(true);
-					Action::GetInstance()->m_Joint.SetEnableBody(false);
-					MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);
-					MotionManager::GetInstance()->SetEnable(true);
-					printf("%d\n", MotionManager::GetInstance()->GetEnable());
-					Walking::GetInstance()->Start();
-					// printf("WALKING %d\n", Walking::GetInstance()->IsRunning());
-					// printf("ACTION %d\n", Action::GetInstance()->IsRunning());
-					MotionManager::GetInstance()->keep_walking=true;
-					//printf("KEEP WALKING DEPOIS %d\n", MotionManager::GetInstance()->keep_walking);
-				}
-			}
+			message_fase.data = true;
+			MotionManager::GetInstance()->GetIniParameter();
 		}
-		
 		else{ // parar o walking
 			RCLCPP_INFO(this->get_logger(), "NO MOTION MANAGER");
 			if (MotionManager::GetInstance()->keep_walking==false && Walking::GetInstance()->GetCurrentPhase()==0){
+				message_fase.data = true;
 				Action::GetInstance()->Stop();
 				MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
 				// MotionManager::GetInstance()->Initialize();
@@ -236,6 +230,7 @@ void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces:
 				MotionManager::GetInstance()->keep_walking=true;
 			}
 		}
+		publisher_fase_zero->publish(message_fase);
 	}
 
 bool MotionManager::Initialize(bool fadeIn)
@@ -256,8 +251,6 @@ bool MotionManager::Initialize(bool fadeIn)
 		MotionStatus::m_CurrentJoints.SetValue(id, position[id]);
 		std::cout << position[id] << std::endl;
 	}
-
-	
 
 	if(fadeIn)
 	{
@@ -377,11 +370,21 @@ void MotionManager::SaveINISettings(minIni* ini, const std::string &section)
 #define MARGIN_OF_SD        2.0
 void MotionManager::Process()
 {
-	if(walk!=0){
+	RCLCPP_INFO(this->get_logger(), "FASE PROCESS %d", Walking::GetInstance()->GetCurrentPhase());
+	if (Walking::GetInstance()->GetCurrentPhase()==0 || Walking::GetInstance()->GetCurrentPhase()==2){
+		auto message_fase = std_msgs::msg::Bool();
+		message_fase.data = true;
+		publisher_fase_zero->publish(message_fase);
+	}
+	
+	if(walk!=0 || (walk==0 && (Walking::GetInstance()->GetCurrentPhase()!=0 || Walking::GetInstance()->GetCurrentPhase()==2))){
 		if((Walking::GetInstance())->m_Joint.GetEnable(5) == true)
 		{
 			Walking::GetInstance()->Process();
 		}
+		
+		if (walk != last_movement)
+			MotionManager::GetInstance()->GetIniParameter();
 
 		if(m_fadeIn && m_torque_count < DEST_TORQUE) {
 			if(m_torque_count < 100)
@@ -431,8 +434,6 @@ void MotionManager::Process()
 			return;
 			
 		MotionManager::GetInstance()->m_IsRunning = true;
-
-
 
 		MotionManager::GetInstance()->m_CalibrationStatus = 1;
 
