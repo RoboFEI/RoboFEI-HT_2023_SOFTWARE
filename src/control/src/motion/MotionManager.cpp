@@ -40,7 +40,7 @@
 #include "custom_interfaces/msg/walk.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
 
-#define INI_FILE_PATH       "src/control/Data/config.ini"
+#define INI_FILE_PATH       "src/control/Data/config_reforced_prometheus.ini"
 
 using namespace Robot;
 using namespace std::chrono_literals;
@@ -370,7 +370,7 @@ void MotionManager::SaveINISettings(minIni* ini, const std::string &section)
 #define MARGIN_OF_SD        2.0
 void MotionManager::Process()
 {
-	RCLCPP_INFO(this->get_logger(), "FASE PROCESS %d", Walking::GetInstance()->GetCurrentPhase());
+	// RCLCPP_INFO(this->get_logger(), "FASE PROCESS %d", Walking::GetInstance()->GetCurrentPhase());
 	if (Walking::GetInstance()->GetCurrentPhase()==0 || Walking::GetInstance()->GetCurrentPhase()==2){
 		auto message_fase = std_msgs::msg::Bool();
 		message_fase.data = true;

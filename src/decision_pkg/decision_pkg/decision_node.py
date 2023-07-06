@@ -260,7 +260,7 @@ class DecisionNode(Node):
             if(ROBOT_NUMBER != 1): # JOGADOR
                 if(self.gamestate == 0): # Initial state - Robô parado em pé
                     self.ready_robot = False
-                    self.gait()
+                    self.stand_still()
                     self.get_logger().info('INITIAL: Initial State')
 
                 elif(self.gamestate == 1 and not self.ready_robot): # Robô vai para a posição inicial    
@@ -388,7 +388,7 @@ class DecisionNode(Node):
                                 self.walking()
                             elif (self.BALL_CLOSE):
                                 self.get_logger().info('BALL CLOSE')
-                                if(self.neck_position[1]>1300):
+                                if(self.neck_position[1]>1340):
                                     self.turn_head_down()
                                 else:
                                     self.get_logger().info('BALL KICK')
@@ -401,7 +401,6 @@ class DecisionNode(Node):
                                     # else: 
                                         # self.get_logger().info('FACING THE OUR GOAL: TURNING')
                                         # self.turn_around_clockwise()
-
 
                 elif(self.gamestate == 4): # Jogo terminou, robô sai do campo
                     self.stand_still()
