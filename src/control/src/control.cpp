@@ -376,7 +376,7 @@ private:
         if (do_gait){
           movement = 15;
           contador++;
-          if (contador >= 20){
+          if (contador >= 5){
             do_gait = false;
             contador = 0;
           }
@@ -384,8 +384,6 @@ private:
         }
 
         choose_movement(movement);          
-        
-        RCLCPP_INFO(this->get_logger(), "FASE ZERO %d", fase_zero);
 
         if (parameters){
           if (goal_handle->is_canceling()) {
