@@ -39,7 +39,11 @@ pip3 install -U scikit-learn
 
 
 echo -e "${blue} setup new rules for usb names${NC}"
-sudo cp robot-usb-ports.rules /etc/udev/rules.d/
+sudo rm /etc/udev/rules.d/robot-usb-ports.rules
+sudo touch /etc/udev/rules.d/robot-usb-ports.rules && sudo chmod 777 /etc/udev/rules.d/robot-usb-ports.rules
+echo -e "KERNEL==\"ttyUSB*\", ATTRS{product}==\"USB-Serial Controller\", SYMLINK+=\"imu\"\n" >> /etc/udev/rules.d/robot-usb-ports.rules 
+echo -e "KERNEL==\"ttyUSB*\", ATTRS{serial}==\"A50285BI\", SYMLINK+=\"motors\"\n" >> /etc/udev/rules.d/robot-usb-ports.rules 
+echo -e "KERNEL==\"video*\", ATTRS{product}==\"HD Pro Webcam C920\",ATTR{index}==\"0\", SYMLINK+=\"camera\"" >> /etc/udev/rules.d/robot-usb-ports.rules
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}
@@ -93,9 +97,6 @@ sudo apt update && sudo apt upgrade && sudo apt install snapd -y
 
 #VS Code
 sudo snap install --classic code
-
-#Telegran Desktop
-sudo snap install telegram-desktop
 
 #Dynamixel Wizard
 wget -P ~/Downloads https://www.dropbox.com/s/dl/csawv9qzl8m8e0d/DynamixelWizard2Setup-x86_64
