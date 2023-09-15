@@ -6,7 +6,7 @@ from construct import Container, ConstError
 from rclpy import logging
 from rclpy.node import Node
 from std_msgs.msg import Bool
-from controller.gamestate import GameState, ReturnData, GAME_CONTROLLER_RESPONSE_VERSION
+from gamecontroller.gamestate import GameState, ReturnData, GAME_CONTROLLER_RESPONSE_VERSION
 from custom_interfaces.msg import HumanoidLeagueMsgs as GameStateMsg
 
 logger = logging.get_logger('humanoid_league_game_controller')
