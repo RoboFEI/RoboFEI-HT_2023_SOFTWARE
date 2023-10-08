@@ -95,9 +95,8 @@ class DecisionNode(Node):
         self.game_already_started = True
         self.last_movement = 0
         self.movement = 1
-        self.contador_imu = 0
         self.contador = 0
-        self.contador_turn_search_ball = 0
+        self.contador_imu = 0
         self.fallen = False
         self.fallenFront = False
         self.fallen_side = False
@@ -265,18 +264,15 @@ class DecisionNode(Node):
                     self.get_logger().info('INITIAL: Initial State')
 
                 elif(self.gamestate == 1 and not self.ready_robot): # Robô vai para a posição inicial    
-                    if (self.contador < 3000):
-                        self.walking()
-                        self.contador+=1
-                    elif (self.gyro_z > 1.57 and self.gyro_z < -1.57): 
-                        self.turn_left()
+                    self.gait()
                     
                 elif(self.gamestate == 2): # Espera o jogo começar
                     self.get_logger().info('SET: Keep ready')
                     self.gait()
-                    self.contador = 0
+
 
                 elif(self.gamestate == 3):
+
                     if(self.secstate == 6): # Penalti do oponente
                         self.gait()
 
@@ -342,37 +338,35 @@ class DecisionNode(Node):
 
                     else: 
                         if(self.BALL_DETECTED == False):
+                            self.get_logger().info('BALL NOT FOUND %d' %self.contador)
                             self.get_logger().info('CONT FALSES %d' %self.cont_falses)
-                            self.get_logger().info('CONT TURN CENTRALIZE %d' %self.cont_turn)
-                            if (self.save_ball_left and self.cont_turn < 250):
+                            if (self.save_ball_left and self.cont_turn < 150):
                                 self.turn_left()
                                 self.cont_turn += 1
-                            elif (self.save_ball_right and self.cont_turn < 250):
+                            elif (self.save_ball_right and self.cont_turn < 150):
                                 self.turn_right()
                                 self.cont_turn += 1
-                            elif (self.cont_falses >= 150):
-                                if (self.contador_turn_search_ball >= 4):
+                            elif (self.contador >= 150):
+                                if (self.cont_falses >=2900 ):
+                                    self.cont_falses = 0
+                                # elif (self.cont_falses >=2700 and (self.gyro_z < 1.57 and self.gyro_z > -1.57)):
+                                elif (self.cont_falses >=2700):
                                     self.walking()
                                     self.cont_falses += 1
-                                    if(self.cont_falses>=200):
-                                        self.contador_turn_search_ball = 0
-                                        self.cont_falses = 0
                                     self.get_logger().info('WALKING INSIDE SEARCH BALL')
-                                elif(self.cont_falses>=2000):
+                                elif(self.cont_falses>=1800):
                                     self.turn_left()
                                     self.cont_falses += 1
-                                    if(self.cont_falses>=2050):
-                                        self.contador_turn_search_ball += 1
-                                        self.cont_falses = 0
                                     self.get_logger().info('TURNING INSIDE SEARCH BALL')
                                 else:
                                     self.get_logger().info('PROCURANDOOOO')
                                     self.cont_falses += 1
                                     self.search_ball() # Procura a bola
                             else:
-                                self.cont_falses += 1
+                                self.contador += 1
                             
                         else:
+                            self.contador = 0
                             self.cont_falses = 0
                             self.cont_turn = 0
                             self.save_ball_left = False
@@ -392,7 +386,7 @@ class DecisionNode(Node):
                                 self.walking()
                             elif (self.BALL_CLOSE):
                                 self.get_logger().info('BALL CLOSE')
-                                if(self.neck_position[1]>1340):
+                                if(self.neck_position[1]>1300):
                                     self.turn_head_down()
                                 else:
                                     self.get_logger().info('BALL KICK')
@@ -405,6 +399,7 @@ class DecisionNode(Node):
                                     # else: 
                                         # self.get_logger().info('FACING THE OUR GOAL: TURNING')
                                         # self.turn_around_clockwise()
+
 
                 elif(self.gamestate == 4): # Jogo terminou, robô sai do campo
                     self.stand_still()
