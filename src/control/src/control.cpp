@@ -160,7 +160,7 @@ private:
           section = "Greeting";
           break;
         case 3: 
-          RCLCPP_INFO(this->get_logger(), "Right kick");
+          RCLCPP_INFO(this->get_logger(), "Right Kick");
           parameters = false;
           section = "Right Kick";
           break;
@@ -200,19 +200,19 @@ private:
           parameter_number = 6;  
           break;
         case 11: 
-          RCLCPP_INFO(this->get_logger(), "Fall Left");
+          RCLCPP_INFO(this->get_logger(), "Goalkeeper Fall Left");
           parameters = false;
-          section = "Fall Left";
+          section = "Goalkeeper Fall Left";
           break;
         case 12: 
-          RCLCPP_INFO(this->get_logger(), "Fall Right");
+          RCLCPP_INFO(this->get_logger(), "Goalkeeper Fall Right");
           parameters = false;
-          section = "Fall Right";
+          section = "Goalkeeper Fall Right";
           break;
         case 13: //
-          RCLCPP_INFO(this->get_logger(), "Agachando");
+          RCLCPP_INFO(this->get_logger(), "Goalkeeper Middle");
           parameters = false;
-          section = "Agachando";
+          section = "Goalkeeper Middle";
           break;
         case 14: 
           parameters = true;
@@ -235,114 +235,69 @@ private:
           section = "Stand Up Front";
           break;
         case 18:
-          RCLCPP_INFO(this->get_logger(), "Fallen Side");
+          RCLCPP_INFO(this->get_logger(), "Fallen Side Left");
           parameters = false;
-          section = "Fallen Side";
+          section = "Fallen Side Left";
+          break; 
+        case 19:
+          RCLCPP_INFO(this->get_logger(), "Fallen Side Right");
+          parameters = false;
+          section = "Fallen Side Right";
           break;
-        case 19: 
+        case 20: 
           RCLCPP_INFO(this->get_logger(), "Andar esquerda");
           parameters = true;
           parameter_number = 8;  
           break;
-        case 20: // OK
+        case 21: // OK
           RCLCPP_INFO(this->get_logger(), "Andar direita");
           parameters = true;
           parameter_number = 7;  
           break;
-        case 21: //
+        case 22: //
           RCLCPP_INFO(this->get_logger(), "Centralizando bola à esquerda");
           parameters = false;
           neck_sides += cont_vision_sides;
           section = "Stand Still";
           break;
-        case 22: //
+        case 23: //
           RCLCPP_INFO(this->get_logger(), "Centralizando bola à direita");
           parameters = false;
           neck_sides -= cont_vision_sides;
           section = "Stand Still";
           break;
-        case 23: //
+        case 24: //
           RCLCPP_INFO(this->get_logger(), "Centralizando bola no pé");
           parameters = false; 
           neck_up -= cont_vision_up;
           section = "Stand Still";
           RCLCPP_INFO(this->get_logger(), "%d", neck_up);
           break;
-        case 24: // Centralizar bola acima
+        case 25: // Centralizar bola acima
           RCLCPP_INFO(this->get_logger(), "Centralizando bola acima");
           parameters = false;
           neck_up += cont_vision_up;
           section = "Stand Still";
           break;
-        case 25: // dança
-          RCLCPP_INFO(this->get_logger(), "Dance");
-          parameters = false;
-          section = "Dance";
-          break;
-        case 26: // chute direito angulado
-          RCLCPP_INFO(this->get_logger(), "Left Leg Right Kick");
-          parameters = false;
-          section = "Left Leg Right Kick";
-          break;  
-        case 27: // chute esquerdo angulado
-          RCLCPP_INFO(this->get_logger(), "Left Leg Left Kick");
-          parameters = false;
-          section = "Left Leg Left Kick";
-          break;
-        case 28: // Andar pra trás
+        case 26: // Andar pra trás
           RCLCPP_INFO(this->get_logger(), "Walking Backward");
           parameters = true;
           parameter_number = 9;
           break; 
-        case 29: // goleiro penalty
-          RCLCPP_INFO(this->get_logger(), "Goalkeeper Penalty");
-          parameters = false;
-          section = "Goalkeeper Penalty";  
-          break; 
-        case 30: 
-          RCLCPP_INFO(this->get_logger(), "Feather Falling Right");
-          parameters = false;
-          section = "Feather Falling Right";
-          break; 
-        case 31: 
+        case 28: 
           RCLCPP_INFO(this->get_logger(), "Goodbye Loop");
           parameters = false;
           section = "Goodbye Loop";
           break; 
-        case 32:
-          RCLCPP_INFO(this->get_logger(), "Cheering Up");
-          parameters = false;
-          section = "Cheering Up";
-          break; 
-        case 33: // quando o robo ta caido de lado
-          RCLCPP_INFO(this->get_logger(), "Fallen Side Left");
-          parameters = false;
-          section = "Fallen Side Left";
-          break; 
-        case 34: // quando o robo ta caido de lado
-          RCLCPP_INFO(this->get_logger(), "Fallen Side Right");
-          parameters = false;
-          section = "Fallen Side Right";
-          break;
-        case 35:
+        case 29:
           RCLCPP_INFO(this->get_logger(), "Goalkeeper Searching Ball");
           parameters = false;
           section = "Goalkeeper Searching Ball";
           break;
-        case 36: 
-          RCLCPP_INFO(this->get_logger(), "Feather Falling Left");
+        case 30: 
+          RCLCPP_INFO(this->get_logger(), "Right Kick Penalti");
           parameters = false;
-          section = "Feather Falling Left";
-          break; 
-        case 37: 
-          RCLCPP_INFO(this->get_logger(), "Quick Left Kick");
-          parameters = false;
-          section = "Quick Left Kick";
-          break;
-        case 38: 
-          RCLCPP_INFO(this->get_logger(), "Quick Right Kick");
-          parameters = false;
-          section = "Quick Right Kick";
+          section = "Right Kick Penalti";
           break;
       }
     }
@@ -376,7 +331,7 @@ private:
         if (do_gait){
           movement = 15;
           contador++;
-          if (contador >= 5){
+          if (contador >= 15){
             do_gait = false;
             contador = 0;
           }
