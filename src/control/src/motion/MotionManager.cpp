@@ -40,7 +40,7 @@
 #include "custom_interfaces/msg/walk.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
 
-#define INI_FILE_PATH       "src/control/Data/config_reforced_prometheus.ini"
+#define INI_FILE_PATH       "src/control/Data/config_altair.ini"
 
 using namespace Robot;
 using namespace std::chrono_literals;
