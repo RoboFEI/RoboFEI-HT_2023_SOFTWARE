@@ -87,7 +87,7 @@ public:
   {
     RCLCPP_INFO(this->get_logger(), "Running action node");
     subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>(
-      "/neck_position", 10, std::bind(&Control::topic_callback_neck, this, _1));
+      "/set_neck_position", 10, std::bind(&Control::topic_callback_neck, this, _1));
     subscriber_fase_zero = this->create_subscription<std_msgs::msg::Bool>("/fase_zero", 10, std::bind(&Control::topic_callback_fase, this, _1));
     publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
     publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
@@ -391,10 +391,10 @@ private:
               else if (j[section][address_name] == 116){
                 position_name = position_name + std::to_string(i);
                 position.push_back(j[section][position_name]);
-                if (movement == 21 or movement == 22 or movement == 23 or movement == 24){
-                  position[0][18] = neck_sides;
-                  position[0][19] = neck_up;
-                }
+
+                position[0][18] = neck_sides;
+                position[0][19] = neck_up;
+                
                 message.position = position.front();
 
                 RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
