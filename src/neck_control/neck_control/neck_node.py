@@ -107,8 +107,16 @@ class NeckNode(Node):
         if(self.BALL_DETECTED):
             if(self.BALL_LEFT and self.old_neck_position[0] < 2650):
                 new_neck_position.position19 = self.move_head('left', self.old_neck_position[0])
+                self.get_logger().info('Move head to left')
+
             elif(self.BALL_RIGHT and self.old_neck_position[0] > 1350):
                 new_neck_position.position19 = self.move_head('right', self.old_neck_position[0])
+
+            elif(self.BALL_FAR):
+                self.get_logger().info('BALL UP')
+                if(self.old_neck_position[1]<2048):
+                    new_neck_position.position20 = self.move_head('up', self.old_neck_position[1])
+
             elif (self.BALL_CLOSE):
                 self.get_logger().info('BALL CLOSE')
                 if(self.old_neck_position[1]>1340):
@@ -120,7 +128,7 @@ class NeckNode(Node):
 
                     
 
-    def listener_callback_vision(self, msg):
+    def listener_callback_vision(self, msg): 
         # print("Vision Callback")
         self.BALL_DETECTED = msg.detected
         self.get_logger().info('BALL "%s"' % self.BALL_DETECTED)
@@ -138,13 +146,16 @@ class NeckNode(Node):
 
     def move_head(self, side, neck_position):
         side = side.lower()
-        if(side == 'left'):
-            return neck_position + cont_vision_sides
-        elif(side == 'right'):    
-            return neck_position + cont_vision_sides
-        elif(side == 'down'):    
-            return neck_position - cont_vision_up
 
+        if(side == 'left'):
+            return neck_position + 10
+        elif(side == 'right'):
+            return neck_position - 10
+        elif(side == 'down'):    
+            return neck_position - 10
+        elif(side == 'up'):
+            self.get_logger().info('teste 1')
+            return neck_position + 10
 
 def main(args=None):
     rclpy.init(args=args)
