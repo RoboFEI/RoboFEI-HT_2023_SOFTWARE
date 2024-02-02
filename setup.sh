@@ -41,6 +41,15 @@ echo -e "${blue} Instalação do ROS2...${NC}"
     echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
     sudo apt install python3-colcon-common-extensions -y
 
+    #Install rqt and plugins 
+    sudo apt update
+    sudo apt install ~nros-humble-rqt*
+
+    # Setup colcon and colcon_cd
+    echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
+    echo "export _colcon_cd_root=/opt/ros/humble/" >> ~/.bashrc
+    echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
 echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     sudo apt install python3-pip -y
     sudo pip3 install opencv-python 
