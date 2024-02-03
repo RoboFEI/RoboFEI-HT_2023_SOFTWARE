@@ -99,21 +99,6 @@ ament_target_dependencies(control
   rclcpp_action
 )
 
-add_executable(client src/teste_client.cpp)
-ament_target_dependencies(client
-  custom_interfaces
-  rclcpp
-  sensor_msgs
-  rclcpp_action
-  rclcpp_components
-)
-
-add_executable(server src/teste.cpp)
-ament_target_dependencies(server
-  custom_interfaces
-  rclcpp
-)
-
 # Build
 add_executable(decision src/dec.cpp)
 ament_target_dependencies(decision
