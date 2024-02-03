@@ -56,13 +56,6 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     pip install -r src/vision_yolov7/vision_yolov7/requirements.txt
     sudo pip install construct
 
-echo -e "${blue} Instalação das bibliotecas para a ViTDet${NC}"
-    pip3 install timm
-    python3 install torch torchvision
-    pyhton3 -m pip3 install -e ./RoboFEI-HT_2023_SOFTWARE/src/vision_vitdet/vision_vitdet/detectron2
-    pip3 install -U scikit-learn
-
-
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
     sudo touch /etc/udev/rules.d/robot-usb-ports.rules && sudo chmod 777 /etc/udev/rules.d/robot-usb-ports.rules
