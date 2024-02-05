@@ -56,6 +56,9 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     pip install -r src/vision_yolov7/vision_yolov7/requirements.txt
     sudo pip install construct
 
+    #instalação da yolov8
+    pip install ultralytics
+
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
     sudo touch /etc/udev/rules.d/robot-usb-ports.rules && sudo chmod 777 /etc/udev/rules.d/robot-usb-ports.rules
