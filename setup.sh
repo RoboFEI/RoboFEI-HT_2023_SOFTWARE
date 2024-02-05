@@ -101,7 +101,7 @@ echo -e "${blue} commands setup${NC}"
     #Comand for run Gamecontroller
     sudo rm /usr/local/bin/gamecontroller
     sudo touch /usr/local/bin/gamecontroller && sudo chmod 777 /usr/local/bin/gamecontroller
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run gamecontroller talker" >> /usr/local/bin/gamecontroller
+    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run game_controller connect" >> /usr/local/bin/gamecontroller
 
     #Comand for run motors
     sudo rm /usr/local/bin/motors
