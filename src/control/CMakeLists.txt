@@ -111,8 +111,6 @@ ament_target_dependencies(decision
 install(TARGETS
   control
   decision
-  client
-  server
   DESTINATION lib/${PROJECT_NAME}
 )
 
