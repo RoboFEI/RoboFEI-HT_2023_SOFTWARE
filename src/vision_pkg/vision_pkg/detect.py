@@ -74,38 +74,38 @@ class BallDetection(Node):
 
         if self.find_ball():
             msg_ball.detected = True
-            print("Bola detectada '%s'" % msg_ball.detected)
+            self.get_logger().info(f'Bola Detectada')
 
             # identify the ball position in Y axis
             if (self.ball_pos.x <= self.config.x_left):     #ball to the left
                 msg_ball.left = True
-                print("Bola à Esquerda")
+                self.get_logger().info("Bola à Esquerda")
 
             elif (self.ball_pos.x < self.config.x_center):  #ball to the center left
                 msg_ball.center_left = True
-                print("Bola Centralizada a Esquerda")
+                self.get_logger().info("Bola Centralizada a Esquerda")
 
             elif (self.ball_pos.x < self.config.x_right):   #ball to the center right
                 msg_ball.center_right = True
-                print("Bola Centralizada a Direita")
+                self.get_logger().info("Bola Centralizada a Direita")
 
             else:                                            #ball to the right
                 msg_ball.right = True
-                print("Bola à Direita")
+                self.get_logger().info("Bola à Direita")
             
 
             # identify the ball position in Y axis
             if (self.ball_pos.y > self.config.y_chute):     #ball near
                 msg_ball.close = True
-                print("Bola Perto")
+                self.get_logger().info("Bola Perto")
             
             elif (self.ball_pos.y <= self.config.y_longe):  #ball far
                 msg_ball.far = True
-                print("Bola Longe")
+                self.get_logger().info("Bola Longe")
 
             else:                                           #Bola middle
                 msg_ball.med = True
-                print("Bola ao Centro")
+                self.get_logger().info("Bola ao Centro")
 
         self.publisher_.publish(msg_ball)
 
