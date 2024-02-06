@@ -7,7 +7,9 @@ from ultralytics import YOLO
 import os
 import numpy as np
 
-from .submodules.utils import draw_boxes, draw_lines, locate_ball
+from custom_interfaces.msg import Vision
+
+from .submodules.utils import draw_lines, position
 from .submodules.ClassConfig import *
 
 class BallDetection(Node):
@@ -18,7 +20,10 @@ class BallDetection(Node):
 
         self.sub = self.create_subscription(Image, "/image", self.predict_callbalck, 10)
         self.sub
-        
+
+        self.publisher_ = self.create_publisher(Vision, '/ball_position', 10)
+        self.publisher_
+
         #recive data from config.ini using the ClassConfig submodule
         self.config = classConfig()
         
@@ -35,33 +40,91 @@ class BallDetection(Node):
 
         self.results = None
         self.img = None
+        self.ball_pos = position()
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
         result = self.model(fake_image, device=self.device, verbose=False)
         classes = result[0].names
         value_classes = {value: key for key, value in classes.items()}
-        return value_classes
+        return value_classes        
 
 
-    def label_img(self): #Draw lines and object boxes detected
-        img_lined = draw_lines(self.img, self.config)
-        labeled_img = draw_boxes(img_lined, self.results[0], self.value_classes)
-        return labeled_img
+    def find_ball(self):
+        ball_detection = (self.results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
+
+        if ball_detection.size > 0:
+            ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() #get the most conf ball detect box in xyxy format
+            array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
+
+            self.ball_pos.x = int((array_box_xyxy[0] + array_box_xyxy[2]) / 2)
+            self.ball_pos.y = int((array_box_xyxy[1] + array_box_xyxy[3]) / 2)
+            
+            raio_ball       = int((array_box_xyxy[2] - array_box_xyxy[0]) / 2)
+
+            cv2.circle(self.img, (self.ball_pos.x, self.ball_pos.y), abs(raio_ball), (255, 0, 0), 2)
+            cv2.circle(self.img, (self.ball_pos.x, self.ball_pos.y), 5, (255, 0, 0), -1)
+            return True
+
+        return False
+    
+
+    def publish_ball_info(self):
+        msg_ball = Vision()
+
+        if self.find_ball():
+            msg_ball.detected = True
+            print("Bola detectada '%s'" % msg_ball.detected)
+
+            # identify the ball position in Y axis
+            if (self.ball_pos.x <= self.config.x_left):     #ball to the left
+                msg_ball.left = True
+                print("Bola à Esquerda")
+
+            elif (self.ball_pos.x < self.config.x_center):  #ball to the center left
+                msg_ball.center_left = True
+                print("Bola Centralizada a Esquerda")
+
+            elif (self.ball_pos.x < self.config.x_right):   #ball to the center right
+                msg_ball.center_right = True
+                print("Bola Centralizada a Direita")
+
+            else:                                            #ball to the right
+                msg_ball.right = True
+                print("Bola à Direita")
+            
+
+            # identify the ball position in Y axis
+            if (self.ball_pos.y > self.config.y_chute):     #ball near
+                msg_ball.close = True
+                print("Bola Perto")
+            
+            elif (self.ball_pos.y <= self.config.y_longe):  #ball far
+                msg_ball.far = True
+                print("Bola Longe")
+
+            else:                                           #Bola middle
+                msg_ball.med = True
+                print("Bola ao Centro")
+
+        self.publisher_.publish(msg_ball)
 
 
     def predict_callbalck(self, msg):
+        
+        self.ball_info = tuple() #clear ball info for a new detection
+
         self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         self.results = self.model(self.img, device=self.device, conf=0.5, max_det=3, verbose=False)
+        self.results = self.results[0]
 
-
+    
         if self.show_divisions:
-            self.img = self.label_img()
-        else:
-            self.img = draw_boxes(self.img, self.results[0])
+            self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
-        locate_ball(self.img, self.results)
-
+        self.publish_ball_info()
+        
+        
         cv2.imshow('Ball', self.img) # Draw divisions of camera
         cv2.waitKey(1)
         

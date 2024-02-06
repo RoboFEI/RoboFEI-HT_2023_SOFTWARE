@@ -1,24 +1,5 @@
 import cv2
-import numpy as np
-
-def draw_boxes(img, results, value_classes):
-
-    img_copy = img.copy()
-
-    ball_detection = (results.boxes.cls == value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
-
-    if ball_detection.size > 0:
-        ball_box_xyxy = results.boxes[ball_detection[0]].xyxy.numpy() #get the most conf ball detect box in xyxy format
-        array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
-
-        ball_center_pos = (int((array_box_xyxy[0] + array_box_xyxy[2]) / 2), #X position of the ball in pixels
-                          int((array_box_xyxy[1] + array_box_xyxy[3]) / 2))  #Y position of the ball in pixels
-        
-        raio_ball       = int((array_box_xyxy[2] - array_box_xyxy[0]) / 2)
-        cv2.circle(img_copy, ball_center_pos, abs(raio_ball), (255, 0, 0), 2)
-        cv2.circle(img_copy, ball_center_pos, 5, (255, 0, 0), -1)
-    
-    return img_copy
+from dataclasses import dataclass
 
 def draw_lines(img, config):
 
@@ -33,5 +14,7 @@ def draw_lines(img, config):
 
     return img
 
-def locate_ball(img, results):
-    pass
+@dataclass
+class position:
+    x: int = 0
+    y: int = 0

@@ -1,9 +1,9 @@
 # Messages
-bool detected
-bool left
-bool center_left
-bool right
-bool center_right
-bool far
-bool med
-bool close
+bool detected       False
+bool left           False
+bool center_left    False
+bool right          False
+bool center_right   False
+bool far            False
+bool med            False
+bool close          False
