@@ -47,7 +47,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"
 
-#include "motors_pkg/teste_motor.hpp"
+#include "motors_pkg/motors_communication.hpp"
 
 // Control table address for X series (except XL-320)
 #define ADDR_OPERATING_MODE 11
