@@ -1,4 +1,3 @@
-traced_model.pt
 **/build
 **/install
 **/log
@@ -6,5 +5,3 @@ traced_model.pt
 .vscode
 **/__pycache__
 
-src/vision_yolov7/vision_yolov7/peso_padrao
-src/vision_yolov7/vision_yolov7/peso_yolox
