@@ -43,7 +43,7 @@ echo -e "${blue} Instalação do ROS2...${NC}"
 
     #Install rqt and plugins 
     sudo apt update
-    sudo apt install ~nros-humble-rqt*
+    sudo apt install ros-humble-rqt*
 
     # Setup colcon and colcon_cd
     echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
