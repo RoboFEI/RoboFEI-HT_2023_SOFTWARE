@@ -1,12 +1,13 @@
 import rclpy
 from rclpy.node import Node
 import cv2
-from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from ultralytics import YOLO
 import os
 import numpy as np
+from math import hypot
 
+from sensor_msgs.msg import Image
 from custom_interfaces.msg import Vision
 
 from .submodules.utils import draw_lines, position
@@ -41,6 +42,7 @@ class BallDetection(Node):
         self.results = None
         self.img = None
         self.ball_pos = position()
+        self.delta_ball_pos = position()
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
@@ -57,8 +59,14 @@ class BallDetection(Node):
             ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() #get the most conf ball detect box in xyxy format
             array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
 
+            self.delta_ball_pos.x = -self.ball_pos.x
+            self.delta_ball_pos.y = -self.ball_pos.y
+
             self.ball_pos.x = int((array_box_xyxy[0] + array_box_xyxy[2]) / 2)
             self.ball_pos.y = int((array_box_xyxy[1] + array_box_xyxy[3]) / 2)
+
+            self.delta_ball_pos.x += self.ball_pos.x
+            self.delta_ball_pos.y += self.ball_pos.y
             
             raio_ball       = int((array_box_xyxy[2] - array_box_xyxy[0]) / 2)
 
@@ -72,7 +80,8 @@ class BallDetection(Node):
     def publish_ball_info(self):
         msg_ball = Vision()
 
-        if self.find_ball():
+        if self.find_ball() and hypot(self.delta_ball_pos.x, self.delta_ball_pos.y) < 50: #Verify if can be a false detection
+            
             msg_ball.detected = True
             self.get_logger().info(f'Bola Detectada')
 
