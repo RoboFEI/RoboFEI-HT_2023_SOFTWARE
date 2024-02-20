@@ -59,13 +59,13 @@ class BallDetection(Node):
             ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() #get the most conf ball detect box in xyxy format
             array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
 
-            self.delta_ball_pos.x = -self.ball_pos.x
+            self.delta_ball_pos.x = -self.ball_pos.x #old position
             self.delta_ball_pos.y = -self.ball_pos.y
 
             self.ball_pos.x = int((array_box_xyxy[0] + array_box_xyxy[2]) / 2)
             self.ball_pos.y = int((array_box_xyxy[1] + array_box_xyxy[3]) / 2)
 
-            self.delta_ball_pos.x += self.ball_pos.x
+            self.delta_ball_pos.x += self.ball_pos.x # delta = new_posiiton - old_position
             self.delta_ball_pos.y += self.ball_pos.y
             
             raio_ball       = int((array_box_xyxy[2] - array_box_xyxy[0]) / 2)
