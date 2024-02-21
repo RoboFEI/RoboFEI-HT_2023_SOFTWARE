@@ -45,6 +45,7 @@ class BallDetection(Node):
         self.delta_ball_pos = position()
 
         self.cont_falses_lost_ball = 0 
+        self.cont_real_detections = 0
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
@@ -84,12 +85,12 @@ class BallDetection(Node):
 
         if self.find_ball() and hypot(self.delta_ball_pos.x, self.delta_ball_pos.y) < 50: #Verify if can be a false detection
 
-            self.cont_falses_lost_ball = self.config.max_count_lost_frame
+            self.cont_falses_lost_ball = self.config.max_count_lost_frame #restart counter for prevent falses detections
             
             msg_ball.detected = True
             self.get_logger().info(f'Bola Detectada')
 
-        elif self.cont_falses_lost_ball > 0:
+        elif self.cont_falses_lost_ball > 0: #after some detection with ball lost keep seting ball detected
             self.cont_falses_lost_ball -= 1
 
             msg_ball.detected = True
