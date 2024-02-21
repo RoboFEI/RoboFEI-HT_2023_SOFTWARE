@@ -44,6 +44,8 @@ class BallDetection(Node):
         self.ball_pos = position()
         self.delta_ball_pos = position()
 
+        self.cont_falses_lost_ball = 0 
+
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
         result = self.model(fake_image, device=self.device, verbose=False)
@@ -81,9 +83,19 @@ class BallDetection(Node):
         msg_ball = Vision()
 
         if self.find_ball() and hypot(self.delta_ball_pos.x, self.delta_ball_pos.y) < 50: #Verify if can be a false detection
+
+            self.cont_falses_lost_ball = self.config.max_count_lost_frame
             
             msg_ball.detected = True
             self.get_logger().info(f'Bola Detectada')
+
+        elif self.cont_falses_lost_ball > 0:
+            self.cont_falses_lost_ball -= 1
+
+            msg_ball.detected = True
+            self.get_logger().info(f'Bola Detectada, Falso negativo: {self.cont_falses_lost_ball}')
+
+        if msg_ball.detected:
 
             # identify the ball position in Y axis
             if (self.ball_pos.x <= self.config.x_left):     #ball to the left
@@ -115,6 +127,7 @@ class BallDetection(Node):
             else:                                           #Bola middle
                 msg_ball.med = True
                 self.get_logger().info("Bola ao Centro")
+
 
         self.publisher_.publish(msg_ball)
 
