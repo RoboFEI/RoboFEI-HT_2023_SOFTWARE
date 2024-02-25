@@ -41,9 +41,12 @@ class BallDetection(Node):
 
         self.results = None
         self.img = None
-        self.ball_pos = position()
-        self.delta_ball_pos = position()
 
+        self.ball_pos = position()
+        self.filtered_ball_position = position()
+
+        self.ball_info_msg = Vision()
+        
         self.cont_falses_lost_ball = 0 
         self.cont_real_detections = 0
 
@@ -57,86 +60,106 @@ class BallDetection(Node):
 
     def find_ball(self):
         ball_detection = (self.results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
-
+        
+        
         if ball_detection.size > 0:
+            ball_pos = position()
+
             ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() #get the most conf ball detect box in xyxy format
             array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
 
-            self.delta_ball_pos.x = -self.ball_pos.x #old position
-            self.delta_ball_pos.y = -self.ball_pos.y
-
-            self.ball_pos.x = int((array_box_xyxy[0] + array_box_xyxy[2]) / 2)
-            self.ball_pos.y = int((array_box_xyxy[1] + array_box_xyxy[3]) / 2)
-
-            self.delta_ball_pos.x += self.ball_pos.x # delta = new_posiiton - old_position
-            self.delta_ball_pos.y += self.ball_pos.y
+            ball_pos.x = int((array_box_xyxy[0] + array_box_xyxy[2]) / 2)
+            ball_pos.y = int((array_box_xyxy[1] + array_box_xyxy[3]) / 2)
             
             raio_ball       = int((array_box_xyxy[2] - array_box_xyxy[0]) / 2)
 
-            cv2.circle(self.img, (self.ball_pos.x, self.ball_pos.y), abs(raio_ball), (255, 0, 0), 2)
-            cv2.circle(self.img, (self.ball_pos.x, self.ball_pos.y), 5, (255, 0, 0), -1)
-            return True
+            cv2.circle(self.img, (ball_pos.x, ball_pos.y), abs(raio_ball), (255, 0, 0), 2)
+            cv2.circle(self.img, (ball_pos.x, ball_pos.y), 5, (255, 0, 0), -1)
+            return ball_pos
 
-        return False
-    
+        return -1
 
-    def publish_ball_info(self):
-        msg_ball = Vision()
+    def ball_delta_position_threshold(self, new_position, threshold):
+        dp = position()
+        dp.x = abs(new_position.x - self.ball_pos.x)
+        dp.y = abs(new_position.y - self.ball_pos.y)
 
-        if self.find_ball() and hypot(self.delta_ball_pos.x, self.delta_ball_pos.y) < 50: #Verify if can be a false detection
+        return hypot(dp.x, dp.y) < threshold
 
-            self.cont_falses_lost_ball = self.config.max_count_lost_frame #restart counter for prevent falses detections
-            
-            msg_ball.detected = True
-            self.get_logger().info(f'Bola Detectada')
+    def ball_info(self):
+        ball_pos = self.find_ball()
+
+        if ball_pos != -1: #if ball was finded
+            if self.ball_delta_position_threshold(ball_pos, 50): #verify if is a false detection
+                self.cont_real_detections += 1
+            else:
+                self.cont_real_detections = 0
+
+
+            if self.cont_real_detections > 5:
+                self.cont_falses_lost_ball = self.config.max_count_lost_frame
+                self.cont_real_detections = 0
+
+                self.filtered_ball_position.x = ball_pos.x
+                self.filtered_ball_position.y = ball_pos.y
+
+                self.ball_info_msg.detected = True
+
+            self.ball_pos.x = ball_pos.x
+            self.ball_pos.y = ball_pos.y
 
         elif self.cont_falses_lost_ball > 0: #after some detection with ball lost keep seting ball detected
             self.cont_falses_lost_ball -= 1
 
-            msg_ball.detected = True
+            self.ball_info_msg.detected = True
             self.get_logger().info(f'Bola Detectada, Falso negativo: {self.cont_falses_lost_ball}')
+        else:
+            self.ball_info_msg = Vision()
 
-        if msg_ball.detected:
+        # tentar colocar isso antes de tudo e atribuir o vision depois
+        if self.ball_info_msg.detected:
+            self.ball_info_msg = Vision()
+            self.ball_info_msg.detected = True
 
             # identify the ball position in Y axis
-            if (self.ball_pos.x <= self.config.x_left):     #ball to the left
-                msg_ball.left = True
+            if (self.filtered_ball_position.x <= self.config.x_left):     #ball to the left
+                self.ball_info_msg.left = True
                 self.get_logger().info("Bola à Esquerda")
 
-            elif (self.ball_pos.x < self.config.x_center):  #ball to the center left
-                msg_ball.center_left = True
+            elif (self.filtered_ball_position.x < self.config.x_center):  #ball to the center left
+                self.ball_info_msg.center_left = True
                 self.get_logger().info("Bola Centralizada a Esquerda")
 
-            elif (self.ball_pos.x < self.config.x_right):   #ball to the center right
-                msg_ball.center_right = True
+            elif (self.filtered_ball_position.x < self.config.x_right):   #ball to the center right
+                self.ball_info_msg.center_right = True
                 self.get_logger().info("Bola Centralizada a Direita")
 
             else:                                            #ball to the right
-                msg_ball.right = True
+                self.ball_info_msg.right = True
                 self.get_logger().info("Bola à Direita")
             
 
             # identify the ball position in Y axis
-            if (self.ball_pos.y > self.config.y_chute):     #ball near
-                msg_ball.close = True
+            if (self.filtered_ball_position.y > self.config.y_chute):     #ball near
+                self.ball_info_msg.close = True
                 self.get_logger().info("Bola Perto")
             
-            elif (self.ball_pos.y <= self.config.y_longe):  #ball far
-                msg_ball.far = True
+            elif (self.filtered_ball_position.y <= self.config.y_longe):  #ball far
+                self.ball_info_msg.far = True
                 self.get_logger().info("Bola Longe")
 
             else:                                           #Bola middle
-                msg_ball.med = True
+                self.ball_info_msg.med = True
                 self.get_logger().info("Bola ao Centro")
+            
 
 
-        self.publisher_.publish(msg_ball)
+    def publish_ball_info(self):
+        self.ball_info()
+        self.publisher_.publish(self.ball_info_msg)
 
 
     def predict_callbalck(self, msg):
-        
-        self.ball_info = tuple() #clear ball info for a new detection
-
         self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         self.results = self.model(self.img, device=self.device, conf=0.5, max_det=3, verbose=False)
         self.results = self.results[0]
