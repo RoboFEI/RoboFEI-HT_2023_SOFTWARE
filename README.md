@@ -59,8 +59,8 @@ It is divided in 8 packages:
 
     - Motors: 
     
-        ```$ ros2 run dynamixel_sdk_examples read_write_node```
+        ```$ ros2 run motors_pkg motors_communication```
     
     - Vision: 
     
-        ```$ ros2 run vision_pkg vision --vb```
+        ```$ ros2 launch robot_bringup vision_bringup.launch.py```
