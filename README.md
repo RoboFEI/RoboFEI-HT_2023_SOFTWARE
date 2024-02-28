@@ -47,7 +47,7 @@ It is divided in 8 packages:
 
     - GC: 
     
-        ```$ ros2 run controller talker```
+        ```$ ros2 run game_controller connect```
 
     - IMU: 
     

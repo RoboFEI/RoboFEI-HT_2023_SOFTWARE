@@ -45,6 +45,9 @@ echo -e "${blue} Instalação do ROS2...${NC}"
     sudo apt update
     sudo apt install ros-humble-rqt*
 
+    #install ros2 dynamixel
+    sudo apt-get install ros-humble-dynamixel-sdk
+
     # Setup colcon and colcon_cd
     echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
     echo "export _colcon_cd_root=/opt/ros/humble/" >> ~/.bashrc
@@ -104,7 +107,7 @@ echo -e "${blue} commands setup${NC}"
     #Comand for run Gamecontroller
     sudo rm /usr/local/bin/gamecontroller
     sudo touch /usr/local/bin/gamecontroller && sudo chmod 777 /usr/local/bin/gamecontroller
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run gamecontroller talker" >> /usr/local/bin/gamecontroller
+    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run game_controller connect" >> /usr/local/bin/gamecontroller
 
     #Comand for run motors
     sudo rm /usr/local/bin/motors
