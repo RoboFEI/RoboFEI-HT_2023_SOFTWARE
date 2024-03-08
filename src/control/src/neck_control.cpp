@@ -14,4 +14,6 @@ NeckNode::NeckNode()
     
 
     set_neck_position_publisher_ = this->create_publisher<NeckPosition>("/set_neck_position", 10)
+
+    
 }

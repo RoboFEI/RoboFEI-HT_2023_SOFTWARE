@@ -34,7 +34,7 @@ class NeckNode : public rclcpp::Node
     using VisionInfo = custom_interfaces::msg::Vision;
     using NeckPosition = custom_interfaces::msg::NeckPosition;
     
-    custom_interfaces::msg::Vision::SharedPtr ball_info
+    ball_information ball;
 
 
     NeckNode();
