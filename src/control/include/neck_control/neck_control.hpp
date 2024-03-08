@@ -14,14 +14,14 @@ using namespace std::chrono_literals;
 
 struct ball_information
 {
-  bool detected   = false;
-  bool left       = false;
-  bool left       = false;
-  bool right      = false;
-  bool right      = false;
-  bool far        = false;
-  bool med        = false;
-  bool close      = false;
+  bool detected     = false;
+  bool left         = false;
+  bool center_left  = false;
+  bool right        = false;
+  bool center_right = false;
+  bool far          = false;
+  bool med          = false;
+  bool close        = false;
 };
 
 
@@ -40,9 +40,9 @@ class NeckNode : public rclcpp::Node
     virtual ~NeckNode();
 
   private:
-    rclcpp::Subscription<BallPosition>::SharedPtr vision_subscriber_;
-    rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
-    rclcpp::Publisher<NeckPosition>::SharedPtr set_neck_position_publisher_;
+    rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
+    // rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
+    // rclcpp::Publisher<NeckPosition>::SharedPtr set_neck_position_publisher_;
     
 };
 

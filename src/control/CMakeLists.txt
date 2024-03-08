@@ -25,8 +25,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp_action REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
-#find_package(rt REQUIRED)
-# find_package(<dependency> REQUIRED)
+
 find_library(LIBRT rt) 
 set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses)
@@ -73,6 +72,13 @@ set(CMAKE_C_FLAGS " -lncurses")
 #)
 #target_link_libraries(action ${CURSES_LIBRARY})
 
+#Neck control definitions
+add_executable(neck_control src/neck_control.cpp)
+ament_target_dependencies(neck_control rclcpp custom_interfaces)
+
+install(TARGETS
+  neck_control
+  DESTINATION lib/${PROJECT_NAME})
 
 ament_target_dependencies(motion
   rclcpp
@@ -84,7 +90,7 @@ ament_target_dependencies(motion
 
 # rosidl_target_interfaces(motion ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
- rclcpp_components_register_node(motion
+rclcpp_components_register_node(motion
    PLUGIN "Robot::MotionManager"
    EXECUTABLE gait_publisher
  )
