@@ -9,8 +9,8 @@ NeckNode::NeckNode()
   vision_subscriber_ = this->create_subscription<VisionInfo>(
     "/ball_position", 10, std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1));
     
-  // neck_position_subscriber_ = this->create_subscription<NeckPosition>(
-  //   "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1));
+  neck_position_subscriber_ = this->create_subscription<NeckPosition>(
+    "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1));
     
   // set_neck_position_publisher_ = this->create_publisher<NeckPosition>("/set_neck_position", 10);
 
@@ -34,6 +34,13 @@ void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
   ball.far          =   msg->far;
   ball.med          =   msg->med;
   ball.close        =   msg->close;
+}
+
+void NeckNode::listener_callback_neck(const NeckPosition::SharedPtr msg)
+{
+  neck.pan  = msg->position19;
+  neck.tilt = msg->position20;
+  RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
 }
 
 

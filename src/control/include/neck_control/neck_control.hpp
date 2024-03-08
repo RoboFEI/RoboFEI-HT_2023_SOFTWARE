@@ -12,7 +12,7 @@
 
 using namespace std::chrono_literals;
 
-struct ball_information
+struct BallInformation
 {
   bool detected     = false;
   bool left         = false;
@@ -24,6 +24,12 @@ struct ball_information
   bool close        = false;
 };
 
+struct Neck
+{
+  int pan   = 2048;
+  int tilt  = 2048;
+};
+
 
 class NeckNode : public rclcpp::Node
 {
@@ -31,9 +37,11 @@ class NeckNode : public rclcpp::Node
     using VisionInfo = custom_interfaces::msg::Vision;
     using NeckPosition = custom_interfaces::msg::NeckPosition;
     
-    ball_information ball;
+    BallInformation ball;
+    Neck neck;
 
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
+    void listener_callback_neck(const NeckPosition::SharedPtr msg); 
 
 
     NeckNode();
@@ -41,7 +49,7 @@ class NeckNode : public rclcpp::Node
 
   private:
     rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
-    // rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
+    rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
     // rclcpp::Publisher<NeckPosition>::SharedPtr set_neck_position_publisher_;
     
 };
