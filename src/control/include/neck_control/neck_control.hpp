@@ -1,16 +1,16 @@
 #ifndef NECK_CONTROL_HPP_
 #define NECK_CONTROL_HPP_
 
-
 #include <chrono>
 #include <functional>
 #include <memory>
 #include <string>
 
-
 #include "rclcpp/rclcpp.hpp"
 #include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
+
+using namespace std::chrono_literals;
 
 struct ball_information
 {
@@ -25,16 +25,15 @@ struct ball_information
 };
 
 
-using namespace std::chrono_literals;
-
-
 class NeckNode : public rclcpp::Node
 {
   public:
     using VisionInfo = custom_interfaces::msg::Vision;
     using NeckPosition = custom_interfaces::msg::NeckPosition;
     
-    custom_interfaces::msg::Vision::SharedPtr ball_info
+    ball_information ball;
+
+    void listener_callback_vision(const VisionInfo::SharedPtr msg);
 
 
     NeckNode();
