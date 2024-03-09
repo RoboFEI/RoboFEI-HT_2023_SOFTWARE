@@ -96,6 +96,7 @@ void NeckNode::follow_ball()
       RCLCPP_INFO(this->get_logger(), "Ball close");
     }
   }
+  
   new_neck_position.position19 = neck.pan;
   new_neck_position.position20 = neck.tilt;
 
