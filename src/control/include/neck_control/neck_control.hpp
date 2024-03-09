@@ -30,19 +30,28 @@ struct Neck
   int tilt  = 2048;
 };
 
+enum class Side 
+{
+  left,
+  right,
+  down,
+  up 
+};
 
 class NeckNode : public rclcpp::Node
 {
   public:
     using VisionInfo = custom_interfaces::msg::Vision;
     using NeckPosition = custom_interfaces::msg::NeckPosition;
-    
+
     BallInformation ball;
     Neck neck;
 
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_neck(const NeckPosition::SharedPtr msg); 
-
+    void move_head(const enum Side &side, Neck &neck_position);
+    void follow_ball();
+    void main_callback();
 
     NeckNode();
     virtual ~NeckNode();
@@ -50,7 +59,8 @@ class NeckNode : public rclcpp::Node
   private:
     rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
     rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
-    // rclcpp::Publisher<NeckPosition>::SharedPtr set_neck_position_publisher_;
+    rclcpp::Publisher<NeckPosition>::SharedPtr set_neck_position_publisher_;
+    rclcpp::TimerBase::SharedPtr main_timer_;
     
 };
 
