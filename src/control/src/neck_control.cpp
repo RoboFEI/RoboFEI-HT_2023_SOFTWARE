@@ -127,8 +127,8 @@ void NeckNode::search_ball()
   
   if(this->atual_time - this->Millis() > 2000)
   {
+    set_neck_position_publisher_->publish(new_neck_position);
     this->atual_time = this->Millis();
-
     this->search_ball_state += 1;
 
     if(this->search_ball_state >= 8)
@@ -139,8 +139,6 @@ void NeckNode::search_ball()
     this->neck.pan  = this->search_ball_pos[search_ball_state][0];
     this->neck.tilt = this->search_ball_pos[search_ball_state][1]; 
   }
-
-  set_neck_position_publisher_->publish(new_neck_position);
 }
 
 
