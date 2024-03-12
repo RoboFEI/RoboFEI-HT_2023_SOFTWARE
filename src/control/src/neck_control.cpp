@@ -6,16 +6,25 @@ NeckNode::NeckNode()
 {
   RCLCPP_INFO(this->get_logger(), "Run neck node");
 
+
+  callback_group_subscriber_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+  auto sub_opt = rclcpp::SubscriptionOptions();
+
   vision_subscriber_ = this->create_subscription<VisionInfo>(
-    "/ball_position", 10, std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1));
+    "/ball_position", 10, std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1), sub_opt);
     
   neck_position_subscriber_ = this->create_subscription<NeckPosition>(
-    "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1));
+    "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
     
   set_neck_position_publisher_ = this->create_publisher<NeckPosition>("/set_neck_position", 10);
 
+
+  main_thread_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+  auto main_opt = rclcpp::SubscriptionOptions();
+  main_opt.callback_group = main_thread_;
+
   main_timer_ = this->create_wall_timer(
-    8ms, std::bind(&NeckNode::main_callback, this));
+    8ms, std::bind(&NeckNode::main_callback, this), main_thread_);
 }
 
 NeckNode::~NeckNode()
@@ -114,7 +123,10 @@ void NeckNode::main_callback()
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<NeckNode>());
+  auto neck_control_node = std::make_shared<NeckNode>();
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(neck_control_node);
+  executor.spin();
   rclcpp::shutdown();
   return 0;
 }
