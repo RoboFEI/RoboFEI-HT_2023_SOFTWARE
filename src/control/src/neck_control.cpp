@@ -94,7 +94,8 @@ void NeckNode::follow_ball()
       this->move_head(Side::right, this->neck);
       // RCLCPP_INFO(this->get_logger(), "Move head to right");
     }
-    else if(ball.far && neck.tilt < 2048)
+    
+    if(ball.far && neck.tilt < 2048)
     {
       this->move_head(Side::up, this->neck);
       // RCLCPP_INFO(this->get_logger(), "Ball up");
