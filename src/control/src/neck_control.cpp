@@ -104,6 +104,7 @@ void NeckNode::follow_ball()
       this->move_head(Side::down, this->neck);
       RCLCPP_INFO(this->get_logger(), "Ball close");
     }
+    else RCLCPP_INFO(this->get_logger(), "Centralized ball");
   }
   
   new_neck_position.position19 = neck.pan;
@@ -114,9 +115,38 @@ void NeckNode::follow_ball()
 
 }
 
+void NeckNode::search_ball()
+{
+  RCLCPP_INFO(this->get_logger(), "Searching the ball");
+}
+
+
 void NeckNode::main_callback()
 {
-  this->follow_ball();
+  switch (this->robot_state)
+  {
+  case State::follow_ball:
+    this->follow_ball();
+    break;
+
+  case State::search_ball:
+    this->search_ball();
+    break;
+  }
+
+  if(this->ball.detected && this->robot_state != State::follow_ball)
+  {
+    this->robot_state = State::follow_ball;
+    this->cont_lost_ball = 0;
+  }
+  else if(!this->ball.detected && this->robot_state != State::follow_ball)
+  {
+    this->cont_lost_ball += 1;
+  }
+
+  if(this->cont_lost_ball > 200)  this->robot_state = State::search_ball;
+
+  
 }
 
 

@@ -38,6 +38,12 @@ enum class Side
   up 
 };
 
+enum class State
+{
+  follow_ball,
+  search_ball
+};
+
 class NeckNode : public rclcpp::Node
 {
   public:
@@ -46,11 +52,15 @@ class NeckNode : public rclcpp::Node
 
     BallInformation ball;
     Neck neck;
+    State robot_state = State::search_ball;
+    int cont_lost_ball = 0;
+
 
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_neck(const NeckPosition::SharedPtr msg); 
     void move_head(const enum Side &side, Neck &neck_position);
     void follow_ball();
+    void search_ball();
     void main_callback();
 
     NeckNode();
