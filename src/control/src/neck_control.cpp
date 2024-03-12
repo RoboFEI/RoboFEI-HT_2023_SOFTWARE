@@ -141,7 +141,7 @@ void NeckNode::main_callback()
     this->robot_state = State::follow_ball;
     this->cont_lost_ball = 0;
   }
-  else if(!this->ball.detected && this->robot_state != State::follow_ball)
+  else if(!this->ball.detected && this->robot_state != State::search_ball)
   {
     this->cont_lost_ball += 1;
   }
