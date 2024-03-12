@@ -111,13 +111,36 @@ void NeckNode::follow_ball()
   new_neck_position.position20 = neck.tilt;
 
   set_neck_position_publisher_->publish(new_neck_position);
+}
 
-
+uint64_t NeckNode::Millis() {
+  using namespace std::chrono;
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
 void NeckNode::search_ball()
 {
-  return;
+  auto new_neck_position = NeckPosition();
+  
+  new_neck_position.position19 = neck.pan;
+  new_neck_position.position20 = neck.tilt;
+  
+  if(this->atual_time - this->Millis() > 2000)
+  {
+    this->atual_time = this->Millis();
+
+    this->search_ball_state += 1;
+
+    if(this->search_ball_state >= 8)
+    {
+      this->search_ball_state = 0;
+    }
+
+    this->neck.pan  = this->search_ball_pos[search_ball_state][0];
+    this->neck.tilt = this->search_ball_pos[search_ball_state][1]; 
+  }
+
+  set_neck_position_publisher_->publish(new_neck_position);
 }
 
 
@@ -140,13 +163,20 @@ void NeckNode::main_callback()
   {
     this->robot_state = State::follow_ball;
     this->cont_lost_ball = 0;
+    this->search_ball_state = 0;
   }
   else if(!this->ball.detected && this->robot_state != State::search_ball)
   {
     this->cont_lost_ball += 1;
   }
+  if(this->cont_lost_ball > 200)
+  {
+    this->robot_state = State::search_ball;
+    this->atual_time = this->Millis();
 
-  if(this->cont_lost_ball > 200)  this->robot_state = State::search_ball;
+    this->neck.pan  = this->search_ball_pos[0][0];
+    this->neck.tilt = this->search_ball_pos[0][1]; 
+  } 
 
   
 }
