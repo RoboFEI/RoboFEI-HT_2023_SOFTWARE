@@ -60,7 +60,6 @@ class NeckNode : public rclcpp::Node
     rclcpp::CallbackGroup::SharedPtr callback_group_subscriber_;
     rclcpp::CallbackGroup::SharedPtr main_thread_;
 
-
     rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
     rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
     rclcpp::Publisher<NeckPosition>::SharedPtr set_neck_position_publisher_;
