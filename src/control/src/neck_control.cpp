@@ -34,7 +34,7 @@ NeckNode::~NeckNode()
 void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
 {
   ball.detected     =   msg->detected;
-  RCLCPP_INFO(this->get_logger(), "BALL '%s'", ball.detected ? "true" : "false");
+  //RCLCPP_INFO(this->get_logger(), "BALL '%s'", ball.detected ? "true" : "false");
   ball.left         =   msg->left;
   ball.center_left  =   msg->center_left;
   ball.right        =   msg->right;
@@ -49,7 +49,7 @@ void NeckNode::listener_callback_neck(const NeckPosition::SharedPtr msg)
 {
   neck.pan  = msg->position19;
   neck.tilt = msg->position20;
-  RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
+  //RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
 }
 
 void NeckNode::move_head(const enum Side &side, Neck &neck_position)
@@ -120,13 +120,16 @@ uint64_t NeckNode::Millis() {
 
 void NeckNode::search_ball()
 {
-  auto new_neck_position = NeckPosition();
   
-  new_neck_position.position19 = neck.pan;
-  new_neck_position.position20 = neck.tilt;
-  
-  if(this->atual_time - this->Millis() > 2000)
+  if(this->Millis()-this->atual_time > 2000)
   {
+    auto new_neck_position = NeckPosition();
+
+    new_neck_position.position19 = this->search_ball_pos[search_ball_state][0];
+    new_neck_position.position20 = this->search_ball_pos[search_ball_state][1];
+    
+    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position19, new_neck_position.position20);
+
     set_neck_position_publisher_->publish(new_neck_position);
     this->atual_time = this->Millis();
     this->search_ball_state += 1;
@@ -135,9 +138,6 @@ void NeckNode::search_ball()
     {
       this->search_ball_state = 0;
     }
-
-    this->neck.pan  = this->search_ball_pos[search_ball_state][0];
-    this->neck.tilt = this->search_ball_pos[search_ball_state][1]; 
   }
 }
 
@@ -147,12 +147,12 @@ void NeckNode::main_callback()
   switch (this->robot_state)
   {
   case State::follow_ball:
-    RCLCPP_INFO(this->get_logger(), "following the ball");
+    //RCLCPP_INFO(this->get_logger(), "following the ball");
     this->follow_ball();
     break;
 
   case State::search_ball:
-    RCLCPP_INFO(this->get_logger(), "Searching the ball");
+    //RCLCPP_INFO(this->get_logger(), "Searching the ball");
     this->search_ball();
     break;
   }
@@ -170,10 +170,6 @@ void NeckNode::main_callback()
   if(this->cont_lost_ball > 200)
   {
     this->robot_state = State::search_ball;
-    this->atual_time = this->Millis();
-
-    this->neck.pan  = this->search_ball_pos[0][0];
-    this->neck.tilt = this->search_ball_pos[0][1]; 
   } 
 
   

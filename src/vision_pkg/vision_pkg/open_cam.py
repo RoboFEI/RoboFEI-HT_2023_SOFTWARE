@@ -10,7 +10,7 @@ class CameraPublisher(Node):
         super().__init__("camera_publisher")
 
         self.bridge = CvBridge()
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(4)
 
         self.pub = self.create_publisher(Image, "/image", 10)
 
