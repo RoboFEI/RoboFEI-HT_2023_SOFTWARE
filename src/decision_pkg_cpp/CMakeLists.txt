@@ -18,6 +18,9 @@ ament_target_dependencies(decision
   rclcpp
 )
 
+install(TARGETS
+  decision
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -34,7 +34,7 @@ class DecisionNode : public rclcpp::Node
         using GameControllerMsg = custom_interfaces::msg::HumanoidLeagueMsgs;
         using VisionMsg = custom_interfaces::msg::Vision;
         
-        auto GC_info = GameControllerMsg{};
+        GameControllerMsg GC_info;
 
         void listener_callback_GC(const GameControllerMsg::SharedPtr msg);
 

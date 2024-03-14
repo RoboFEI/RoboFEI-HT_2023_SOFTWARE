@@ -2,7 +2,9 @@
 
 DecisionNode::DecisionNode() : Node("decision_node")
 {
-    RCLCPP_INFO(this->get_logger(), "Running Decision Node");
+    RCLCPP_INFO(this->get_logger(), "Running Decision Node"); 
+    RCLCPP_INFO(this->get_logger(), "Recive %d", this->GC_info.game_state);
+   
 
     // GameController Subscriber
     gc_subscriber_ = this->create_subscription<GameControllerMsg>(
@@ -39,9 +41,8 @@ DecisionNode::~DecisionNode()
 
 void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr msg)
 {
-    this->GC_info = msg;
+    this->GC_info = *msg;
     RCLCPP_INFO(this->get_logger(), "Recive %d", this->GC_info.game_state);
-    
 }
 
 
