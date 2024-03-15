@@ -9,6 +9,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(custom_interfaces REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 include_directories(include)
 
@@ -16,6 +18,8 @@ add_executable(decision src/decision_node.cpp)
 ament_target_dependencies(decision
   custom_interfaces
   rclcpp
+  geometry_msgs
+  sensor_msgs
 )
 
 install(TARGETS

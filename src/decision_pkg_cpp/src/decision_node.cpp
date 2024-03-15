@@ -13,21 +13,23 @@ DecisionNode::DecisionNode() : Node("decision_node")
         rclcpp::QoS(10),
         std::bind(&DecisionNode::listener_callback_GC, this, std::placeholders::_1));
 
-    // Ball Position Subscriber
-    vision_subscriber_ = this->create_subscription<VisionMsg>(
-        "/ball_position",
+    neck_position_subscriber_ = this->create_subscription<NeckPosMsg>(
+        "neck_position",
         rclcpp::QoS(10),
-        std::bind(&DecisionNode::listener_callback_vision, this, std::placeholders::_1));
-    
+        std::bind(&DecisionNode::listener_callback_neck_pos, this, std::placeholders::_1));
+
+    imu_gyro_subscriber_ = this->create_subscription<ImuGyroMsg>(
+        "imu/rpy",
+        rclcpp::QoS(10),
+        std::bind(&DecisionNode::listener_callback_imu_gyro, this, std::placeholders::_1));
+
+
 
 
 
     main_timer_ = this->create_wall_timer(
             8ms,
             std::bind(&DecisionNode::main_callback, this));
-
-    // vision_subscriber_ = this->create_subscription<VisionInfo>(
-    // "/ball_position", 10, std::bind(this->listener_callback_vision, this, std::placeholders::_1), sub_opt);
 }
 
 DecisionNode::~DecisionNode()
@@ -40,17 +42,23 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
     // RCLCPP_INFO(this->get_logger(), "Recive GC Info");
 }
 
-void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr ball_info)
+void DecisionNode::listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos)
 {
-    this->ball_info = *ball_info;
-    // RCLCPP_INFO(this->get_logger(), "Recive ball info");
+    this->neck_pos = *neck_pos;
+    // RCLCPP_INFO(this->get_logger(), "Recive Neck Pos Info");
+
+}
+
+void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro)
+{
+    this->imu_gyro = *imu_gyro;
+    //RCLCPP_INFO(this->get_logger(), "Recive Imu Gyro Info");
 }
 
 void DecisionNode::main_callback()
 {
-    RCLCPP_INFO(this->get_logger(), "ball detected: %d", this->ball_info.detected);
     RCLCPP_INFO(this->get_logger(), "Primary GameState: %d", this->gc_info.game_state);
-    
+    RCLCPP_INFO(this->get_logger(), "id19: %d / id20: %d", this->neck_pos.position19, this->neck_pos.position20); 
 
 }
 

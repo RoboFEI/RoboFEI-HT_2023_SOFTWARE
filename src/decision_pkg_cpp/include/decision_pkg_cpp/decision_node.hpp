@@ -7,40 +7,29 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/msg/humanoid_league_msgs.hpp"
+#include "custom_interfaces/msg/neck_position.hpp"
 
-
-
-// struct GameController
-// {
-    
-// };
-
-// enum PrimaryGameState
-// {
-//     Initial,
-//     Ready,
-//     Set,
-//     Playing,
-
-// }
-
-
-
-
+#include "geometry_msgs/msg/vector3_stamped.hpp"
+#include "sensor_msgs/msg/imu.hpp"
 
 class DecisionNode : public rclcpp::Node
 {
     public:
         using GameControllerMsg = custom_interfaces::msg::HumanoidLeagueMsgs;
-        using VisionMsg = custom_interfaces::msg::Vision;
-        
-        GameControllerMsg   gc_info     ;
-        VisionMsg           ball_info   ;
+        using NeckPosMsg = custom_interfaces::msg::NeckPosition;
+        using ImuGyroMsg = geometry_msgs::msg::Vector3Stamped;
+        using ImuAccelMsg = sensor_msgs::msg::Imu;
 
-        void listener_callback_GC(const GameControllerMsg::SharedPtr msg);
-        void listener_callback_vision(const VisionMsg::SharedPtr ball_info);
+        GameControllerMsg   gc_info;
+        NeckPosMsg          neck_pos;
+        ImuGyroMsg             imu_gyro;
+
+        void listener_callback_GC(const GameControllerMsg::SharedPtr gc_info);
+        void listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos);
+        void listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro);
+
+
         void main_callback();
 
 
@@ -49,13 +38,10 @@ class DecisionNode : public rclcpp::Node
 
     private:
         rclcpp::Subscription<GameControllerMsg>::SharedPtr gc_subscriber_;
-        rclcpp::Subscription<VisionMsg>::SharedPtr vision_subscriber_;
+        rclcpp::Subscription<NeckPosMsg>::SharedPtr neck_position_subscriber_;
+        rclcpp::Subscription<ImuGyroMsg>::SharedPtr imu_gyro_subscriber_;
 
         rclcpp::TimerBase::SharedPtr main_timer_;
-
-    
-
-
 };
 
 
