@@ -69,9 +69,9 @@ void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gy
 
 void DecisionNode::listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel)
 {
-  robot_detect_fallen( imu_accel->linear_acceleration.x,
-                      -imu_accel->linear_acceleration.y,
-                      -imu_accel->linear_acceleration.z); 
+  robot_detect_fallen(imu_accel->linear_acceleration.x,
+                      imu_accel->linear_acceleration.y,
+                      imu_accel->linear_acceleration.z); 
 
   RCLCPP_INFO(this->get_logger(), "Recive Imu Accel Info");
 }
@@ -80,20 +80,12 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
                                        const float &robot_accel_y,
                                        const float &robot_accel_z)
 {
-  RCLCPP_INFO(this->get_logger(), "Ax: %f\nAy: %f\nAz: %f", robot_accel_x, robot_accel_y, robot_accel_z);
+  RCLCPP_INFO(this->get_logger(), "\nAx: %f\nAy: %f\nAz: %f\n", robot_accel_x, robot_accel_y, robot_accel_z);
 
-    // VERIFICAR O FUNCIONAMENTO ASSIM
-    // if(abs(robot_accel_y) < FALL_ACCEL_TH)
-    // {
-    //     falses_fallen_counter += 1;
-    // }
-    // else falses_fallen_counter = 0;
-
-
-  if( abs(robot_accel_x) > FALL_ACCEL_TH ||
-    abs(robot_accel_z) > FALL_ACCEL_TH)
+  // VERIFICAR O FUNCIONAMENTO ASSIM
+  if(abs(robot_accel_y) < FALL_ACCEL_TH)
   {
-    falses_fallen_counter += 1;
+      falses_fallen_counter += 1;
   }
   else
   {
@@ -101,13 +93,14 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
     this->robot.fall = NotFallen;
   } 
 
-  if(falses_fallen_counter > 30)
+  if(falses_fallen_counter > FALSES_FALLEN_TH)
   {
     if(robot_accel_z > FALL_ACCEL_TH)       this->robot.fall = FallenFront;
     else if(robot_accel_z < -FALL_ACCEL_TH) this->robot.fall = FallenBack;
     else if(robot_accel_x > FALL_ACCEL_TH)  this->robot.fall = FallenLeft;
     else this->robot.fall = FallenRight;  
   }
+  RCLCPP_INFO(this->get_logger(), "Robot Fall State: %d", robot.fall);
 }
 
 void DecisionNode::send_goal(const Move &move)

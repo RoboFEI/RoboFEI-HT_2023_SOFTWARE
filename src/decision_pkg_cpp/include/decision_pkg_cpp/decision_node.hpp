@@ -16,6 +16,7 @@
 #include "sensor_msgs/msg/imu.hpp"
 
 #define FALL_ACCEL_TH 7.0
+#define FALSES_FALLEN_TH 30
 
 enum class Move
 {
@@ -34,11 +35,11 @@ enum class Move
 
 enum FallStatus
 {
-    NotFallen,
-    FallenFront,
-    FallenBack,
-    FallenRight,
-    FallenLeft
+    NotFallen   = 0,
+    FallenFront = 1,
+    FallenBack  = 2,
+    FallenRight = 3,
+    FallenLeft  = 4
 };
 
 struct Acceleration
