@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(custom_interfaces REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -16,8 +17,9 @@ include_directories(include)
 
 add_executable(decision src/decision_node.cpp)
 ament_target_dependencies(decision
-  custom_interfaces
   rclcpp
+  rclcpp_action
+  custom_interfaces
   geometry_msgs
   sensor_msgs
 )
