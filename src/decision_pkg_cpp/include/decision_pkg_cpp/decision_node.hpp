@@ -103,7 +103,7 @@ class DecisionNode : public rclcpp::Node
 
         rclcpp::TimerBase::SharedPtr main_timer_;
 
-        void goal_response_callback(std::shared_future<GoalHandleControl::SharedPtr> future)
+        void goal_response_callback(std::shared_future<GoalHandleControl::SharedPtr> future);
 
 };
 
