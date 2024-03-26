@@ -18,7 +18,7 @@
 #define FALL_ACCEL_TH 7.0
 #define FALSES_FALLEN_TH 30
 
-enum class Move
+enum Move
 {
     stand_still     = 1,
     greeting        = 2,
@@ -42,18 +42,11 @@ enum FallStatus
     FallenLeft  = 4
 };
 
-struct Acceleration
-{
-    float x;
-    float y;
-    float z;
-};
-
-
 struct Robot
 {
     FallStatus fall = NotFallen;
-    Move movement = Move::stand_still;
+    Move movement = stand_still;
+    custom_interfaces::msg::NeckPosition neck_pos;
 };
 
 
@@ -72,7 +65,6 @@ class DecisionNode : public rclcpp::Node
         GameControllerMsg   gc_info;
         NeckPosMsg          neck_pos;
         ImuGyroMsg          imu_gyro;
-        Move                move;
         Robot               robot;
 
         int falses_fallen_counter = 0;

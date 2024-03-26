@@ -56,9 +56,8 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
 
 void DecisionNode::listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos)
 {
-    this->neck_pos = *neck_pos;
+    this->robot.neck_pos = *neck_pos;
     // RCLCPP_INFO(this->get_logger(), "Recive Neck Pos Info");
-
 }
 
 void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro)
@@ -105,16 +104,17 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 
 void DecisionNode::send_goal(const Move &move)
 {
+  
+  // if (!this->action_client_->wait_for_action_server()) {
+  //   RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+  //   rclcpp::shutdown();
+  // }
 
-    // if (!this->action_client_->wait_for_action_server()) {
-    //   RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
-    //   rclcpp::shutdown();
-    // }
+    auto goal_msg = ControlActionMsg::Goal();
+    this->robot.movement = move;
+    goal_msg.action_number = move;
 
-    // auto goal_msg = ControlActionMsg::Goal();
-    // goal_msg.action_number = int(move);
-
-    // RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
+    RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
     // auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
     // send_goal_options.goal_response_callback =
@@ -143,9 +143,10 @@ void DecisionNode::goal_response_callback(std::shared_future<GoalHandleControl::
 
 void DecisionNode::main_callback()
 {
-    // RCLCPP_INFO(this->get_logger(), "Primary GameState: %d", this->gc_info.game_state);
-    // RCLCPP_INFO(this->get_logger(), "id19: %d / id20: %d", this->neck_pos.position19, this->neck_pos.position20);
-    // send_goal(Move::gait);
+    RCLCPP_INFO(this->get_logger(), "Primary GameState: %d", this->gc_info.game_state);
+    RCLCPP_INFO(this->get_logger(), "id19: %d / id20: %d", this->robot.neck_pos.position19, this->robot.neck_pos.position20);
+    send_goal(gait);
+    send_goal(stand_still);
 }
 
 int main(int argc, char * argv[])
