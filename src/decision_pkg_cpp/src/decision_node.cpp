@@ -102,23 +102,34 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
   RCLCPP_INFO(this->get_logger(), "Robot Fall State: %d", robot.fall);
 }
 
-void DecisionNode::send_goal(const Move &move)
+void DecisionNode::send_goal(const Move &order)
 {
-  
-  // if (!this->action_client_->wait_for_action_server()) {
-  //   RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
-  //   rclcpp::shutdown();
-  // }
+  auto goal_msg = ControlActionMsg::Goal();
 
-    auto goal_msg = ControlActionMsg::Goal();
-    this->robot.movement = move;
-    goal_msg.action_number = move;
+  if (!this->action_client_->wait_for_action_server()) {
+    RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+    rclcpp::shutdown();
+  }
 
-    RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
+  if(order != this->robot.movement)
+  {
+    if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
+    {
 
-    // auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
-    // send_goal_options.goal_response_callback =
-    //   std::bind(&DecisionNode::goal_response_callback, this, _1);
+    }
+
+  }
+
+
+
+  this->robot. = order;
+  goal_msg.action_number = order;
+
+  RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
+
+  auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
+  send_goal_options.goal_response_callback =
+    std::bind(&DecisionNode::goal_response_callback, this, _1);
 
     
 
