@@ -11,25 +11,25 @@ DecisionNode::DecisionNode() : Node("decision_node")
     gc_subscriber_ = this->create_subscription<GameControllerMsg>(
         "gamestate",
         rclcpp::QoS(10),
-        std::bind(&DecisionNode::listener_callback_GC, this, std::placeholders::_1)
+        std::bind(&DecisionNode::listener_callback_GC, this, _1)
     );
 
     neck_position_subscriber_ = this->create_subscription<NeckPosMsg>(
         "neck_position",
         rclcpp::QoS(10),
-        std::bind(&DecisionNode::listener_callback_neck_pos, this, std::placeholders::_1)
+        std::bind(&DecisionNode::listener_callback_neck_pos, this, _1)
     );
 
     imu_gyro_subscriber_ = this->create_subscription<ImuGyroMsg>(
         "imu/rpy",
         rclcpp::QoS(10),
-        std::bind(&DecisionNode::listener_callback_imu_gyro, this, std::placeholders::_1)
+        std::bind(&DecisionNode::listener_callback_imu_gyro, this, _1)
     );
 
     imu_accel_subscriber_ = this->create_subscription<ImuAccelMsg>(
         "imu/data",
         rclcpp::QoS(10),
-        std::bind(&DecisionNode::listener_callback_imu_accel, this, std::placeholders::_1)
+        std::bind(&DecisionNode::listener_callback_imu_accel, this, _1)
     );
 
     this->action_client_ = rclcpp_action::create_client<ControlActionMsg>(
@@ -81,7 +81,6 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 {
   RCLCPP_INFO(this->get_logger(), "\nAx: %f\nAy: %f\nAz: %f\n", robot_accel_x, robot_accel_y, robot_accel_z);
 
-  // VERIFICAR O FUNCIONAMENTO ASSIM
   if(abs(robot_accel_y) < FALL_ACCEL_TH)
   {
       falses_fallen_counter += 1;
@@ -104,12 +103,33 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 
 void DecisionNode::send_goal(const Move &order)
 {
+  this->main_timer_->cancel();
   auto goal_msg = ControlActionMsg::Goal();
 
   if (!this->action_client_->wait_for_action_server()) {
     RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
     rclcpp::shutdown();
   }
+
+
+  this->robot.movement = order;
+  goal_msg.action_number = order;
+
+  RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
+
+  auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
+  send_goal_options.goal_response_callback =
+    std::bind(&DecisionNode::goal_response_callback, this, _1);
+
+  send_goal_options.feedback_callback =
+    std::bind(&DecisionNode::feedback_callback, this, _1, _2);
+  
+  send_goal_options.result_callback =
+    std::bind(&DecisionNode::result_callback, this, _1);
+
+  goal_handle_future_ = action_client_->async_send_goal(goal_msg, send_goal_options);
+
+  this->action_client_->async_cancel_goal();
 
   if(order != this->robot.movement)
   {
@@ -122,42 +142,52 @@ void DecisionNode::send_goal(const Move &order)
 
 
 
-  this->robot. = order;
-  goal_msg.action_number = order;
 
-  RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
-
-  auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
-  send_goal_options.goal_response_callback =
-    std::bind(&DecisionNode::goal_response_callback, this, _1);
-
-    
-
-
-    // send_goal_options.feedback_callback =
-    //   std::bind(&FibonacciActionClient::feedback_callback, this, _1, _2);
-    // send_goal_options.result_callback =
-    //   std::bind(&FibonacciActionClient::result_callback, this, _1);
-    // this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
 }
 
-void DecisionNode::goal_response_callback(std::shared_future<GoalHandleControl::SharedPtr> future)
-  {
-    // auto goal_handle = future.get();
-    // if (!goal_handle) {
-    //   RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
-    // } else {
-    //   RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
-    // }
+void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr & goal_handle)
+{
+  goal_handle_ = future
+  if (!goal_handle) {
+    RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
+  } else {
+    RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+  }
+}
+
+
+void DecisionNode::feedback_callback(
+  GoalHandleControl::SharedPtr,
+  const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
+{
+  RCLCPP_INFO(this->get_logger(), "%d", feedback->movements_remaining);
+}
+
+void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & result)
+{
+  switch (result.code) {
+    case rclcpp_action::ResultCode::SUCCEEDED:
+      break;
+    case rclcpp_action::ResultCode::ABORTED:
+      RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+      return;
+    case rclcpp_action::ResultCode::CANCELED:
+      RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+      return;
+    default:
+      RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+      return;
   }
 
+  RCLCPP_INFO(this->get_logger(), "%d", result.result->finished);
+}
 
 void DecisionNode::main_callback()
 {
     RCLCPP_INFO(this->get_logger(), "Primary GameState: %d", this->gc_info.game_state);
     RCLCPP_INFO(this->get_logger(), "id19: %d / id20: %d", this->robot.neck_pos.position19, this->robot.neck_pos.position20);
-    send_goal(gait);
-    send_goal(stand_still);
+    send_goal(left_kick);
+    
 }
 
 int main(int argc, char * argv[])

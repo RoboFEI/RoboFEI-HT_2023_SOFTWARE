@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <memory>
 #include <string>
+#include <future>
+
+#include <unistd.h> //apagar
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -17,6 +20,8 @@
 
 #define FALL_ACCEL_TH 7.0
 #define FALSES_FALLEN_TH 30
+
+using namespace std::placeholders;
 
 enum Move
 {
@@ -57,10 +62,11 @@ class DecisionNode : public rclcpp::Node
     public:
         using GameControllerMsg = custom_interfaces::msg::HumanoidLeagueMsgs;
         using NeckPosMsg = custom_interfaces::msg::NeckPosition;
-        using ControlActionMsg = custom_interfaces::action::Control;
-        using GoalHandleControl = rclcpp_action::ClientGoalHandle<ControlActionMsg>;
         using ImuGyroMsg = geometry_msgs::msg::Vector3Stamped;
         using ImuAccelMsg = sensor_msgs::msg::Imu;
+
+        using ControlActionMsg = custom_interfaces::action::Control;
+        using GoalHandleControl = rclcpp_action::ClientGoalHandle<ControlActionMsg>;
         
 
         GameControllerMsg   gc_info;
@@ -76,6 +82,7 @@ class DecisionNode : public rclcpp::Node
         void listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro);
         void listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel);
         void send_goal(const Move &move);
+
 
         void robot_detect_fallen(const float &robot_accel_x,
                                  const float &robot_accel_y,
@@ -93,11 +100,23 @@ class DecisionNode : public rclcpp::Node
         rclcpp::Subscription<ImuGyroMsg>::SharedPtr imu_gyro_subscriber_;
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
 
+        
+
         rclcpp_action::Client<ControlActionMsg>::SharedPtr action_client_;
 
         rclcpp::TimerBase::SharedPtr main_timer_;
 
-        void goal_response_callback(std::shared_future<GoalHandleControl::SharedPtr> future);
+        void goal_response_callback(const GoalHandleControl::SharedPtr & goal_handle);
+        void feedback_callback(
+            GoalHandleControl::SharedPtr,
+            const std::shared_ptr<const ControlActionMsg::Feedback> feedback);
+        void result_callback(const GoalHandleControl::WrappedResult & result);
+
+
+        rclcpp_action::ClientGoalHandle<ControlActionMsg>::SharedPtr goal_handle_;
+
+
+        std::shared_future<GoalHandleControl::SharedPtr> goal_handle_future_;
 
 };
 
