@@ -70,27 +70,23 @@ class DecisionNode : public rclcpp::Node
         
 
         GameControllerMsg   gc_info;
-        NeckPosMsg          neck_pos;
         ImuGyroMsg          imu_gyro;
         Robot               robot;
 
         int falses_fallen_counter = 0;
 
+        Move lixo = right_kick;
 
         void listener_callback_GC(const GameControllerMsg::SharedPtr gc_info);
         void listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos);
         void listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro);
         void listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel);
-        
-        rclcpp_action::Client<ControlActionMsg>::SendGoalOptions send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
-
-        void send_goal(const Move &move);
-
-
         void robot_detect_fallen(const float &robot_accel_x,
                                  const float &robot_accel_y,
-                                 const float &robot_accel_z);
-
+                                 const float &robot_accel_z);        
+        
+        void send_goal(const Move &move);
+        
         void main_callback();
 
 
@@ -103,9 +99,8 @@ class DecisionNode : public rclcpp::Node
         rclcpp::Subscription<ImuGyroMsg>::SharedPtr imu_gyro_subscriber_;
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
 
-        
-
         rclcpp_action::Client<ControlActionMsg>::SharedPtr action_client_;
+        rclcpp_action::Client<ControlActionMsg>::SendGoalOptions send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
 
         rclcpp::TimerBase::SharedPtr main_timer_;
 
@@ -116,9 +111,7 @@ class DecisionNode : public rclcpp::Node
         void result_callback(const GoalHandleControl::WrappedResult & result);
 
 
-        rclcpp_action::ClientGoalHandle<ControlActionMsg>::SharedPtr goal_handle_;
-
-
+        GoalHandleControl::SharedPtr goal_handle_;
         std::shared_future<GoalHandleControl::SharedPtr> goal_handle_future_;
 
 

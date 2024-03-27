@@ -47,9 +47,8 @@ DecisionNode::DecisionNode() : Node("decision_node")
       std::bind(&DecisionNode::result_callback, this, _1);
 
 
-
     main_timer_ = this->create_wall_timer(
-            8ms,
+            2000ms,
             std::bind(&DecisionNode::main_callback, this));
 }
 
@@ -112,7 +111,7 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 
 void DecisionNode::send_goal(const Move &order)
 {
-  this->main_timer_->cancel();
+  // this->main_timer_->cancel();
   auto goal_msg = ControlActionMsg::Goal();
 
   if (!this->action_client_->wait_for_action_server()) {
@@ -126,37 +125,33 @@ void DecisionNode::send_goal(const Move &order)
 
   RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
-  // auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
-  // send_goal_options.goal_response_callback =
-  //   std::bind(&DecisionNode::goal_response_callback, this, _1);
-
-  // send_goal_options.feedback_callback =
-  //   std::bind(&DecisionNode::feedback_callback, this, _1, _2);
-  
-  // send_goal_options.result_callback =
-  //   std::bind(&DecisionNode::result_callback, this, _1);
-
   goal_handle_future_ = action_client_->async_send_goal(goal_msg, send_goal_options);
 
-  // this->action_client_->async_cancel_goal();
-
-  if(order != this->robot.movement)
+  if(order == left_kick)
   {
-    if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
-    {
-
-    }
-
+    this->action_client_->async_cancel_goal(goal_handle_);
   }
+  // sleep(1);
+  // this->action_client_->async_cancel_goal(goal_handle_);
+
+
+  // if(order != this->robot.movement)
+  // {
+  //   if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
+  //   {
+  //       goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle, );
+  //   }
+
+  // }
 
 
 
 
 }
 
-void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr & goal_handle)
+void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr &goal_handle)
 {
-  // goal_handle_ = future
+  goal_handle_ = goal_handle;
   if (!goal_handle) {
     RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
   } else {
@@ -195,7 +190,8 @@ void DecisionNode::main_callback()
 {
     RCLCPP_INFO(this->get_logger(), "Primary GameState: %d", this->gc_info.game_state);
     RCLCPP_INFO(this->get_logger(), "id19: %d / id20: %d", this->robot.neck_pos.position19, this->robot.neck_pos.position20);
-    send_goal(left_kick);
+    send_goal(lixo);
+    lixo = left_kick;
     
 }
 
