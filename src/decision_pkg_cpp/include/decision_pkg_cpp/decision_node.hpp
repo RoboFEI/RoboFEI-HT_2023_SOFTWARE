@@ -81,6 +81,9 @@ class DecisionNode : public rclcpp::Node
         void listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos);
         void listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro);
         void listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel);
+        
+        rclcpp_action::Client<ControlActionMsg>::SendGoalOptions send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
+
         void send_goal(const Move &move);
 
 
@@ -117,6 +120,8 @@ class DecisionNode : public rclcpp::Node
 
 
         std::shared_future<GoalHandleControl::SharedPtr> goal_handle_future_;
+
+
 
 };
 

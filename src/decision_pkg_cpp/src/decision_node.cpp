@@ -37,6 +37,15 @@ DecisionNode::DecisionNode() : Node("decision_node")
       "control_action"
     );
 
+    send_goal_options.goal_response_callback =
+      std::bind(&DecisionNode::goal_response_callback, this, _1);
+
+    send_goal_options.feedback_callback =
+      std::bind(&DecisionNode::feedback_callback, this, _1, _2);
+    
+    send_goal_options.result_callback =
+      std::bind(&DecisionNode::result_callback, this, _1);
+
 
 
     main_timer_ = this->create_wall_timer(
@@ -117,19 +126,19 @@ void DecisionNode::send_goal(const Move &order)
 
   RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
-  auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
-  send_goal_options.goal_response_callback =
-    std::bind(&DecisionNode::goal_response_callback, this, _1);
+  // auto send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
+  // send_goal_options.goal_response_callback =
+  //   std::bind(&DecisionNode::goal_response_callback, this, _1);
 
-  send_goal_options.feedback_callback =
-    std::bind(&DecisionNode::feedback_callback, this, _1, _2);
+  // send_goal_options.feedback_callback =
+  //   std::bind(&DecisionNode::feedback_callback, this, _1, _2);
   
-  send_goal_options.result_callback =
-    std::bind(&DecisionNode::result_callback, this, _1);
+  // send_goal_options.result_callback =
+  //   std::bind(&DecisionNode::result_callback, this, _1);
 
   goal_handle_future_ = action_client_->async_send_goal(goal_msg, send_goal_options);
 
-  this->action_client_->async_cancel_goal();
+  // this->action_client_->async_cancel_goal();
 
   if(order != this->robot.movement)
   {
@@ -147,7 +156,7 @@ void DecisionNode::send_goal(const Move &order)
 
 void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr & goal_handle)
 {
-  goal_handle_ = future
+  // goal_handle_ = future
   if (!goal_handle) {
     RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
   } else {
@@ -160,7 +169,7 @@ void DecisionNode::feedback_callback(
   GoalHandleControl::SharedPtr,
   const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
 {
-  RCLCPP_INFO(this->get_logger(), "%d", feedback->movements_remaining);
+  RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
 }
 
 void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & result)
@@ -179,7 +188,7 @@ void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & resu
       return;
   }
 
-  RCLCPP_INFO(this->get_logger(), "%d", result.result->finished);
+  RCLCPP_INFO(this->get_logger(), "Goal finish");
 }
 
 void DecisionNode::main_callback()
