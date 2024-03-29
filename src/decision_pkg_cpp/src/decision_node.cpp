@@ -47,9 +47,9 @@ DecisionNode::DecisionNode() : Node("decision_node")
       std::bind(&DecisionNode::result_callback, this, _1);
 
 
-    main_timer_ = this->create_wall_timer(
-            2000ms,
-            std::bind(&DecisionNode::main_callback, this));
+    body_behavior_ = this->create_wall_timer(
+            8ms,
+            std::bind(&DecisionNode::body_behavior_callback, this));
 }
 
 DecisionNode::~DecisionNode()
@@ -112,6 +112,7 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 void DecisionNode::send_goal(const Move &order)
 {
   // this->main_timer_->cancel();
+
   auto goal_msg = ControlActionMsg::Goal();
 
   if (!this->action_client_->wait_for_action_server()) {
@@ -119,32 +120,65 @@ void DecisionNode::send_goal(const Move &order)
     rclcpp::shutdown();
   }
 
-
-  this->robot.movement = order;
   goal_msg.action_number = order;
 
   RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
-  goal_handle_future_ = action_client_->async_send_goal(goal_msg, send_goal_options);
+  // goal_handle_future_ = action_client_->async_send_goal(goal_msg, send_goal_options);
 
-  if(order == left_kick)
-  {
-    this->action_client_->async_cancel_goal(goal_handle_);
-  }
+  // if(order == left_kick)
+  // {
+  //   auto goal_handle_future = this->action_client_->async_cancel_goal(goal_handle_);
+  //   goal_handle_future_.wait_for(1500ms);
+  //   robot.movement = order
+  // }
   // sleep(1);
   // this->action_client_->async_cancel_goal(goal_handle_);
 
 
+  if(order != this->robot.movement)
+  {
+    if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
+    {
+      auto goal_handle_future = this->action_client_->async_cancel_goal(goal_handle_);
+      goal_handle_future_.wait_for(1500ms);
+      action_client_->async_send_goal(goal_msg, send_goal_options);
+      robot.movement = order;
+    }
+    else if(robot.finished_move)
+    {
+      action_client_->async_send_goal(goal_msg, send_goal_options);
+      robot.movement = order;
+    }
+
+    robot.finished_move = false;
+  }
+  else if(robot.finished_move)
+  {
+    action_client_->async_send_goal(goal_msg, send_goal_options); 
+    robot.movement = order;
+    robot.finished_move = false;
+  }
+
+
+//testar
   // if(order != this->robot.movement)
   // {
   //   if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
   //   {
-  //       goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle, );
+  //     auto goal_handle_future = this->action_client_->async_cancel_goal(goal_handle_);
+  //     goal_handle_future_.wait_for(1500ms);
+  //     action_client_->async_send_goal(goal_msg, send_goal_options);
+  //     robot.movement = order;
+  //     robot.finished_move = false;
   //   }
-
   // }
-
-
+  // else if(robot.finished_move)
+  // {
+  //   action_client_->async_send_goal(goal_msg, send_goal_options); 
+  //   robot.movement = order;
+  //   robot.finished_move = false;
+  // }
 
 
 }
@@ -182,7 +216,7 @@ void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & resu
       RCLCPP_ERROR(this->get_logger(), "Unknown result code");
       return;
   }
-
+  robot.finished_move = true;
   RCLCPP_INFO(this->get_logger(), "Goal finish");
 }
 

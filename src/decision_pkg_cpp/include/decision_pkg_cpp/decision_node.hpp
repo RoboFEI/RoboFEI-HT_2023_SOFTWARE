@@ -52,6 +52,7 @@ struct Robot
 {
     FallStatus fall = NotFallen;
     Move movement = stand_still;
+    bool finished_move = true;
     custom_interfaces::msg::NeckPosition neck_pos;
 };
 
@@ -87,7 +88,7 @@ class DecisionNode : public rclcpp::Node
         
         void send_goal(const Move &move);
         
-        void main_callback();
+        void body_behavior_callback();
 
 
         DecisionNode();
@@ -102,7 +103,7 @@ class DecisionNode : public rclcpp::Node
         rclcpp_action::Client<ControlActionMsg>::SharedPtr action_client_;
         rclcpp_action::Client<ControlActionMsg>::SendGoalOptions send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
 
-        rclcpp::TimerBase::SharedPtr main_timer_;
+        rclcpp::TimerBase::SharedPtr body_behavior_;
 
         void goal_response_callback(const GoalHandleControl::SharedPtr & goal_handle);
         void feedback_callback(
