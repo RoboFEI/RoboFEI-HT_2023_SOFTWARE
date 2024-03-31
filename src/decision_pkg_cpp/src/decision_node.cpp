@@ -2,11 +2,13 @@
 
 using namespace std::chrono_literals;
 
+#define FALL_ACCEL_TH 7.0
+#define FALSES_FALLEN_TH 30
+
 DecisionNode::DecisionNode() : Node("decision_node")
 {
     RCLCPP_INFO(this->get_logger(), "Running Decision Node"); 
-   
-
+    
     // GameController Subscriber
     gc_subscriber_ = this->create_subscription<GameControllerMsg>(
         "gamestate",
@@ -46,10 +48,6 @@ DecisionNode::DecisionNode() : Node("decision_node")
     send_goal_options.result_callback =
       std::bind(&DecisionNode::result_callback, this, _1);
 
-
-    body_behavior_ = this->create_wall_timer(
-            8ms,
-            std::bind(&DecisionNode::body_behavior_callback, this));
 }
 
 DecisionNode::~DecisionNode()
@@ -124,18 +122,6 @@ void DecisionNode::send_goal(const Move &order)
 
   RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
-  // goal_handle_future_ = action_client_->async_send_goal(goal_msg, send_goal_options);
-
-  // if(order == left_kick)
-  // {
-  //   auto goal_handle_future = this->action_client_->async_cancel_goal(goal_handle_);
-  //   goal_handle_future_.wait_for(1500ms);
-  //   robot.movement = order
-  // }
-  // sleep(1);
-  // this->action_client_->async_cancel_goal(goal_handle_);
-
-
   if(order != this->robot.movement)
   {
     if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
@@ -193,7 +179,6 @@ void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr &go
   }
 }
 
-
 void DecisionNode::feedback_callback(
   GoalHandleControl::SharedPtr,
   const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
@@ -220,15 +205,6 @@ void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & resu
   RCLCPP_INFO(this->get_logger(), "Goal finish");
 }
 
-void DecisionNode::main_callback()
-{
-    RCLCPP_INFO(this->get_logger(), "Primary GameState: %d", this->gc_info.game_state);
-    RCLCPP_INFO(this->get_logger(), "id19: %d / id20: %d", this->robot.neck_pos.position19, this->robot.neck_pos.position20);
-    send_goal(lixo);
-    lixo = left_kick;
-    
-}
-
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
@@ -239,4 +215,3 @@ int main(int argc, char * argv[])
   rclcpp::shutdown();
   return 0;
 }
-
