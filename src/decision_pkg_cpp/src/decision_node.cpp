@@ -72,7 +72,9 @@ void DecisionNode::listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_p
 void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro)
 {
     this->imu_gyro = *imu_gyro;
-    //RCLCPP_INFO(this->get_logger(), "Recive Imu Gyro Info");
+    RCLCPP_INFO(this->get_logger(), "Recive Imu Gyro Info");
+    RCLCPP_INFO(this->get_logger(), "Yaw: %f\n", this->imu_gyro.vector.z);
+    
 }
 
 void DecisionNode::listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel)
@@ -80,14 +82,13 @@ void DecisionNode::listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_
   robot_detect_fallen(imu_accel->linear_acceleration.x,
                       imu_accel->linear_acceleration.y,
                       imu_accel->linear_acceleration.z); 
-
-  RCLCPP_INFO(this->get_logger(), "Recive Imu Accel Info");
 }
 
 void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
                                        const float &robot_accel_y,
                                        const float &robot_accel_z)
 {
+  RCLCPP_INFO(this->get_logger(), "Recive Imu Accel Info");
   RCLCPP_INFO(this->get_logger(), "\nAx: %f\nAy: %f\nAz: %f\n", robot_accel_x, robot_accel_y, robot_accel_z);
 
   if(abs(robot_accel_y) < FALL_ACCEL_TH)
