@@ -4,15 +4,14 @@
 #include "custom_interfaces/msg/neck_position.hpp"
 #include "custom_interfaces/msg/humanoid_league_msgs.hpp"
 
-
-struct Robot
+enum FallStatus
 {
-    FallStatus fall = NotFallen;
-    Move movement = stand_still;
-    bool finished_move = true;
-    custom_interfaces::msg::NeckPosition neck_pos;
+    NotFallen   = 0,
+    FallenFront = 1,
+    FallenBack  = 2,
+    FallenRight = 3,
+    FallenLeft  = 4
 };
-
 
 enum Move
 {
@@ -30,16 +29,20 @@ enum Move
     stand_up_side   = 18
 };
 
-
-
-enum FallStatus
+struct Robot
 {
-    NotFallen   = 0,
-    FallenFront = 1,
-    FallenBack  = 2,
-    FallenRight = 3,
-    FallenLeft  = 4
+    FallStatus fall = NotFallen;
+    Move movement = stand_still;
+    bool finished_move = true;
+    custom_interfaces::msg::NeckPosition neck_pos;
 };
+
+
+
+
+
+
+
 
 
 

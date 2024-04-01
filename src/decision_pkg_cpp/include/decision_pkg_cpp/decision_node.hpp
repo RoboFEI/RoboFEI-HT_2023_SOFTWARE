@@ -6,7 +6,7 @@
 #include <string>
 #include <future>
 
-#include "attributes"
+#include "attributes.h"
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -70,8 +70,6 @@ class DecisionNode : public rclcpp::Node
         void result_callback(const GoalHandleControl::WrappedResult & result);
 
         GoalHandleControl::SharedPtr goal_handle_;
-
-
 
 };
 

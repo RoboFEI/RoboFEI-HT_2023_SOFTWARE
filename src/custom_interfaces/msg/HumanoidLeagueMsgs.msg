@@ -24,7 +24,7 @@ uint8 STATE_PENALTYKICK = 6
 uint8 STATE_CORNER_KICK = 7
 uint8 STATE_GOAL_KICK = 8
 uint8 STATE_THROW_IN = 9
-uint8 secondary_state
+uint8 secondary_state 0
 
 # For newest version of game controller
 # Tells which team has the free kick or penalty kick

@@ -22,7 +22,7 @@ class GameStateReceiver(Node):
     def __init__(self):
         super().__init__('game_controller', automatically_declare_parameters_from_overrides=True)
 
-        self.declare_parameter('TEAM_ROBOFEI', 3)
+        self.declare_parameter('TEAM_ROBOFEI', 7)
         self.declare_parameter('ROBOT_NUMBER', 2)
         self.team = self.get_parameter('TEAM_ROBOFEI').get_parameter_value().integer_value
         self.player_number = self.get_parameter('ROBOT_NUMBER').get_parameter_value().integer_value

@@ -58,12 +58,15 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
 {
     this->gc_info = *gc_info;
     // RCLCPP_INFO(this->get_logger(), "Recive GC Info");
+    // RCLCPP_INFO(this->get_logger(), "Game State: %d", this->gc_info.game_state);
+    // RCLCPP_INFO(this->get_logger(), "Secondary Game State: %d", this->gc_info.secondary_state);
 }
 
 void DecisionNode::listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos)
 {
     this->robot.neck_pos = *neck_pos;
-    // RCLCPP_INFO(this->get_logger(), "Recive Neck Pos Info");
+    RCLCPP_INFO(this->get_logger(), "Recive Neck Pos Info");
+    RCLCPP_INFO(this->get_logger(), "Id 19: %d  |  Id 20: %d", robot.neck_pos.position19, robot.neck_pos.position20);
 }
 
 void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro)
@@ -126,7 +129,7 @@ void DecisionNode::send_goal(const Move &order)
   {
     if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
     {
-      auto goal_handle_future = this->action_client_->async_cancel_goal(goal_handle_);
+      auto goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle_);
       goal_handle_future_.wait_for(1500ms);
       action_client_->async_send_goal(goal_msg, send_goal_options);
       robot.movement = order;
