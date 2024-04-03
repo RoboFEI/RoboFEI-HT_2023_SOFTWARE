@@ -61,7 +61,21 @@ void RobotBehavior::normal_game()
 
 void RobotBehavior::player_normal_game()
 {
+    switch (robot.state)
+    {
+    case searching_ball:
+        if(true/*ball_found()*/) robot.state = aligning_with_the_ball;
+        else send_goal(turn_left);
+        break;
     
+    default:
+        break;
+    }
+}
+
+bool RobotBehavior::ball_found()
+{
+    return true;
 }
 
 bool RobotBehavior::is_penalized()

@@ -2,7 +2,14 @@
 #define ATTRIBUTES_H
 
 #include "custom_interfaces/msg/neck_position.hpp"
+#include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/msg/humanoid_league_msgs.hpp"
+
+enum State
+{
+    searching_ball = 1,
+    aligning_with_the_ball = 2
+}
 
 enum FallStatus
 {
@@ -34,7 +41,9 @@ struct Robot
     FallStatus fall = NotFallen;
     Move movement = stand_still;
     bool finished_move = true;
+    State state;
     custom_interfaces::msg::NeckPosition neck_pos;
+    custom_interfaces::msg::Vision vision_info;
 };
 
 
