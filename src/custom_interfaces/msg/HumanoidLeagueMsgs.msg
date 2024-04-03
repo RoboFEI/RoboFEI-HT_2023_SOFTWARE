@@ -10,7 +10,7 @@ uint8 GAMESTATE_READY=1
 uint8 GAMESTATE_SET=2
 uint8 GAMESTATE_PLAYING=3
 uint8 GAMESTATE_FINISHED=4
-uint8 game_state 0
+uint8 game_state 3
 
 # Secondary state, penaltyshoot is penalty shootout at the end of the game,
 # penaltykick is a kick during the game

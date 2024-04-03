@@ -20,13 +20,48 @@ void RobotBehavior::players_behavior()
         switch (gc_info.secondary_state)
         {
         case GameControllerMsg::STATE_NORMAL:
-            play_normal_game();
+            normal_game();
             break;
         
         default:
             break;
         }
     }
+}
+
+void RobotBehavior::normal_game()
+{
+    switch (gc_info.game_state)
+    {
+    case GameControllerMsg::GAMESTATE_INITAL:
+        send_goal(stand_still);
+        break;
+    
+    case GameControllerMsg::GAMESTATE_READY:
+        // normal_game_prepair();
+        break;
+    
+    case GameControllerMsg::GAMESTATE_SET:
+        send_goal(stand_still);
+        break;
+    
+    case GameControllerMsg::GAMESTATE_PLAYING:
+        if(is_goalkeeper(ROBOT_NUMBER)) player_normal_game();
+        else goalkeeper_normal_game();
+        break;
+    
+    case GameControllerMsg::GAMESTATE_FINISHED:
+
+        break;
+
+    default:
+        break;
+    }
+}
+
+void RobotBehavior::player_normal_game()
+{
+    
 }
 
 bool RobotBehavior::is_penalized()
