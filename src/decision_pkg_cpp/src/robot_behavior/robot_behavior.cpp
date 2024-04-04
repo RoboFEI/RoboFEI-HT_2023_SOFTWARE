@@ -1,5 +1,10 @@
 #include "decision_pkg_cpp/robot_behavior.hpp"
 
+#define NECK_LEFT_LIMIT 2650
+#define NECK_RIGHT_LIMIT 1350
+#define NECK_CLOSE_LIMIT 1340
+#define LIMIT_TH 40
+
 RobotBehavior::RobotBehavior()
 {
     robot_behavior_ = this->create_wall_timer(
@@ -65,7 +70,6 @@ void RobotBehavior::player_normal_game()
     {
     case searching_ball:
         if(true/*ball_found()*/) robot.state = aligning_with_the_ball;
-        else send_goal(turn_left);
         break;
     
     default:
@@ -73,17 +77,46 @@ void RobotBehavior::player_normal_game()
     }
 }
 
-bool RobotBehavior::ball_found()
+bool RobotBehavior::ball_found() // feito
 {
-    if(!robot.ball.detected)
-    {
-        return false;
-    }
-    else if(ball_centralized()) // fazer a função
-    return true;
+    if(!robot.ball.detected) return false;
+    else if(vision_stable()) return true;
+    return false;
 }
 
+bool RobotBehavior::vision_stable()// feito
+{
+    if(ball_in_camera_center() || ball_in_robot_limits()) return true;
+    return false;
+}
 
+bool RobotBehavior::ball_in_robot_limits() // feito
+{
+    if(robo.ball_pos.left  && ball_in_left_limit())     return true;
+    if(robo.ball_pos.right && ball_in_right_limit())    return true;
+    if(robo.ball_pos.right && ball_in_close_limit())    return true;
+    return false
+}
+
+bool RobotBehavior::ball_in_close_limit() // feito
+{
+    return abs(robot.neck_pos.position20 - NECK_CLOSE_LIMIT) < LIMIT_TH;
+}
+
+bool RobotBehavior::ball_in_right_limit() // feito
+{
+    return abs(robot.neck_pos.position19 - NECK_RIGHT_LIMIT) < LIMIT_TH;
+}
+
+bool RobotBehavior::ball_in_left_limit() // feito
+{
+    return abs(robot.neck_pos.position19 - NECK_LEFT_LIMIT) < LIMIT_TH;
+}
+
+bool RobotBehavior::ball_in_camera_center() // feita
+{
+    return (robo.ball_pos.center_left || robo.ball_pos.center_right) && robo.ball_pos.med;
+}
 
 bool RobotBehavior::is_penalized()
 {
