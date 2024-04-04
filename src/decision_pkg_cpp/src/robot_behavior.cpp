@@ -19,9 +19,9 @@ RobotBehavior::~RobotBehavior()
 
 void RobotBehavior::players_behavior()
 {
-    RCLCPP_INFO(this->get_logger(), "player behavior");
+    
     if(robot_fallen(robot)) get_up();
-    // else if (is_penalized()) 
+    else if (is_penalized()) RCLCPP_INFO(this->get_logger(), "Penalizado");
     // else
     // {
     //     switch (gc_info.secondary_state)
@@ -130,6 +130,10 @@ bool RobotBehavior::is_penalized()
             RCLCPP_INFO(this->get_logger(), "Preparing to return, gait started");
             send_goal(gait);
         } 
+        else
+        {
+            send_goal(stand_still);
+        }
         return true;
     }
     return false;
