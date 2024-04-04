@@ -53,6 +53,8 @@ DecisionNode::DecisionNode() : Node("decision_node")
     
     send_goal_options.result_callback =
       std::bind(&DecisionNode::result_callback, this, _1);
+    
+    goal_handle_ = nullptr;
 
 }
 
@@ -142,8 +144,11 @@ void DecisionNode::send_goal(const Move &order)
   {
     if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
     {
-      auto goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle_);
-      goal_handle_future_.wait_for(1500ms);
+      if(goal_handle_ != nullptr)
+      {
+        auto goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle_);
+        goal_handle_future_.wait_for(1500ms);
+      }
       action_client_->async_send_goal(goal_msg, send_goal_options);
       robot.movement = order;
     }
@@ -221,13 +226,13 @@ void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & resu
   RCLCPP_INFO(this->get_logger(), "Goal finish");
 }
 
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  auto decision_node = std::make_shared<DecisionNode>();
-  rclcpp::executors::MultiThreadedExecutor executor;
-  executor.add_node(decision_node);
-  executor.spin();
-  rclcpp::shutdown();
-  return 0;
-}
+// int main(int argc, char * argv[])
+// {
+//   rclcpp::init(argc, argv);
+//   auto decision_node = std::make_shared<DecisionNode>();
+//   rclcpp::executors::MultiThreadedExecutor executor;
+//   executor.add_node(decision_node);
+//   executor.spin();
+//   rclcpp::shutdown();
+//   return 0;
+// }

@@ -43,7 +43,7 @@ struct Robot
     bool finished_move = true;
     State state;
     custom_interfaces::msg::NeckPosition neck_pos;
-    custom_interfaces::msg::Vision ball_pos;
+    custom_interfaces::msg::Vision ball;
 };
 
 

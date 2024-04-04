@@ -15,7 +15,7 @@ find_package(sensor_msgs REQUIRED)
 
 include_directories(include)
 
-add_executable(decision src/decision_node.cpp)
+add_library(decision src/decision_node.cpp)
 ament_target_dependencies(decision
   rclcpp
   rclcpp_action
@@ -24,20 +24,19 @@ ament_target_dependencies(decision
   sensor_msgs
 )
 
-install(TARGETS
-  decision
-  DESTINATION lib/${PROJECT_NAME})
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+
+add_executable(robot_behavior src/robot_behavior.cpp)
+ament_target_dependencies(robot_behavior
+  rclcpp
+  rclcpp_action
+  custom_interfaces
+  geometry_msgs
+  sensor_msgs
+)
+
+install(TARGETS
+  robot_behavior
+  DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

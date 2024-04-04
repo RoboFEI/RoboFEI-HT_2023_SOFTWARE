@@ -1,8 +1,13 @@
+#ifndef ROBOT_BEHAVIOR_HPP
+#define ROBOT_BEHAVIOR_HPP
+
 #include "decision_pkg_cpp/decision_node.hpp"
 #include "decision_pkg_cpp/attributes.h"
 #include "decision_pkg_cpp/utils.h"
 
 #define ROBOT_NUMBER 2
+
+using namespace std::chrono_literals;
 
 class RobotBehavior : public DecisionNode
 {
@@ -17,7 +22,7 @@ class RobotBehavior : public DecisionNode
         bool ball_in_robot_limits();
         bool ball_in_left_limit();
         bool ball_in_right_limit();
-        bool ball_in_close_limit()
+        bool ball_in_close_limit();
 
         RobotBehavior();
         virtual ~RobotBehavior();
@@ -29,4 +34,6 @@ class RobotBehavior : public DecisionNode
         rclcpp::TimerBase::SharedPtr robot_behavior_;
 
         
-}
+};
+
+#endif // ROBOT_BEHAVIOR_H

@@ -1,4 +1,5 @@
 #include "decision_pkg_cpp/robot_behavior.hpp"
+#include "decision_node.cpp"
 
 #define NECK_LEFT_LIMIT 2650
 #define NECK_RIGHT_LIMIT 1350
@@ -18,20 +19,21 @@ RobotBehavior::~RobotBehavior()
 
 void RobotBehavior::players_behavior()
 {
+    RCLCPP_INFO(this->get_logger(), "player behavior");
     if(robot_fallen(robot)) get_up();
-    else if (is_penalized()) 
-    else
-    {
-        switch (gc_info.secondary_state)
-        {
-        case GameControllerMsg::STATE_NORMAL:
-            normal_game();
-            break;
+    // else if (is_penalized()) 
+    // else
+    // {
+    //     switch (gc_info.secondary_state)
+    //     {
+    //     case GameControllerMsg::STATE_NORMAL:
+    //         normal_game();
+    //         break;
         
-        default:
-            break;
-        }
-    }
+    //     default:
+    //         break;
+    //     }
+    // }
 }
 
 void RobotBehavior::normal_game()
@@ -52,11 +54,10 @@ void RobotBehavior::normal_game()
     
     case GameControllerMsg::GAMESTATE_PLAYING:
         if(is_goalkeeper(ROBOT_NUMBER)) player_normal_game();
-        else goalkeeper_normal_game();
+        // else goalkeeper_normal_game();
         break;
     
     case GameControllerMsg::GAMESTATE_FINISHED:
-
         break;
 
     default:
@@ -92,10 +93,10 @@ bool RobotBehavior::vision_stable()// feito
 
 bool RobotBehavior::ball_in_robot_limits() // feito
 {
-    if(robo.ball_pos.left  && ball_in_left_limit())     return true;
-    if(robo.ball_pos.right && ball_in_right_limit())    return true;
-    if(robo.ball_pos.right && ball_in_close_limit())    return true;
-    return false
+    if(robot.ball.left  && ball_in_left_limit())     return true;
+    if(robot.ball.right && ball_in_right_limit())    return true;
+    if(robot.ball.right && ball_in_close_limit())    return true;
+    return false;
 }
 
 bool RobotBehavior::ball_in_close_limit() // feito
@@ -115,7 +116,7 @@ bool RobotBehavior::ball_in_left_limit() // feito
 
 bool RobotBehavior::ball_in_camera_center() // feita
 {
-    return (robo.ball_pos.center_left || robo.ball_pos.center_right) && robo.ball_pos.med;
+    return (robot.ball.center_left || robot.ball.center_right) && robot.ball.med;
 }
 
 bool RobotBehavior::is_penalized()
@@ -126,11 +127,12 @@ bool RobotBehavior::is_penalized()
 
         if(gc_info.seconds_till_unpenalized < 5)
         {
-            RCLCPP_INFO(this->get_logger(), "Preparing to return, gait started";
+            RCLCPP_INFO(this->get_logger(), "Preparing to return, gait started");
             send_goal(gait);
         } 
-        else return;
+        return true;
     }
+    return false;
 }
 
 void RobotBehavior::get_up()
@@ -151,7 +153,7 @@ void RobotBehavior::get_up()
 
     default:
         RCLCPP_INFO(this->get_logger(), "Stand up sides");
-        send_goal(stand_up_side)
+        send_goal(stand_up_side);
         break;
     }
 }
