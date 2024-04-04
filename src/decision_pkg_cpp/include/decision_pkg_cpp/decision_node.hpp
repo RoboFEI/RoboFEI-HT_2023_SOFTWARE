@@ -51,7 +51,7 @@ class DecisionNode : public rclcpp::Node
         void robot_detect_fallen(const float &robot_accel_x,
                                  const float &robot_accel_y,
                                  const float &robot_accel_z); 
-        void listener_callback_vision(const VisionInfo::SharedPtr vision_info);       
+        void listener_callback_vision(const VisionMsg::SharedPtr vision_info);       
         
         void send_goal(const Move &move);
         

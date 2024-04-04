@@ -75,8 +75,15 @@ void RobotBehavior::player_normal_game()
 
 bool RobotBehavior::ball_found()
 {
+    if(!robot.ball.detected)
+    {
+        return false;
+    }
+    else if(ball_centralized()) // fazer a função
     return true;
 }
+
+
 
 bool RobotBehavior::is_penalized()
 {

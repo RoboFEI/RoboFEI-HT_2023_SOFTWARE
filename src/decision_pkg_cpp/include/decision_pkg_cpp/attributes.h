@@ -9,7 +9,7 @@ enum State
 {
     searching_ball = 1,
     aligning_with_the_ball = 2
-}
+};
 
 enum FallStatus
 {
@@ -43,7 +43,7 @@ struct Robot
     bool finished_move = true;
     State state;
     custom_interfaces::msg::NeckPosition neck_pos;
-    custom_interfaces::msg::Vision vision_info;
+    custom_interfaces::msg::Vision ball_pos;
 };
 
 

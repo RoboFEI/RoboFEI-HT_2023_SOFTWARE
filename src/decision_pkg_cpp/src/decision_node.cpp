@@ -34,10 +34,10 @@ DecisionNode::DecisionNode() : Node("decision_node")
         std::bind(&DecisionNode::listener_callback_imu_accel, this, _1)
     );
 
-    vision_subscriber_ = this->create_subscription<VisionInfo>(
+    vision_subscriber_ = this->create_subscription<VisionMsg>(
       "/ball_position",
       rclcpp::QoS(10),
-      std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1)
+      std::bind(&DecisionNode::listener_callback_vision, this, std::placeholders::_1)
     );
 
     this->action_client_ = rclcpp_action::create_client<ControlActionMsg>(
@@ -117,11 +117,10 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
   RCLCPP_INFO(this->get_logger(), "Robot Fall State: %d", robot.fall);
 }
 
-void DecisionNode::listener_callback_vision(const VisionInfo::SharedPtr vision_info)
+void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_info)
 {
-  this->robot.vision_info = *vision_info;
-  RCLCPP_INFO(this->get_logger(), "Recive Vision Info");
-
+  this->robot.ball = *vision_info;
+  // RCLCPP_INFO(this->get_logger(), "Recive Vision Info");
 }
 
 void DecisionNode::send_goal(const Move &order)
