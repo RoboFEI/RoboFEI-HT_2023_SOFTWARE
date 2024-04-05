@@ -92,12 +92,12 @@ echo -e "${blue} commands setup${NC}"
     #Comand for run control
     sudo rm /usr/local/bin/control
     sudo touch /usr/local/bin/control && sudo chmod 777 /usr/local/bin/control
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 launch control action.launch.py" >> /usr/local/bin/control
+    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 launch robot_bringup control_bringup.launch.py" >> /usr/local/bin/control
 
     #Comand for run vision
     sudo rm /usr/local/bin/vision
     sudo touch /usr/local/bin/vision && sudo chmod 777 /usr/local/bin/vision
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run vision_yolov7 detect" >> /usr/local/bin/vision
+    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 launch robot_bringup vision_bringup.launch.py" >> /usr/local/bin/vision
 
     #Comand for run decision
     sudo rm /usr/local/bin/decision
@@ -112,7 +112,7 @@ echo -e "${blue} commands setup${NC}"
     #Comand for run motors
     sudo rm /usr/local/bin/motors
     sudo touch /usr/local/bin/motors && sudo chmod 777 /usr/local/bin/motors
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run dynamixel_sdk_examples read_write_node" >> /usr/local/bin/motors
+    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run motors_pkg motors_communication" >> /usr/local/bin/motors
 
     sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
 
