@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ssh -X robo@192.168.7.$1
