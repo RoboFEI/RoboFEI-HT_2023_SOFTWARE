@@ -74,6 +74,11 @@ echo -e "${blue} setup new rules for usb names${NC}"
 
 #Bind Comand
 echo -e "${blue} commands setup${NC}"
+
+    #Send movements
+    rm /usr/local/bin/pos
+    sudo cp robot_commands/pos /usr/local/bin && sudo chmod 777 /usr/local/bin/pos
+
     #goalkeeper fast conection 
     sudo rm /usr/local/bin/gol
     sudo touch /usr/local/bin/gol && sudo chmod 777 /usr/local/bin/gol

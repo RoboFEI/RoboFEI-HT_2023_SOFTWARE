@@ -1,0 +1,50 @@
+#!/bin/bash
+
+cd ~/RoboFEI-HT_2023_SOFTWARE
+clear
+source install/setup.bash
+
+echo $1
+if [ -z $1 ]; then
+	echo 'Lista de movimentos:'
+	echo 'Movimento 1- Stand Still'
+	echo 'Movimento 2- Greeting'
+	echo 'Movimento 7- Goodbye'
+	read n
+	clear
+	if [ $n = 1 ]; then
+		echo '1- Stand Still'
+		echo ''
+	fi
+	if [ $n = 2 ]; then
+		echo '2- Greeting'
+		echo ''
+	fi
+	if [ $n = 3 ]; then
+		echo '3- Right Kick'
+		echo ''
+	fi
+	if [ $n = 4 ]; then
+		echo '4- Left Kick'
+		echo ''
+	fi
+	if [ $n = 7 ]; then
+		echo '7- Goodbye'
+		echo ''
+	fi
+	if [ $n = 14 ]; then
+		echo '14- Walking'
+		echo ''
+	fi
+	if [ $n = 15 ]; then
+		echo '15- Gait'
+		echo ''
+	fi
+else
+	 n=$1  
+
+fi
+
+ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: $n}"
+
+
