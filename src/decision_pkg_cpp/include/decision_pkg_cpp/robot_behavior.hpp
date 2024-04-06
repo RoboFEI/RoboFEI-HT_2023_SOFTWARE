@@ -4,6 +4,7 @@
 #include "decision_pkg_cpp/decision_node.hpp"
 #include "decision_pkg_cpp/attributes.h"
 #include "decision_pkg_cpp/utils.h"
+#include "decision_pkg_cpp/AssyncTimer.hpp"
 
 #define ROBOT_NUMBER 2
 
@@ -26,11 +27,16 @@ class RobotBehavior : public DecisionNode
         bool robot_align_with_the_ball();
         bool centered_neck();
         void detect_ball_position();
+        bool neck_to_left();
+        bool neck_to_right();
+        bool turn_to_ball();
 
         RobotBehavior();
         virtual ~RobotBehavior();
 
     private:
+
+        AssyncTimer lost_ball_timer;
         bool is_penalized();
         void get_up();
 

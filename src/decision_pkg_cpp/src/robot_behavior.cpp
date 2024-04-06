@@ -2,11 +2,15 @@
 #include "decision_node.cpp"
 
 #define NECK_LEFT_LIMIT 2650
+#define NECK_LEFT_TH 400
 #define NECK_RIGHT_LIMIT 1350
+#define NECK_RIGHT_TH 400
 #define NECK_CLOSE_LIMIT 1340
 #define LIMIT_TH 40
 #define NECK_TILT_CENTER 2048
 #define NECK_CENTER_TH 40
+
+#define MAX_LOST_BALL_TIME 10e3 //10 seconds
 
 RobotBehavior::RobotBehavior()
 {
@@ -71,11 +75,12 @@ void RobotBehavior::player_normal_game() // fazer
     {
     case searching_ball:
         if(ball_found()) robot.state = aligning_with_the_ball; // fazer caso ela nn ache virar o robo
+        else if(lost_ball_timer.delay(MAX_LOST_BALL_TIME)) turn_to_ball();
         break;
     
     case aligning_with_the_ball:
         if(robot_align_with_the_ball()) robot.state = ball_approach; // fazer
-    
+        break;
     default:
         break;
     }
@@ -84,11 +89,14 @@ void RobotBehavior::player_normal_game() // fazer
 bool RobotBehavior::robot_align_with_the_ball() // fazer a parte de virar para a posição da bola
 {
     if(ball_in_camera_center() && centered_neck()) return true;
-    if(vision_stable()) 
-    {
-    }
-    
+    if(vision_stable()) turn_to_ball();
     return false;
+}
+
+void RobotBehavior::turn_to_ball()
+{
+    if(robot.ball_position == left) send_goal(turn_left);
+    if(robot.ball_position == right) send_goal(turn_right);
 }
 
 bool RobotBehavior::centered_neck() // feito
@@ -98,8 +106,11 @@ bool RobotBehavior::centered_neck() // feito
 
 bool RobotBehavior::ball_found() // feito
 {
-    if(!robot.camera_ball_position.detected) return false;
-    else if(vision_stable()) return true;
+    if(robot.camera_ball_position.detected)
+    {
+        lost_ball_timer.reset();
+        if(vision_stable()) return true;
+    }
     return false;
 }
 
@@ -114,9 +125,21 @@ bool RobotBehavior::vision_stable()// feito
     return false;
 }
 
-void RobotBehavior::detect_ball_position() // fazer
+void RobotBehavior::detect_ball_position() // feito
 {
-    
+    if(centered_neck()) robot.ball_position = center;
+    else if(neck_to_left()) robot.ball_position = left;
+    else if(neck_to_right()) robot.ball_position = right;
+}
+
+bool RobotBehavior::neck_to_right() // feito
+{
+    return (NECK_RIGHT_LIMIT - NECK_RIGHT_TH) > robot.neck_pos.position19;
+}
+
+bool RobotBehavior::neck_to_left() // feito
+{
+    return (NECK_LEFT_LIMIT - NECK_LEFT_TH) < robot.neck_pos.position19;
 }
 
 bool RobotBehavior::ball_in_robot_limits() // feito
@@ -144,7 +167,6 @@ bool RobotBehavior::ball_in_left_limit() // feito
 
 bool RobotBehavior::ball_in_camera_center() // feito
 {
-    robot.ball_position = center;
     return (robot.camera_ball_position.center_left || robot.camera_ball_position.center_right) && robot.camera_ball_position.med;
 }
 
