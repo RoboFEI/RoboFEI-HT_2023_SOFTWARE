@@ -5,6 +5,8 @@
 #define NECK_RIGHT_LIMIT 1350
 #define NECK_CLOSE_LIMIT 1340
 #define LIMIT_TH 40
+#define NECK_TILT_CENTER 2048
+#define NECK_CENTER_TH 40
 
 RobotBehavior::RobotBehavior()
 {
@@ -40,62 +42,88 @@ void RobotBehavior::normal_game()
 {
     switch (gc_info.game_state)
     {
-    case GameControllerMsg::GAMESTATE_INITAL:
+    case GameControllerMsg::GAMESTATE_INITAL: // feito
         send_goal(stand_still);
         break;
     
-    case GameControllerMsg::GAMESTATE_READY:
+    case GameControllerMsg::GAMESTATE_READY: // fazer
         // normal_game_prepair();
         break;
     
-    case GameControllerMsg::GAMESTATE_SET:
+    case GameControllerMsg::GAMESTATE_SET: // feito
         send_goal(stand_still);
         break;
     
-    case GameControllerMsg::GAMESTATE_PLAYING:
-        if(is_goalkeeper(ROBOT_NUMBER)) player_normal_game();
+    case GameControllerMsg::GAMESTATE_PLAYING: // fazer
+        if(is_goalkeeper(ROBOT_NUMBER)) player_normal_game(); // fazer
         // else goalkeeper_normal_game();
         break;
     
-    case GameControllerMsg::GAMESTATE_FINISHED:
-        break;
-
-    default:
+    case GameControllerMsg::GAMESTATE_FINISHED: // feito
+        send_goal(stand_still);
         break;
     }
 }
 
-void RobotBehavior::player_normal_game()
+void RobotBehavior::player_normal_game() // fazer
 {
     switch (robot.state)
     {
     case searching_ball:
-        if(true/*ball_found()*/) robot.state = aligning_with_the_ball;
+        if(ball_found()) robot.state = aligning_with_the_ball; // fazer caso ela nn ache virar o robo
         break;
+    
+    case aligning_with_the_ball:
+        if(robot_align_with_the_ball()) robot.state = ball_approach; // fazer
     
     default:
         break;
     }
 }
 
+bool RobotBehavior::robot_align_with_the_ball() // fazer a parte de virar para a posição da bola
+{
+    if(ball_in_camera_center() && centered_neck()) return true;
+    if(vision_stable()) 
+    {
+    }
+    
+    return false;
+}
+
+bool RobotBehavior::centered_neck() // feito
+{
+    return abs(robot.neck_pos.position19 - NECK_TILT_CENTER) < NECK_CENTER_TH;
+}
+
 bool RobotBehavior::ball_found() // feito
 {
-    if(!robot.ball.detected) return false;
+    if(!robot.camera_ball_position.detected) return false;
     else if(vision_stable()) return true;
     return false;
 }
 
 bool RobotBehavior::vision_stable()// feito
 {
-    if(ball_in_camera_center() || ball_in_robot_limits()) return true;
+
+    if(ball_in_camera_center() || ball_in_robot_limits())
+    {
+        detect_ball_position();
+        return true;
+    }
     return false;
+}
+
+void RobotBehavior::detect_ball_position() // fazer
+{
+    
 }
 
 bool RobotBehavior::ball_in_robot_limits() // feito
 {
-    if(robot.ball.left  && ball_in_left_limit())     return true;
-    if(robot.ball.right && ball_in_right_limit())    return true;
-    if(robot.ball.right && ball_in_close_limit())    return true;
+    if(robot.camera_ball_position.left  && ball_in_left_limit())     return true;
+    if(robot.camera_ball_position.right && ball_in_right_limit())    return true;
+    if(robot.camera_ball_position.close && ball_in_close_limit())    return true;
     return false;
 }
 
@@ -114,12 +142,13 @@ bool RobotBehavior::ball_in_left_limit() // feito
     return abs(robot.neck_pos.position19 - NECK_LEFT_LIMIT) < LIMIT_TH;
 }
 
-bool RobotBehavior::ball_in_camera_center() // feita
+bool RobotBehavior::ball_in_camera_center() // feito
 {
-    return (robot.ball.center_left || robot.ball.center_right) && robot.ball.med;
+    robot.ball_position = center;
+    return (robot.camera_ball_position.center_left || robot.camera_ball_position.center_right) && robot.camera_ball_position.med;
 }
 
-bool RobotBehavior::is_penalized()
+bool RobotBehavior::is_penalized() // feito
 {
     if(gc_info.penalized)
     {
@@ -139,7 +168,7 @@ bool RobotBehavior::is_penalized()
     return false;
 }
 
-void RobotBehavior::get_up()
+void RobotBehavior::get_up() // feito
 {
     RCLCPP_INFO(this->get_logger(), "Robot Fallen");
 

@@ -8,7 +8,8 @@
 enum State
 {
     searching_ball = 1,
-    aligning_with_the_ball = 2
+    aligning_with_the_ball = 2,
+    ball_approach = 3
 };
 
 enum FallStatus
@@ -36,14 +37,25 @@ enum Move
     stand_up_side   = 18
 };
 
+enum RobotBallPosition
+{
+    left,
+    right,
+    center
+};
+
+
 struct Robot
 {
     FallStatus fall = NotFallen;
     Move movement = stand_still;
+
     bool finished_move = true;
-    State state;
+    State state = searching_ball;
     custom_interfaces::msg::NeckPosition neck_pos;
-    custom_interfaces::msg::Vision ball;
+    custom_interfaces::msg::Vision camera_ball_position;
+    RobotBallPosition ball_position = center;
+
 };
 
 

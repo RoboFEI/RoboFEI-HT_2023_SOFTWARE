@@ -121,7 +121,7 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 
 void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_info)
 {
-  this->robot.ball = *vision_info;
+  this->robot.camera_ball_position = *vision_info;
   // RCLCPP_INFO(this->get_logger(), "Recive Vision Info");
 }
 
