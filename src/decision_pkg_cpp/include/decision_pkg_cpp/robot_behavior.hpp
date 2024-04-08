@@ -29,7 +29,7 @@ class RobotBehavior : public DecisionNode
         void detect_ball_position();
         bool neck_to_left();
         bool neck_to_right();
-        bool turn_to_ball();
+        void turn_to_ball();
 
         RobotBehavior();
         virtual ~RobotBehavior();

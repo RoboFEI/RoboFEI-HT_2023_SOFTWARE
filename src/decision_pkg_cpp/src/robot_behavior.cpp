@@ -10,7 +10,7 @@
 #define NECK_TILT_CENTER 2048
 #define NECK_CENTER_TH 40
 
-#define MAX_LOST_BALL_TIME 10e3 //10 seconds
+#define MAX_LOST_BALL_TIME 10000 //10 seconds
 
 RobotBehavior::RobotBehavior()
 {
