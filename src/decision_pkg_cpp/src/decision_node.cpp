@@ -73,15 +73,15 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
 void DecisionNode::listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos)
 {
     this->robot.neck_pos = *neck_pos;
-    RCLCPP_INFO(this->get_logger(), "Recive Neck Pos Info");
-    RCLCPP_INFO(this->get_logger(), "Id 19: %d  |  Id 20: %d", robot.neck_pos.position19, robot.neck_pos.position20);
+    // RCLCPP_INFO(this->get_logger(), "Recive Neck Pos Info");
+    // RCLCPP_INFO(this->get_logger(), "Id 19: %d  |  Id 20: %d", robot.neck_pos.position19, robot.neck_pos.position20);
 }
 
 void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro)
 {
     this->imu_gyro = *imu_gyro;
-    RCLCPP_INFO(this->get_logger(), "Recive Imu Gyro Info");
-    RCLCPP_INFO(this->get_logger(), "Yaw: %f\n", this->imu_gyro.vector.z);
+    // RCLCPP_INFO(this->get_logger(), "Recive Imu Gyro Info");
+    // RCLCPP_INFO(this->get_logger(), "Yaw: %f\n", this->imu_gyro.vector.z);
     
 }
 
@@ -96,8 +96,8 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
                                        const float &robot_accel_y,
                                        const float &robot_accel_z)
 {
-  RCLCPP_INFO(this->get_logger(), "Recive Imu Accel Info");
-  RCLCPP_INFO(this->get_logger(), "\nAx: %f\nAy: %f\nAz: %f\n", robot_accel_x, robot_accel_y, robot_accel_z);
+  // RCLCPP_INFO(this->get_logger(), "Recive Imu Accel Info");
+  // RCLCPP_INFO(this->get_logger(), "\nAx: %f\nAy: %f\nAz: %f\n", robot_accel_x, robot_accel_y, robot_accel_z);
 
   if(abs(robot_accel_y) < FALL_ACCEL_TH)
   {
@@ -116,7 +116,7 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
     else if(robot_accel_x > FALL_ACCEL_TH)  this->robot.fall = FallenLeft;
     else this->robot.fall = FallenRight;  
   }
-  RCLCPP_INFO(this->get_logger(), "Robot Fall State: %d", robot.fall);
+  // RCLCPP_INFO(this->get_logger(), "Robot Fall State: %d", robot.fall);
 }
 
 void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_info)
@@ -196,7 +196,7 @@ void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr &go
   if (!goal_handle) {
     RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
   } else {
-    RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+    // RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
   }
 }
 
@@ -204,7 +204,7 @@ void DecisionNode::feedback_callback(
   GoalHandleControl::SharedPtr,
   const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
 {
-  RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
+  // RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
 }
 
 void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & result)
@@ -223,7 +223,7 @@ void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & resu
       return;
   }
   robot.finished_move = true;
-  RCLCPP_INFO(this->get_logger(), "Goal finish");
+  // RCLCPP_INFO(this->get_logger(), "Goal finish");
 }
 
 // int main(int argc, char * argv[])
