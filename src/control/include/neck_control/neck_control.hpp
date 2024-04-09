@@ -9,6 +9,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
+#include "custom_interfaces/msg/set_position.hpp"
+#include "std_msgs/msg/multi_array_dimension.hpp"
+
 
 using namespace std::chrono_literals;
 
@@ -49,6 +52,8 @@ class NeckNode : public rclcpp::Node
   public:
     using VisionInfo = custom_interfaces::msg::Vision;
     using NeckPosition = custom_interfaces::msg::NeckPosition;
+    using SetPosition = custom_interfaces::msg::SetPosition;
+    using MultArrDim = std_msgs::msg::MultiArrayDimension;
 
     BallInformation ball;
     Neck neck;
@@ -76,7 +81,7 @@ class NeckNode : public rclcpp::Node
 
     rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
     rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
-    rclcpp::Publisher<NeckPosition>::SharedPtr set_neck_position_publisher_;
+    rclcpp::Publisher<SetPosition>::SharedPtr set_neck_position_publisher_;
     rclcpp::TimerBase::SharedPtr main_timer_;
     
 };

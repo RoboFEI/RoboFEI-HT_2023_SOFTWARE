@@ -105,36 +105,12 @@ ReadWriteNode::ReadWriteNode()
       RCLCPP_INFO(this->get_logger(), "Entrou na funcao");
       
       uint8_t dxl_error = 0;
-
+      
       uint8_t motors [20][4];
 
       for (int i=0; i<20; i++){
         uint32_t position = (unsigned int)msg->position[i]; // Convert int32 -> uint32
 
-        // dxl_comm_result = packetHandler->read4ByteTxRx(
-        //   portHandler,
-        //   (uint8_t) i,
-        //   MAX_POSITION_LIMIT,
-        //   reinterpret_cast<uint32_t *>(&max_limit_position),
-        //   &dxl_error
-        // );
-
-        // RCLCPP_INFO(this->get_logger(), "ID %d MAX LIMIT %d", msg->id[i], max_limit_position);
-
-        // if (position > max_limit_position)
-        //   position = max_limit_position;
-
-        // dxl_comm_result = packetHandler->read4ByteTxRx(
-        //   portHandler,
-        //   (uint8_t) i,
-        //   MIN_POSITION_LIMIT,
-        //   reinterpret_cast<uint32_t *>(&min_limit_position),
-        //   &dxl_error
-        // );
-
-        // if (position < min_limit_position)
-        //   position = min_limit_position;
-                
         motors[i][0] = DXL_LOBYTE(DXL_LOWORD(position));
         motors[i][1] = DXL_HIBYTE(DXL_LOWORD(position));
         motors[i][2] = DXL_LOBYTE(DXL_HIWORD(position));
@@ -258,26 +234,27 @@ ReadWriteNode::ReadWriteNode()
 
 }
 
-void ReadWriteNode::timer_callback(){
-    auto message = custom_interfaces::msg::NeckPosition();
+void ReadWriteNode::timer_callback()
+{
+  auto message = custom_interfaces::msg::NeckPosition();
 
-    for(int i=0; i<2; i++)
-    {
-      dxl_comm_result = packetHandler->read4ByteTxRx(
-        portHandler,
-        (uint8_t) (19+i), //for motor with id 19 and 20
-        ADDR_PRESENT_POSITION,
-        reinterpret_cast<uint32_t *>(&motor[i]),
-        &dxl_error
-      );
-    }
-   
-    message.position19 = motor[0];
-    message.position20 = motor[1];
-
-    neck_position_publisher->publish(message);
-
+  for(int i=0; i<2; i++)
+  {
+    dxl_comm_result = packetHandler->read4ByteTxRx(
+      portHandler,
+      (uint8_t) (19+i), //for motor with id 19 and 20
+      ADDR_PRESENT_POSITION,
+      reinterpret_cast<uint32_t *>(&motor[i]),
+      &dxl_error
+    );
   }
+  
+  message.position19 = motor[0];
+  message.position20 = motor[1];
+
+  neck_position_publisher->publish(message);
+
+}
 
 ReadWriteNode::~ReadWriteNode()
 {

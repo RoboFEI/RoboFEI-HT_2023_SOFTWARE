@@ -74,7 +74,7 @@ set(CMAKE_C_FLAGS " -lncurses")
 
 #Neck control definitions
 add_executable(neck_control src/neck_control.cpp)
-ament_target_dependencies(neck_control rclcpp custom_interfaces)
+ament_target_dependencies(neck_control std_msgs rclcpp custom_interfaces)
 
 install(TARGETS
   neck_control

@@ -464,7 +464,7 @@ void MotionManager::Process()
 			auto message = custom_interfaces::msg::SetPosition();  
 			int param[JointData::NUMBER_OF_JOINTS * MX28::PARAM_BYTES];
 			int joint_num = 0;
-			int pos[18];
+			int pos[19];
 			for(int id=JointData::ID_MIN; id<=JointData::ID_MAX-2; id++) // loop que vai de 1 até 18
 					{
 					param[id] = id;
@@ -474,8 +474,8 @@ void MotionManager::Process()
 					if(DEBUG_PRINT == true)
 					fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
 					}
-			message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};          
-			message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18], neck_sides, neck_up};   
+			message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};          
+			message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18]};   
 			publisher_->publish(message);
 
 		}

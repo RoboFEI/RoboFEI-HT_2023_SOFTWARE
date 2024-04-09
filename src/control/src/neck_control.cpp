@@ -16,7 +16,7 @@ NeckNode::NeckNode()
   neck_position_subscriber_ = this->create_subscription<NeckPosition>(
     "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
     
-  set_neck_position_publisher_ = this->create_publisher<NeckPosition>("/set_neck_position", 10);
+  set_neck_position_publisher_ = this->create_publisher<SetPosition>("/set_neck_position", 10);
 
 
   main_thread_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -76,10 +76,13 @@ void NeckNode::move_head(const enum Side &side, Neck &neck_position)
 
 void NeckNode::follow_ball()
 {
-  auto new_neck_position = NeckPosition();
+  auto new_neck_position = SetPosition();
 
-  new_neck_position.position19 = neck.pan;
-  new_neck_position.position20 = neck.tilt;
+  new_neck_position.id.push_back(19);
+  new_neck_position.id.push_back(20);
+  
+  new_neck_position.position.push_back(neck.pan);
+  new_neck_position.position.push_back(neck.tilt);
 
   if(ball.detected)
   {
@@ -108,8 +111,9 @@ void NeckNode::follow_ball()
     // else RCLCPP_INFO(this->get_logger(), "Centralized ball");
   }
   
-  new_neck_position.position19 = neck.pan;
-  new_neck_position.position20 = neck.tilt;
+
+  new_neck_position.position[0] = neck.pan;
+  new_neck_position.position[1] = neck.tilt;
 
   set_neck_position_publisher_->publish(new_neck_position);
 }
@@ -124,12 +128,15 @@ void NeckNode::search_ball()
   
   if(this->Millis()-this->atual_time > 2000)
   {
-    auto new_neck_position = NeckPosition();
+    auto new_neck_position = SetPosition();
 
-    new_neck_position.position19 = this->search_ball_pos[search_ball_state][0];
-    new_neck_position.position20 = this->search_ball_pos[search_ball_state][1];
+    new_neck_position.id.push_back(19);
+    new_neck_position.id.push_back(20);
+  
+    new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][0]);
+    new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][1]);
     
-    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position19, new_neck_position.position20);
+    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
     set_neck_position_publisher_->publish(new_neck_position);
     this->atual_time = this->Millis();
