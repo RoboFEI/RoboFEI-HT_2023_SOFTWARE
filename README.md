@@ -23,9 +23,13 @@ It is divided in 8 packages:
 
     ```$ ./comandos.sh```
 
-3. Compile all the packages, in the source folder (*if there are more folders besides src delete them*) and setup the environment:
+3. Compile all the packages, in the source folder (*if there are more folders besides src delete them*):
 
-        ```$ compile```
+   ```$ colcon build --symlink-install ```
+
+4. Setup the environment:
+
+   ```$ source install/setup.bash```
    
 5. Run all codes at once:
 
@@ -35,29 +39,26 @@ It is divided in 8 packages:
 
     - Control: 
     
-          ```$ control```
+      ```$ ros2 launch robot_bringup control_bringup.launch.py```
 
     - Decision: 
     
-          ```$ decision```
+      ```$ ros2 run decision_pkg decision_node```
 
     - GC: 
     
-          ```$ gamecontroler```
+      ```$ ros2 run game_controller connect```
 
     - IMU: 
     
-          ```$ imu```
+      ```$ ros2 run um7 um7_node ```
 
     - Motors: 
 
-           ```$ motors```
+      ```$ ros2 run motors_pkg motors_communication```
       
     - Vision: 
     
-          ```$ vision```
+      ```$ ros2 launch robot_bringup vision_bringup.launch.py```
 
-    - Neck:
-          ```$ neck```
-   
 
