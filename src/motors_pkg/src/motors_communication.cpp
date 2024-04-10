@@ -111,7 +111,7 @@ ReadWriteNode::ReadWriteNode()
    
   set_neck_position_subscriber_ =
     this->create_subscription<SetPosition>(
-    "set_position",
+    "set_neck_position",
     QOS_RKL10V,
     [this](const std::shared_ptr<SetPosition> msg) -> void 
     {
@@ -222,6 +222,10 @@ void ReadWriteNode::save_motors_position(const SetPosition::SharedPtr msg)
   {
     uint32_t position = (unsigned int)msg->position[i]; // Convert int32 -> uint32
 
+    motores2[i] = position;
+    
+    RCLCPP_INFO(this->get_logger(), "set id%d: pos %d", i, motores2[i]);
+
     motores[msg->id[i]][0] = DXL_LOBYTE(DXL_LOWORD(position));
     motores[msg->id[i]][1] = DXL_HIBYTE(DXL_LOWORD(position));
     motores[msg->id[i]][2] = DXL_LOBYTE(DXL_HIWORD(position));
@@ -258,7 +262,6 @@ void ReadWriteNode::timer_callback()
     //msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
   }
 
-  RCLCPP_INFO(this->get_logger(), "Terminou");
 
   groupSyncWrite.clearParam();
 

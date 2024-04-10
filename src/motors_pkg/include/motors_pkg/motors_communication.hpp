@@ -42,6 +42,7 @@ public:
   void save_motors_position(const SetPosition::SharedPtr msg);
 
   uint8_t motores[21][4];
+  uint32_t motores2[21];
 
   ReadWriteNode();
   virtual ~ReadWriteNode();
