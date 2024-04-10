@@ -224,7 +224,7 @@ void ReadWriteNode::save_motors_position(const SetPosition::SharedPtr msg)
 
     motores2[i] = position;
     
-    RCLCPP_INFO(this->get_logger(), "set id%d: pos %d", i, motores2[i]);
+    RCLCPP_INFO(this->get_logger(), "set id%d: pos %d", msg->id[i], motores2[i]);
 
     motores[msg->id[i]][0] = DXL_LOBYTE(DXL_LOWORD(position));
     motores[msg->id[i]][1] = DXL_HIBYTE(DXL_LOWORD(position));
