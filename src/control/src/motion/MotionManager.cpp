@@ -80,7 +80,6 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	subscription_imu = this->create_subscription<sensor_msgs::msg::Imu>("imu/data", 10, std::bind(&MotionManager::topic_callback, this, _1));
 	subscription_walk = this->create_subscription<custom_interfaces::msg::Walk>("walking", 10, std::bind(&MotionManager::topic_callback_walk, this, _1));
 	subscription_positions = this->create_subscription<custom_interfaces::msg::SetPosition>("set_position", 10, std::bind(&MotionManager::topic_callback_positions, this, _1));
-	subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>("/set_neck_position", 10, std::bind(&MotionManager::topic_callback_neck, this, _1));
 	publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
 	publisher_fase_zero = this->create_publisher<std_msgs::msg::Bool>("/fase_zero", 10); 
 	publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
@@ -94,12 +93,6 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	ini = new minIni((char *)INI_FILE_PATH);
 	
 }
-
-void MotionManager::topic_callback_neck(const std::shared_ptr<custom_interfaces::msg::NeckPosition> neck_msg) const
-    {
-      neck_sides = neck_msg->position19;
-      neck_up = neck_msg->position20;
-    }
 
 void MotionManager::update_loop(void)
 {
