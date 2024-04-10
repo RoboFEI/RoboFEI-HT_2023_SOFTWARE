@@ -83,68 +83,50 @@ ReadWriteNode::ReadWriteNode()
 {
   RCLCPP_INFO(this->get_logger(), "Run read write node");
 
+  for(int i=1; i<21; i++)
+  {
+    uint32_t position = 2048;
+
+    motores[i][0] = DXL_LOBYTE(DXL_LOWORD(position));
+    motores[i][1] = DXL_HIBYTE(DXL_LOWORD(position));
+    motores[i][2] = DXL_LOBYTE(DXL_HIWORD(position));
+    motores[i][3] = DXL_HIBYTE(DXL_HIWORD(position));  
+  }
+
+
+
   this->declare_parameter("qos_depth", 10);
   int8_t qos_depth = 0;
   this->get_parameter("qos_depth", qos_depth);
+  
 
   const auto QOS_RKL10V =
     rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
   
   //Create a publisher to send the neck position for vision.py
   neck_position_publisher = this->create_publisher<NeckPosition>("neck_position", 10);
+
   timer_ = this->create_wall_timer(
   8ms, std::bind(&ReadWriteNode::timer_callback, this));
    
+  set_neck_position_subscriber_ =
+    this->create_subscription<SetPosition>(
+    "set_position",
+    QOS_RKL10V,
+    [this](const std::shared_ptr<SetPosition> msg) -> void 
+    {
+      save_motors_position(msg);
+    }
+    );
+
 
   set_position_subscriber_ =
     this->create_subscription<SetPosition>(
     "set_position",
     QOS_RKL10V,
     [this](const std::shared_ptr<SetPosition> msg) -> void 
-    {
-      RCLCPP_INFO(this->get_logger(), "Entrou na funcao");
-      
-      uint8_t dxl_error = 0;
-      
-      uint8_t motors [20][4];
-
-      for (int i=0; i<20; i++){
-        uint32_t position = (unsigned int)msg->position[i]; // Convert int32 -> uint32
-
-        motors[i][0] = DXL_LOBYTE(DXL_LOWORD(position));
-        motors[i][1] = DXL_HIBYTE(DXL_LOWORD(position));
-        motors[i][2] = DXL_LOBYTE(DXL_HIWORD(position));
-        motors[i][3] = DXL_HIBYTE(DXL_HIWORD(position));  
-      }
-      
-      RCLCPP_INFO(this->get_logger(), "Fez os parametros");
-
-      for(int i=0; i<20; i++)
-      {
-        dxl_addparam_result = groupSyncWrite.addParam((uint8_t)msg->id[i], motors[i]);
-        if (dxl_addparam_result != true) {
-          RCLCPP_INFO(this->get_logger(), "Failed to addparam to groupSyncWrite for Dynamixel ID %d", msg->id[i]);
-        }
-      }
-
-      dxl_comm_result = groupSyncWrite.txPacket();
-
-      if (dxl_comm_result != COMM_SUCCESS) {
-        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
-      } 
-      else if (dxl_error != 0) {
-        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
-      } 
-      else {
-        //RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d,%d,%d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d, %d,%d}]", 
-        //msg->id[0], msg->id[1], msg->id[2], msg->id[3], msg->id[4], msg->id[5], msg->id[6], msg->id[7], msg->id[8], msg->id[9], msg->id[10], msg->id[11], msg->id[12], msg->id[13], msg->id[14], msg->id[15], msg->id[16], msg->id[17], msg->id[18], msg->id[19],
-        //msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11], msg->position[12], msg->position[13], 
-        //msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
-      }
-
-      RCLCPP_INFO(this->get_logger(), "Terminou");
-
-      groupSyncWrite.clearParam();
+    {      
+      save_motors_position(msg);
     }
     );
 
@@ -234,9 +216,51 @@ ReadWriteNode::ReadWriteNode()
 
 }
 
+void ReadWriteNode::save_motors_position(const SetPosition::SharedPtr msg)
+{
+  for(int i=0; i<(int)msg->position.size(); i++)
+  {
+    uint32_t position = (unsigned int)msg->position[i]; // Convert int32 -> uint32
+
+    motores[msg->id[i]][0] = DXL_LOBYTE(DXL_LOWORD(position));
+    motores[msg->id[i]][1] = DXL_HIBYTE(DXL_LOWORD(position));
+    motores[msg->id[i]][2] = DXL_LOBYTE(DXL_HIWORD(position));
+    motores[msg->id[i]][3] = DXL_HIBYTE(DXL_HIWORD(position)); 
+  }  
+}
+
 void ReadWriteNode::timer_callback()
 {
   auto message = custom_interfaces::msg::NeckPosition();
+
+  uint8_t dxl_error = 0;
+
+  for(int i=1; i<21; i++)
+  {
+    dxl_addparam_result = groupSyncWrite.addParam((uint8_t)i, motores[i]);
+    if (dxl_addparam_result != true) {
+      RCLCPP_INFO(this->get_logger(), "Failed to addparam to groupSyncWrite for Dynamixel ID %d", i);
+    }
+  }
+
+  dxl_comm_result = groupSyncWrite.txPacket();
+
+  if (dxl_comm_result != COMM_SUCCESS) {
+    RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+  } 
+  else if (dxl_error != 0) {
+    RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+  } 
+  else {
+    //RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d,%d,%d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d, %d,%d}]", 
+    //msg->id[0], msg->id[1], msg->id[2], msg->id[3], msg->id[4], msg->id[5], msg->id[6], msg->id[7], msg->id[8], msg->id[9], msg->id[10], msg->id[11], msg->id[12], msg->id[13], msg->id[14], msg->id[15], msg->id[16], msg->id[17], msg->id[18], msg->id[19],
+    //msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11], msg->position[12], msg->position[13], 
+    //msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
+  }
+
+  RCLCPP_INFO(this->get_logger(), "Terminou");
+
+  groupSyncWrite.clearParam();
 
   for(int i=0; i<2; i++)
   {
@@ -354,3 +378,114 @@ int main(int argc, char * argv[])
 
   return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// set_position_subscriber_ =
+//     this->create_subscription<SetPosition>(
+//     "set_position",
+//     QOS_RKL10V,
+//     [this](const std::shared_ptr<SetPosition> msg) -> void 
+//     {      
+//       uint8_t dxl_error = 0;
+      
+//       uint8_t motors [20][4];
+
+//       for (int i=0; i<20; i++){
+//         uint32_t position = (unsigned int)msg->position[i]; // Convert int32 -> uint32
+
+//         motors[i][0] = DXL_LOBYTE(DXL_LOWORD(position));
+//         motors[i][1] = DXL_HIBYTE(DXL_LOWORD(position));
+//         motors[i][2] = DXL_LOBYTE(DXL_HIWORD(position));
+//         motors[i][3] = DXL_HIBYTE(DXL_HIWORD(position));  
+//       }
+      
+//       RCLCPP_INFO(this->get_logger(), "Fez os parametros");
+
+//       for(int i=0; i<20; i++)
+//       {
+//         dxl_addparam_result = groupSyncWrite.addParam((uint8_t)msg->id[i], motors[i]);
+//         if (dxl_addparam_result != true) {
+//           RCLCPP_INFO(this->get_logger(), "Failed to addparam to groupSyncWrite for Dynamixel ID %d", msg->id[i]);
+//         }
+//       }
+
+//       dxl_comm_result = groupSyncWrite.txPacket();
+
+//       if (dxl_comm_result != COMM_SUCCESS) {
+//         RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+//       } 
+//       else if (dxl_error != 0) {
+//         RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+//       } 
+//       else {
+//         //RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d,%d,%d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d, %d,%d}]", 
+//         //msg->id[0], msg->id[1], msg->id[2], msg->id[3], msg->id[4], msg->id[5], msg->id[6], msg->id[7], msg->id[8], msg->id[9], msg->id[10], msg->id[11], msg->id[12], msg->id[13], msg->id[14], msg->id[15], msg->id[16], msg->id[17], msg->id[18], msg->id[19],
+//         //msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11], msg->position[12], msg->position[13], 
+//         //msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
+//       }
+
+//       RCLCPP_INFO(this->get_logger(), "Terminou");
+
+//       groupSyncWrite.clearParam();
+//     }
+//     );
