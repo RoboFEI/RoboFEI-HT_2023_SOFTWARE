@@ -56,8 +56,6 @@ int cont_vision_sides = 40;
 bool fase_zero = true;
 uint32_t valor = 246;
 uint32_t valor_up = 250;
-int neck_sides = 2048;
-int neck_up = 2048;
 float sleep_sec = 0.0;
 int parameters = true;
 int parameter_number = 0;
@@ -86,8 +84,6 @@ public:
   : Node("control")
   {
     RCLCPP_INFO(this->get_logger(), "Running action node");
-    subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>(
-      "/set_neck_position", 10, std::bind(&Control::topic_callback_neck, this, _1));
     subscriber_fase_zero = this->create_subscription<std_msgs::msg::Bool>("/fase_zero", 10, std::bind(&Control::topic_callback_fase, this, _1));
     publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
     publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
@@ -109,12 +105,6 @@ public:
   
 private:
 
-    void topic_callback_neck(const std::shared_ptr<custom_interfaces::msg::NeckPosition> neck_msg) const
-    {
-      neck_sides = neck_msg->position19;
-      neck_up = neck_msg->position20;
-    }
-    
     void topic_callback_fase(const std::shared_ptr<std_msgs::msg::Bool> fase_msg) const
     {
       fase_zero = fase_msg->data;
@@ -254,31 +244,6 @@ private:
           parameters = true;
           parameter_number = 7;  
           break;
-        case 22: //
-          RCLCPP_INFO(this->get_logger(), "Centralizando bola à esquerda");
-          parameters = false;
-          neck_sides += cont_vision_sides;
-          section = "Stand Still";
-          break;
-        case 23: //
-          RCLCPP_INFO(this->get_logger(), "Centralizando bola à direita");
-          parameters = false;
-          neck_sides -= cont_vision_sides;
-          section = "Stand Still";
-          break;
-        case 24: //
-          RCLCPP_INFO(this->get_logger(), "Centralizando bola no pé");
-          parameters = false; 
-          neck_up -= cont_vision_up;
-          section = "Stand Still";
-          RCLCPP_INFO(this->get_logger(), "%d", neck_up);
-          break;
-        case 25: // Centralizar bola acima
-          RCLCPP_INFO(this->get_logger(), "Centralizando bola acima");
-          parameters = false;
-          neck_up += cont_vision_up;
-          section = "Stand Still";
-          break;
         case 26: // Andar pra trás
           RCLCPP_INFO(this->get_logger(), "Walking Backward");
           parameters = true;
@@ -391,9 +356,6 @@ private:
               else if (j[section][address_name] == 116){
                 position_name = position_name + std::to_string(i);
                 position.push_back(j[section][position_name]);
-
-                position[0][18] = neck_sides;
-                position[0][19] = neck_up;
                 
                 message.position = position.front();
 
