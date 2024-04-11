@@ -21,8 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'detect     = vision_pkg.detect:main',
-            'open_cam   = vision_pkg.open_cam:main'
+            'detect     = vision_pkg.detect:main'
         ],
     },
 )

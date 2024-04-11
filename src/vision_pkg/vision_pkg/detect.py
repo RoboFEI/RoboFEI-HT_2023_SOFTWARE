@@ -1,13 +1,11 @@
 import rclpy
 from rclpy.node import Node
 import cv2
-from cv_bridge import CvBridge
 from ultralytics import YOLO
 import os
 import numpy as np
 from math import hypot
-
-from sensor_msgs.msg import Image
+    
 from custom_interfaces.msg import Vision
 
 from .submodules.utils import draw_lines, position
@@ -16,13 +14,15 @@ from .submodules.ClassConfig import *
 class BallDetection(Node):
     def __init__(self):
 
-        super().__init__("image_subscriber")
-        self.bridge = CvBridge()
+        super().__init__("image_topic")
 
-        self.sub = self.create_subscription(Image, "/image", self.predict_callbalck, 10)
-        self.sub
+        self.cap = cv2.VideoCapture(0)
+        self.cap.set(3, 640)
+        self.cap.set(4, 480)
 
-        self.publisher_ = self.create_publisher(Vision, '/ball_position', 10)
+        self.timer = self.create_timer(0.008, self.predict_callbalck)
+
+        self.publisher_ = self.create_publisher(Vision, '/ball_position', 2)
         self.publisher_
 
         #recive data from config.ini using the ClassConfig submodule
@@ -56,7 +56,6 @@ class BallDetection(Node):
         classes = result[0].names
         value_classes = {value: key for key, value in classes.items()}
         return value_classes        
-
 
     def find_ball(self):
         ball_detection = (self.results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
@@ -117,7 +116,7 @@ class BallDetection(Node):
             self.ball_info_msg = Vision()
 
         # tentar colocar isso antes de tudo e atribuir o vision depois
-        if self.ball_info_msg.detected:
+        if self.ball_info_msg.detected and self.cont_falses_lost_ball == self.config.max_count_lost_frame:
             self.ball_info_msg = Vision()
             self.ball_info_msg.detected = True
 
@@ -159,21 +158,24 @@ class BallDetection(Node):
         self.publisher_.publish(self.ball_info_msg)
 
 
-    def predict_callbalck(self, msg):
-        self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
-        self.results = self.model(self.img, device=self.device, conf=0.5, max_det=3, verbose=False)
-        self.results = self.results[0]
+    def predict_callbalck(self):
 
-    
-        if self.show_divisions:
-            self.img = draw_lines(self.img, self.config)  #Draw camera divisions
+        ret, self.img = self.cap.read()
 
-        self.publish_ball_info()
+        if(ret):
+            self.results = self.model(self.img, device=self.device, conf=0.5, max_det=3, verbose=False)
+            self.results = self.results[0]
+
         
-        
-        cv2.imshow('Ball', self.img) # Draw divisions of camera
-        cv2.waitKey(1)
-        
+            if self.show_divisions:
+                self.img = draw_lines(self.img, self.config)  #Draw camera divisions
+
+            self.publish_ball_info()
+            
+            
+            cv2.imshow('Ball', self.img) # Draw divisions of camera
+            cv2.waitKey(1)
+            
 
 def main(args=None):
     rclpy.init(args=args)

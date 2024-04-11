@@ -9,7 +9,6 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>vision_pkg</exec_depend>
   <exec_depend>control</exec_depend>
   
 
