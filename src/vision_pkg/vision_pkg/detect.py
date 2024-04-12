@@ -7,6 +7,7 @@ import numpy as np
 from math import hypot
     
 from custom_interfaces.msg import Vision
+from vision_msgs.msg import Point2D
 
 from .submodules.utils import draw_lines, position
 from .submodules.ClassConfig import *
@@ -22,8 +23,11 @@ class BallDetection(Node):
 
         self.timer = self.create_timer(0.008, self.predict_callbalck)
 
-        self.publisher_ = self.create_publisher(Vision, '/ball_position', 2)
-        self.publisher_
+        self.ball_position_publisher_ = self.create_publisher(Vision, '/ball_position', 2)
+        self.ball_position_publisher_
+        
+        self.ball_px_position_publisher_ = self.create_publisher(Point2D, '/ball_px_position', 2)
+        self.ball_px_position_publisher_
 
         #recive data from config.ini using the ClassConfig submodule
         self.config = classConfig()
@@ -43,7 +47,7 @@ class BallDetection(Node):
         self.img = None
 
         self.ball_pos = position()
-        self.filtered_ball_position = position()
+        self.filtered_ball_position = Point2D()
 
         self.ball_info_msg = Vision()
         
@@ -104,6 +108,10 @@ class BallDetection(Node):
 
                 self.ball_info_msg.detected = True
 
+
+
+                self.ball_px_position_publisher_.publish(self.filtered_ball_position)
+
             self.ball_pos.x = ball_pos.x
             self.ball_pos.y = ball_pos.y
 
@@ -155,7 +163,7 @@ class BallDetection(Node):
 
     def publish_ball_info(self):
         self.ball_info()
-        self.publisher_.publish(self.ball_info_msg)
+        self.ball_position_publisher_.publish(self.ball_info_msg)
 
 
     def predict_callbalck(self):
