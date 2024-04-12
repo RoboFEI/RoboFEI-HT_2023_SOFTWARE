@@ -103,12 +103,10 @@ class BallDetection(Node):
                 self.cont_falses_lost_ball = self.config.max_count_lost_frame
                 self.cont_real_detections = 0
 
-                self.filtered_ball_position.x = ball_pos.x
-                self.filtered_ball_position.y = ball_pos.y
+                self.filtered_ball_position.x = float(ball_pos.x)
+                self.filtered_ball_position.y = float(ball_pos.y)
 
                 self.ball_info_msg.detected = True
-
-
 
                 self.ball_px_position_publisher_.publish(self.filtered_ball_position)
 
