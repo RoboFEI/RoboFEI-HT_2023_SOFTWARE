@@ -480,11 +480,11 @@
     },
 
     "Stand Up Back":{
-        "number of movements" : 15, 
+        "number of movements" : 7, 
 
         "address1" : 112,
         "id1" : 254,
-        "velocity1" : 40,
+        "velocity1" : 60,
 
         "address2" : 116,
         "position2" : [944,3203,2048,2048,804,3292,2048,2048,2044,2078,1315,2781,3660,436,3037,1061,2048,2048,2048,2048],
@@ -516,23 +516,23 @@
 
         "address9" : 112,
         "id9" : 254,
-        "velocity9" : 30,
+        "velocity9" : 45,
 
         "address10" : 112,
         "id10" : 11,
-        "velocity10" : 45,
+        "velocity10" : 57,
 
         "address11" : 112,
         "id11" : 12,
-        "velocity11" : 45,
+        "velocity11" : 57,
 
         "address12" : 112,
         "id12" : 13,
-        "velocity12" : 63,
+        "velocity12" : 91,
 
         "address13" : 112,
         "id13" : 14,
-        "velocity13" : 63,
+        "velocity13" : 91,
 
         "address14" : 116,
         "position14" : [1676,2420,2217,1915,888,3208,2048,2067,2000,2100,1139,2971,3644,452,2875,1225,2023,2081,2047,2047],
