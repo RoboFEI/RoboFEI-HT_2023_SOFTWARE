@@ -14,7 +14,7 @@ NeckNode::NeckNode()
     "/ball_position", 10, std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1), sub_opt);
   
   vision_px_subscriber_ = this->create_subscription<Point2d>(
-    "/ball_position", 10, std::bind(&NeckNode::listener_callback_vision_px, this, std::placeholders::_1), sub_opt);
+    "/ball_px_position", 10, std::bind(&NeckNode::listener_callback_vision_px, this, std::placeholders::_1), sub_opt);
     
   neck_position_subscriber_ = this->create_subscription<NeckPosition>(
     "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
@@ -44,8 +44,8 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
   new_neck_position.id.push_back(19);
   new_neck_position.id.push_back(20);
 
-  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 3);
-  new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 3);
+  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.5);
+  new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.3);
 
   if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
   else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
