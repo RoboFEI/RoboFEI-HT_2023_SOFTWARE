@@ -11,6 +11,7 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <depend>std_msgs</depend>
+  <depend>vision_msgs</depend>
   <depend>serial</depend>
   <depend>rt</depend>
   <depend>Curses</depend>

@@ -48,6 +48,13 @@ enum class State
   search_ball
 };
 
+struct BallPositionPx
+{
+  int x = 0;
+  int y = 0;
+};
+
+
 class NeckNode : public rclcpp::Node
 {
   public:
@@ -55,12 +62,13 @@ class NeckNode : public rclcpp::Node
     using NeckPosition = custom_interfaces::msg::NeckPosition;
     using SetPosition = custom_interfaces::msg::SetPosition;
     using MultArrDim = std_msgs::msg::MultiArrayDimension;
-    using Point2d = vision_msgs::msg::point2D;
+    using Point2d = vision_msgs::msg::Point2D;
 
 
     BallInformation ball;
     Neck neck;
     State robot_state = State::search_ball;
+    BallPositionPx ball_pos_px;
     int cont_lost_ball = 0;
     uint64_t atual_time = this->Millis();
     int search_ball_pos[9][2] = {{2270,1300}, {2048, 1300}, {1826, 1300}, {1528, 1550}, {2048, 1550}, {2568, 1550}, {2866, 1800}, {2048, 1800},{1230, 1800}};
@@ -84,6 +92,7 @@ class NeckNode : public rclcpp::Node
     rclcpp::CallbackGroup::SharedPtr main_thread_;
 
     rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
+    rclcpp::Subscription<Point2d>::SharedPtr vision_px_subscriber_;
     rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
     rclcpp::Publisher<SetPosition>::SharedPtr set_neck_position_publisher_;
     rclcpp::TimerBase::SharedPtr main_timer_;
