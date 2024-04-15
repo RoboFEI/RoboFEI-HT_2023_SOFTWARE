@@ -11,6 +11,7 @@
 #include "custom_interfaces/msg/neck_position.hpp"
 #include "custom_interfaces/msg/set_position.hpp"
 #include "std_msgs/msg/multi_array_dimension.hpp"
+#include "vision_msgs/msg/point2_d.hpp"
 
 
 using namespace std::chrono_literals;
@@ -54,6 +55,8 @@ class NeckNode : public rclcpp::Node
     using NeckPosition = custom_interfaces::msg::NeckPosition;
     using SetPosition = custom_interfaces::msg::SetPosition;
     using MultArrDim = std_msgs::msg::MultiArrayDimension;
+    using Point2d = vision_msgs::msg::point2D;
+
 
     BallInformation ball;
     Neck neck;
@@ -64,6 +67,7 @@ class NeckNode : public rclcpp::Node
     int search_ball_state = 0;
 
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
+    void listener_callback_vision_px(const Point2d::SharedPtr msg);
     void listener_callback_neck(const NeckPosition::SharedPtr msg); 
     void move_head(const enum Side &side, Neck &neck_position);
     void follow_ball();
