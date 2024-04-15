@@ -157,11 +157,13 @@ class BallDetection(Node):
                 self.ball_info_msg.med = True
                 self.get_logger().info("Bola ao Centro")
             
+            self.ball_position_publisher_.publish(self.ball_info_msg)
+            
 
 
     def publish_ball_info(self):
         self.ball_info()
-        self.ball_position_publisher_.publish(self.ball_info_msg)
+
 
 
     def predict_callbalck(self):

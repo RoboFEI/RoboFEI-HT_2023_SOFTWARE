@@ -89,26 +89,26 @@ void NeckNode::follow_ball()
     if(ball.left && neck.pan < 2650)
     {
       this->move_head(Side::left, this->neck);
-      // RCLCPP_INFO(this->get_logger(), "Move head to left");
+      RCLCPP_INFO(this->get_logger(), "Move head to left");
 
     }
     else if(ball.right && neck.pan > 1350)
     {
       this->move_head(Side::right, this->neck);
-      // RCLCPP_INFO(this->get_logger(), "Move head to right");
+      RCLCPP_INFO(this->get_logger(), "Move head to right");
     }
     
     if(ball.far && neck.tilt < 2048)
     {
       this->move_head(Side::up, this->neck);
-      // RCLCPP_INFO(this->get_logger(), "Ball up");
+      RCLCPP_INFO(this->get_logger(), "Ball up");
     }
     else if(ball.close && neck.tilt > 1340)
     {
       this->move_head(Side::down, this->neck);
-      // RCLCPP_INFO(this->get_logger(), "Ball close");
+      RCLCPP_INFO(this->get_logger(), "Ball close");
     }
-    // else RCLCPP_INFO(this->get_logger(), "Centralized ball");
+    else RCLCPP_INFO(this->get_logger(), "Centralized ball");
   }
   
 

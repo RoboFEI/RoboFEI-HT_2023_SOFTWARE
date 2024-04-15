@@ -85,12 +85,12 @@ ReadWriteNode::ReadWriteNode()
 
   for(int i=1; i<21; i++)
   {
-    uint32_t position = 2048;
+    uint32_t position[21] = {2048, 1676,2420,2217,1915,888,3208,2048,2087,2044,2078,1783,2350,2840,1300,2592,1560,2012,2082,2048,1750};
 
-    motores[i][0] = DXL_LOBYTE(DXL_LOWORD(position));
-    motores[i][1] = DXL_HIBYTE(DXL_LOWORD(position));
-    motores[i][2] = DXL_LOBYTE(DXL_HIWORD(position));
-    motores[i][3] = DXL_HIBYTE(DXL_HIWORD(position));  
+    motores[i][0] = DXL_LOBYTE(DXL_LOWORD(position[i]));
+    motores[i][1] = DXL_HIBYTE(DXL_LOWORD(position[i]));
+    motores[i][2] = DXL_LOBYTE(DXL_HIWORD(position[i]));
+    motores[i][3] = DXL_HIBYTE(DXL_HIWORD(position[i]));  
   }
 
 
