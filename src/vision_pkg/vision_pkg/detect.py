@@ -101,7 +101,6 @@ class BallDetection(Node):
 
             if self.cont_real_detections > 5:
                 self.cont_falses_lost_ball = self.config.max_count_lost_frame
-                self.cont_real_detections = 0
 
                 self.filtered_ball_position.x = float(ball_pos.x)
                 self.filtered_ball_position.y = float(ball_pos.y)
@@ -119,6 +118,7 @@ class BallDetection(Node):
             self.ball_info_msg.detected = True
             self.get_logger().info(f'Bola Detectada, Falso negativo: {self.cont_falses_lost_ball}')
         else:
+            self.cont_real_detections = 0
             self.ball_info_msg = Vision()
 
         # tentar colocar isso antes de tudo e atribuir o vision depois

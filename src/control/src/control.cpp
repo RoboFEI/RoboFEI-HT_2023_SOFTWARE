@@ -296,7 +296,7 @@ private:
         if (do_gait){
           movement = 15;
           contador++;
-          if (contador >= 15){
+          if (contador >= 3){
             do_gait = false;
             contador = 0;
           }
