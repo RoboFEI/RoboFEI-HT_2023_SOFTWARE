@@ -54,6 +54,13 @@ class BallDetection(Node):
         self.cont_falses_lost_ball = 0 
         self.cont_real_detections = 0
 
+    def get_classes(self): #function for list all classes and the respective number in a dictionary
+        fake_image = np.zeros((640,480,3), dtype=np.uint8)
+        result = self.model(fake_image, device=self.device, verbose=False)
+        classes = result[0].names
+        value_classes = {value: key for key, value in classes.items()}
+        return value_classes   
+
     def main_callbalck(self):
 
         ret, self.img = self.cap.read()
@@ -65,30 +72,27 @@ class BallDetection(Node):
             if self.show_divisions:
                 self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
-            self.detect_ball(self.results)
-
-            self.publish_ball_info()
+            self.ball_detection(self.results)
             
             
             cv2.imshow('Ball', self.img) # Show image
             cv2.waitKey(1)
     
-    def detect_ball(self, results):
-        ball_detection = (results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
-        
-        if ball_detection.size > 0: # if ball is detected
-            
-
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False)
         return results[0]
 
-    def get_classes(self): #function for list all classes and the respective number in a dictionary
-        fake_image = np.zeros((640,480,3), dtype=np.uint8)
-        result = self.model(fake_image, device=self.device, verbose=False)
-        classes = result[0].names
-        value_classes = {value: key for key, value in classes.items()}
-        return value_classes        
+    def ball_detection(self, results):
+        ball_pos = self.find_ball() # recive [x, y] of ball position
+
+        if ball_pos != -1: #if ball was finded
+            ball_px_pos = Point2D()
+            ball_px_pos.x = float(ball_pos.x)
+            ball_px_pos.y = float(ball_pos.y)
+
+            self.ball_px_position_publisher_.publish(ball_px_pos)
+
+
 
     def find_ball(self):
         ball_detection = (self.results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
@@ -187,9 +191,6 @@ class BallDetection(Node):
                 self.get_logger().info("Bola ao Centro")
             
             self.ball_position_publisher_.publish(self.ball_info_msg)
-            
-    def publish_ball_info(self):
-        self.ball_info()
             
 
 def main(args=None):
