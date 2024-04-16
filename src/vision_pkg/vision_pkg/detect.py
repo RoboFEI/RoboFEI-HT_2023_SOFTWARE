@@ -50,6 +50,7 @@ class BallDetection(Node):
         self.filtered_ball_position = Point2D()
 
         self.ball_info_msg = Vision()
+        self.ball_pos_area = Vision()
         
         self.cont_falses_lost_ball = 0 
         self.cont_real_detections = 0
@@ -85,10 +86,17 @@ class BallDetection(Node):
     def ball_detection(self):
         ball_px_pos = self.find_ball() # recive x and y position (Point2D)
 
+        new_ball_pos_area = Vision()
+
         if ball_px_pos != -1: #if ball was finded
-            ball_px_pos = self.ball_position_filter(ball_px_pos, 0) 
-            
-            self.ball_px_position_publisher_.publish(ball_px_pos)
+            ball_px_pos = self.ball_px_position_filter(ball_px_pos, 0)
+
+            new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
+
+        self.ball_pos_area_filter(new_ball_pos_area, 0)
+
+        
+        
 
 
     def find_ball(self):
@@ -112,9 +120,63 @@ class BallDetection(Node):
 
         return -1
 
-    def ball_position_filter(self, not_filtered_ball_pos, opt):
+    def ball_px_position_filter(self, not_filtered_ball_pos, opt):
+        
+        ball_px_pos = not_filtered_ball_pos
+
         if opt == 0:
-            return not_filtered_ball_pos
+            pass
+        
+        self.ball_px_position_publisher_.publish(ball_px_pos)
+
+    def ball_pos_area_filter(self, not_filtered_ball_pos, opt):
+        ball_pos_area = not_filtered_ball_pos
+        
+        if opt == 1:
+            pass
+        
+        self.ball_position_publisher_.publish(self.ball_pos_area)
+
+
+
+    
+    def get_ball_pos_area(self, ball_px_pos):
+        ball_pos = Vision()
+        ball_pos.detected = True
+
+        # identify the ball position in Y axis
+        if (ball_px_pos.x <= self.config.x_left):     #ball to the left
+            self.ball_info_msg.left = True
+            self.get_logger().info("Bola à Esquerda")
+
+        elif (ball_px_pos.x < self.config.x_center):  #ball to the center left
+            self.ball_info_msg.center_left = True
+            self.get_logger().info("Bola Centralizada a Esquerda")
+
+        elif (ball_px_pos.x < self.config.x_right):   #ball to the center right
+            self.ball_info_msg.center_right = True
+            self.get_logger().info("Bola Centralizada a Direita")
+
+        else:                                            #ball to the right
+            self.ball_info_msg.right = True
+            self.get_logger().info("Bola à Direita")
+        
+
+        # identify the ball position in Y axis
+        if (ball_px_pos.y > self.config.y_chute):     #ball near
+            self.ball_info_msg.close = True
+            self.get_logger().info("Bola Perto")
+        
+        elif (ball_px_pos.y <= self.config.y_longe):  #ball far
+            self.ball_info_msg.far = True
+            self.get_logger().info("Bola Longe")
+
+        else:                                           #Bola middle
+            self.ball_info_msg.med = True
+            self.get_logger().info("Bola ao Centro")
+
+        return ball_pos
+        
 
     def ball_delta_position_threshold(self, new_position, threshold):
         dp = position()
