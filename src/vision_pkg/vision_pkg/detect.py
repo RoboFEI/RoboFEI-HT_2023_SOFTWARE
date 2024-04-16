@@ -21,7 +21,7 @@ class BallDetection(Node):
         self.cap.set(3, 640)
         self.cap.set(4, 480)
 
-        self.timer = self.create_timer(0.008, self.predict_callbalck)
+        self.timer = self.create_timer(0.008, self.main_callbalck)
 
         self.ball_position_publisher_ = self.create_publisher(Vision, '/ball_position', 2)
         self.ball_position_publisher_
@@ -53,6 +53,35 @@ class BallDetection(Node):
         
         self.cont_falses_lost_ball = 0 
         self.cont_real_detections = 0
+
+    def main_callbalck(self):
+
+        ret, self.img = self.cap.read()
+
+
+        if(ret):
+            self.results = self.predict_image(self.img) # predict image 
+        
+            if self.show_divisions:
+                self.img = draw_lines(self.img, self.config)  #Draw camera divisions
+
+            self.detect_ball(self.results)
+
+            self.publish_ball_info()
+            
+            
+            cv2.imshow('Ball', self.img) # Show image
+            cv2.waitKey(1)
+    
+    def detect_ball(self, results):
+        ball_detection = (results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
+        
+        if ball_detection.size > 0: # if ball is detected
+            
+
+    def predict_image(self, img):
+        results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False)
+        return results[0]
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
@@ -159,30 +188,8 @@ class BallDetection(Node):
             
             self.ball_position_publisher_.publish(self.ball_info_msg)
             
-
-
     def publish_ball_info(self):
         self.ball_info()
-
-
-
-    def predict_callbalck(self):
-
-        ret, self.img = self.cap.read()
-
-        if(ret):
-            self.results = self.model(self.img, device=self.device, conf=0.5, max_det=3, verbose=False)
-            self.results = self.results[0]
-
-        
-            if self.show_divisions:
-                self.img = draw_lines(self.img, self.config)  #Draw camera divisions
-
-            self.publish_ball_info()
-            
-            
-            cv2.imshow('Ball', self.img) # Draw divisions of camera
-            cv2.waitKey(1)
             
 
 def main(args=None):
