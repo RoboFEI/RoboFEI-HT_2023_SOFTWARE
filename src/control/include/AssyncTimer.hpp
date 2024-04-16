@@ -12,7 +12,7 @@ class AssyncTimer
     public:
         void reset();
         bool delay(int ms);
-        bool delayNR(int ms)
+        bool delayNR(int ms);
         int deltaT();
         AssyncTimer();
         ~AssyncTimer();
@@ -32,7 +32,7 @@ void AssyncTimer::reset()
     old_time = Millis();
 }
 
-bool AssyncTimer::delayNR(int ms)
+bool AssyncTimer::delay(int ms)
 {
     if(int(Millis() - old_time) > ms)
     {
@@ -43,7 +43,7 @@ bool AssyncTimer::delayNR(int ms)
     return false;
 }
 
-bool AssyncTimer::delay(int ms)
+bool AssyncTimer::delayNR(int ms)
 {
     if(int(Millis() - old_time) > ms)
     {

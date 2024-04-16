@@ -77,6 +77,8 @@ class NeckNode : public rclcpp::Node
     int search_ball_state = 0;
 
     AssyncTimer lost_ball_timer;
+    AssyncTimer search_ball_timer;
+    
 
 
     void listener_callback_vision(const VisionInfo::SharedPtr msg);

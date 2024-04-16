@@ -17,7 +17,7 @@ class BallDetection(Node):
 
         super().__init__("image_topic")
 
-        self.cap = cv2.VideoCapture(2)
+        self.cap = cv2.VideoCapture(0)
         self.cap.set(3, 640)
         self.cap.set(4, 480)
 

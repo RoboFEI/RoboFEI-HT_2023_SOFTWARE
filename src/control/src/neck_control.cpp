@@ -30,6 +30,7 @@ NeckNode::NeckNode()
     8ms, std::bind(&NeckNode::main_callback, this), main_thread_);
 
    lost_ball_timer.reset(); 
+   search_ball_timer.reset();
 }
 
 NeckNode::~NeckNode()
@@ -110,7 +111,7 @@ uint64_t NeckNode::Millis() {
 void NeckNode::search_ball()
 {
   
-  if(this->Millis()-this->atual_time > 2000)
+  if(search_ball_timer.delay(2000))
   {
     auto new_neck_position = SetPosition();
 
@@ -120,10 +121,9 @@ void NeckNode::search_ball()
     new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][0]);
     new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][1]);
     
-    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
+    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.position[0], new_neck_position.position[1]);
 
     set_neck_position_publisher_->publish(new_neck_position);
-    this->atual_time = this->Millis();
     this->search_ball_state += 1;
 
     if(this->search_ball_state >= 8)
@@ -149,15 +149,16 @@ void NeckNode::main_callback()
     break;
   }
 
-  if(lost_ball_timer.delayNR(2000) && this->robot_state == State::follow_ball)
-  {
-    this->robot_state = State::search_ball;
-    this->search_ball_state = 0;
-  }
-  else if (!lost_ball_timer.delayNR(2000))
-  {
-    this->robot_state = State::follow_ball;
-  }
+  // if(lost_ball_timer.delayNR(2000) && this->robot_state == State::follow_ball)
+  // {
+  //   this->robot_state = State::search_ball;
+  //   search_ball_timer.reset();
+  //   this->search_ball_state = 0;
+  // }
+  // else if (!lost_ball_timer.delayNR(2000))
+  // {
+  //   this->robot_state = State::follow_ball;
+  // }
 
   // if(this->ball.detected && this->robot_state != State::follow_ball)
   // {
