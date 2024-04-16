@@ -44,8 +44,8 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
   new_neck_position.id.push_back(19);
   new_neck_position.id.push_back(20);
 
-  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.5);
-  new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.3);
+  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.0);
+  new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.15);
 
   if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
   else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
