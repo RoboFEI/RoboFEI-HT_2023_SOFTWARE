@@ -28,6 +28,8 @@ NeckNode::NeckNode()
 
   main_timer_ = this->create_wall_timer(
     8ms, std::bind(&NeckNode::main_callback, this), main_thread_);
+
+   lost_ball_timer.reset(); 
 }
 
 NeckNode::~NeckNode()
@@ -39,57 +41,25 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
   ball_pos_px.x = msg->x - 640/2;
   ball_pos_px.y = msg->y - 480/2;
 
-  auto new_neck_position = SetPosition();
+  lost_ball_timer.reset(); 
 
-  new_neck_position.id.push_back(19);
-  new_neck_position.id.push_back(20);
+  // auto new_neck_position = SetPosition();
 
-  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.2);
-  new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.15);
+  // new_neck_position.id.push_back(19);
+  // new_neck_position.id.push_back(20);
 
-  if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
-  else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
-  if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
-  else if(new_neck_position.position[1] < 1200) new_neck_position.position[1] = 1200;
+  // new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.2);
+  // new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.15);
 
-  RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
+  // if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
+  // else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
+  // if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
+  // else if(new_neck_position.position[1] < 1200) new_neck_position.position[1] = 1200;
 
-  set_neck_position_publisher_->publish(new_neck_position);
+  // RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
+  // set_neck_position_publisher_->publish(new_neck_position);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
 {
@@ -112,70 +82,24 @@ void NeckNode::listener_callback_neck(const NeckPosition::SharedPtr msg)
   //RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
 }
 
-void NeckNode::move_head(const enum Side &side, Neck &neck_position)
-{
-  // switch (side)
-  // {
-  // case Side::left:
-  //   neck_position.pan += 10;
-  //   break;
-  
-  // case Side::right:
-  //   neck_position.pan -= 10;
-  //   break;
-
-  // case Side::down:
-  //   neck_position.tilt -= 10;
-  //   break;
-  
-  // case Side::up:
-  //   neck_position.tilt += 10;
-  //   break;
-  // }
-}
-
 void NeckNode::follow_ball()
 {
-  // auto new_neck_position = SetPosition();
+  auto new_neck_position = SetPosition();
 
-  // new_neck_position.id.push_back(19);
-  // new_neck_position.id.push_back(20);
-  
-  // new_neck_position.position.push_back(neck.pan);
-  // new_neck_position.position.push_back(neck.tilt);
+  new_neck_position.id.push_back(19);
+  new_neck_position.id.push_back(20);
 
-  // if(ball.detected)
-  // {
-  //   if(ball.left && neck.pan < 2650)
-  //   {
-  //     this->move_head(Side::left, this->neck);
-  //     RCLCPP_INFO(this->get_logger(), "Move head to left");
+  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.2);
+  new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.15);
 
-  //   }
-  //   else if(ball.right && neck.pan > 1350)
-  //   {
-  //     this->move_head(Side::right, this->neck);
-  //     RCLCPP_INFO(this->get_logger(), "Move head to right");
-  //   }
-    
-  //   if(ball.far && neck.tilt < 2048)
-  //   {
-  //     this->move_head(Side::up, this->neck);
-  //     RCLCPP_INFO(this->get_logger(), "Ball up");
-  //   }
-  //   else if(ball.close && neck.tilt > 1340)
-  //   {
-  //     this->move_head(Side::down, this->neck);
-  //     RCLCPP_INFO(this->get_logger(), "Ball close");
-  //   }
-  //   else RCLCPP_INFO(this->get_logger(), "Centralized ball");
-  // }
-  
+  if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
+  else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
+  if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
+  else if(new_neck_position.position[1] < 1200) new_neck_position.position[1] = 1200;
 
-  // new_neck_position.position[0] = neck.pan;
-  // new_neck_position.position[1] = neck.tilt;
+  RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
-  // set_neck_position_publisher_->publish(new_neck_position);
+  set_neck_position_publisher_->publish(new_neck_position);
 }
 
 uint64_t NeckNode::Millis() {
@@ -186,44 +110,54 @@ uint64_t NeckNode::Millis() {
 void NeckNode::search_ball()
 {
   
-  // if(this->Millis()-this->atual_time > 2000)
-  // {
-  //   auto new_neck_position = SetPosition();
+  if(this->Millis()-this->atual_time > 2000)
+  {
+    auto new_neck_position = SetPosition();
 
-  //   new_neck_position.id.push_back(19);
-  //   new_neck_position.id.push_back(20);
+    new_neck_position.id.push_back(19);
+    new_neck_position.id.push_back(20);
   
-  //   new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][0]);
-  //   new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][1]);
+    new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][0]);
+    new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][1]);
     
-  //   RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
+    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
-  //   set_neck_position_publisher_->publish(new_neck_position);
-  //   this->atual_time = this->Millis();
-  //   this->search_ball_state += 1;
+    set_neck_position_publisher_->publish(new_neck_position);
+    this->atual_time = this->Millis();
+    this->search_ball_state += 1;
 
-  //   if(this->search_ball_state >= 8)
-  //   {
-  //     this->search_ball_state = 0;
-  //   }
-  // }
+    if(this->search_ball_state >= 8)
+    {
+      this->search_ball_state = 0;
+    }
+  }
 }
 
 
 void NeckNode::main_callback()
 {
-  // switch (this->robot_state)
-  // {
-  // case State::follow_ball:
-  //   //RCLCPP_INFO(this->get_logger(), "following the ball");
-  //   this->follow_ball();
-  //   break;
+  switch (this->robot_state)
+  {
+  case State::follow_ball:
+    //RCLCPP_INFO(this->get_logger(), "following the ball");
+    this->follow_ball();
+    break;
 
-  // case State::search_ball:
-  //   //RCLCPP_INFO(this->get_logger(), "Searching the ball");
-  //   this->search_ball();
-  //   break;
-  // }
+  case State::search_ball:
+    //RCLCPP_INFO(this->get_logger(), "Searching the ball");
+    this->search_ball();
+    break;
+  }
+
+  if(lost_ball_timer.delayNR(2000) && this->robot_state == State::follow_ball)
+  {
+    this->robot_state = State::search_ball;
+    this->search_ball_state = 0;
+  }
+  else if (!lost_ball_timer.delayNR(2000))
+  {
+    this->robot_state = State::follow_ball;
+  }
 
   // if(this->ball.detected && this->robot_state != State::follow_ball)
   // {

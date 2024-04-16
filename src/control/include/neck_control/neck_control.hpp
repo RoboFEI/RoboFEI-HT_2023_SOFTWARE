@@ -7,6 +7,8 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "AssyncTimer.hpp"
+
 #include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
 #include "custom_interfaces/msg/set_position.hpp"
@@ -74,10 +76,12 @@ class NeckNode : public rclcpp::Node
     int search_ball_pos[9][2] = {{2270,1300}, {2048, 1300}, {1826, 1300}, {1528, 1550}, {2048, 1550}, {2568, 1550}, {2866, 1800}, {2048, 1800},{1230, 1800}};
     int search_ball_state = 0;
 
+    AssyncTimer lost_ball_timer;
+
+
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_vision_px(const Point2d::SharedPtr msg);
     void listener_callback_neck(const NeckPosition::SharedPtr msg); 
-    void move_head(const enum Side &side, Neck &neck_position);
     void follow_ball();
     void search_ball();
     uint64_t Millis();
