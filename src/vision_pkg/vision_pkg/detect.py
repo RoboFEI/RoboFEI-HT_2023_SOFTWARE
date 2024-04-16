@@ -86,12 +86,13 @@ class BallDetection(Node):
         ball_pos = self.find_ball() # recive [x, y] of ball position
 
         if ball_pos != -1: #if ball was finded
+            ball_pos = self.ball_position_filter(ball_pos, 0) 
+
             ball_px_pos = Point2D()
             ball_px_pos.x = float(ball_pos.x)
             ball_px_pos.y = float(ball_pos.y)
 
             self.ball_px_position_publisher_.publish(ball_px_pos)
-
 
 
     def find_ball(self):
@@ -114,6 +115,10 @@ class BallDetection(Node):
             return ball_pos
 
         return -1
+
+    def ball_position_filter(self, not_filtered_ball_pos, opt):
+        if opt == 0:
+            return not_filtered_ball_pos
 
     def ball_delta_position_threshold(self, new_position, threshold):
         dp = position()
@@ -192,7 +197,6 @@ class BallDetection(Node):
             
             self.ball_position_publisher_.publish(self.ball_info_msg)
             
-
 def main(args=None):
     rclpy.init(args=args)
 
