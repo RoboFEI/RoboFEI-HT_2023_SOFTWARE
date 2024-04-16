@@ -72,7 +72,7 @@ class BallDetection(Node):
             if self.show_divisions:
                 self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
-            self.ball_detection(self.results)
+            self.ball_detection()
             
             
             cv2.imshow('Ball', self.img) # Show image
@@ -82,16 +82,12 @@ class BallDetection(Node):
         results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False)
         return results[0]
 
-    def ball_detection(self, results):
-        ball_pos = self.find_ball() # recive [x, y] of ball position
+    def ball_detection(self):
+        ball_px_pos = self.find_ball() # recive x and y position (Point2D)
 
-        if ball_pos != -1: #if ball was finded
-            ball_pos = self.ball_position_filter(ball_pos, 0) 
-
-            ball_px_pos = Point2D()
-            ball_px_pos.x = float(ball_pos.x)
-            ball_px_pos.y = float(ball_pos.y)
-
+        if ball_px_pos != -1: #if ball was finded
+            ball_px_pos = self.ball_position_filter(ball_px_pos, 0) 
+            
             self.ball_px_position_publisher_.publish(ball_px_pos)
 
 
@@ -100,18 +96,18 @@ class BallDetection(Node):
         
         
         if ball_detection.size > 0:
-            ball_pos = position()
+            ball_pos = Point2D()
 
             ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() #get the most conf ball detect box in xyxy format
             array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
 
-            ball_pos.x = int((array_box_xyxy[0] + array_box_xyxy[2]) / 2)
-            ball_pos.y = int((array_box_xyxy[1] + array_box_xyxy[3]) / 2)
+            ball_pos.x = (array_box_xyxy[0] + array_box_xyxy[2]) / 2
+            ball_pos.y = (array_box_xyxy[1] + array_box_xyxy[3]) / 2
             
             raio_ball       = int((array_box_xyxy[2] - array_box_xyxy[0]) / 2)
 
-            cv2.circle(self.img, (ball_pos.x, ball_pos.y), abs(raio_ball), (255, 0, 0), 2)
-            cv2.circle(self.img, (ball_pos.x, ball_pos.y), 5, (255, 0, 0), -1)
+            cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), abs(raio_ball), (255, 0, 0), 2)
+            cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), 5, (255, 0, 0), -1)
             return ball_pos
 
         return -1
