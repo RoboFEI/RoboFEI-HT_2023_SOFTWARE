@@ -44,13 +44,13 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
   new_neck_position.id.push_back(19);
   new_neck_position.id.push_back(20);
 
-  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.0);
+  new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.2);
   new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.15);
 
   if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
   else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
   if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
-  else if(new_neck_position.position[1] < 1340) new_neck_position.position[1] = 1340;
+  else if(new_neck_position.position[1] < 1200) new_neck_position.position[1] = 1200;
 
   RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
