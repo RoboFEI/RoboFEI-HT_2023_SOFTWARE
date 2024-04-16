@@ -69,7 +69,7 @@ class NeckNode : public rclcpp::Node
 
     BallInformation ball;
     Neck neck;
-    State robot_state = State::search_ball;
+    State robot_state = State::follow_ball;
     BallPositionPx ball_pos_px;
     int cont_lost_ball = 0;
     uint64_t atual_time = this->Millis();
