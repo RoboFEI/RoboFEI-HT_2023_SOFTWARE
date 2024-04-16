@@ -92,10 +92,6 @@ class BallDetection(Node):
 
         self.ball_pos_area_filter(new_ball_pos_area, 1)
 
-        
-        
-
-
     def find_ball(self):
         ball_detection = (self.results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
         
