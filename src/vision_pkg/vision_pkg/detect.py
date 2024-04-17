@@ -75,8 +75,6 @@ class BallDetection(Node):
             
             self.results = self.predict_image(recise_image(self.img, REDUCE_IMG_QLTY)) # predict image 
 
-            self.get_logger().info(f"{self.img.shape}")
-        
             if self.show_divisions:
                 self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
@@ -112,9 +110,6 @@ class BallDetection(Node):
 
             ball_pos.x = float(array_box_xywh[0] * self.img.shape[1])
             ball_pos.y = float(array_box_xywh[1] * self.img.shape[0])
-
-            self.get_logger().info(f"x: {ball_pos.x} | y:{ball_pos.y}")
-            self.get_logger().info(f"XYWH: {self.results.boxes[ball_detection[0]].xywh.numpy() * 100 / REDUCE_IMG_QLTY}")
             
             raio_ball       = int((array_box_xywh[2] * self.img.shape[1] +array_box_xywh[3] * self.img.shape[0]) / 4)
 
