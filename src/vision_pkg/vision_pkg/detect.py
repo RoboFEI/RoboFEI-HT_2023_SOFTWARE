@@ -13,7 +13,7 @@ from vision_msgs.msg import Point2D
 from .submodules.utils import draw_lines, position, recise_image
 from .submodules.ClassConfig import *
 
-REDUCE_IMG_QLTY = 80 #[%]
+REDUCE_IMG_QLTY = 70 #[%]
 
 class BallDetection(Node):
     def __init__(self):
@@ -87,7 +87,7 @@ class BallDetection(Node):
             cv2.waitKey(1)
     
     def predict_image(self, img):
-        results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False, imgsz=img.shape[:2])
+        results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=True, imgsz=img.shape[:2])
         return results[0]
 
     def ball_detection(self):
