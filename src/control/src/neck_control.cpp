@@ -44,7 +44,8 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
 
   lost_ball_timer.reset(); 
 
-  if this->robot_state == State::follow_ball:
+  if( this->robot_state == State::follow_ball)
+  {
     auto new_neck_position = SetPosition();
 
     new_neck_position.id.push_back(19);
@@ -61,6 +62,7 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
     RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
     set_neck_position_publisher_->publish(new_neck_position);
+  }
 }
 
 void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
@@ -82,26 +84,6 @@ void NeckNode::listener_callback_neck(const NeckPosition::SharedPtr msg)
   neck.pan  = msg->position19;
   neck.tilt = msg->position20;
   //RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
-}
-
-void NeckNode::follow_ball()
-{
-  // auto new_neck_position = SetPosition();
-
-  // new_neck_position.id.push_back(19);
-  // new_neck_position.id.push_back(20);
-
-  // new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.2);
-  // new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.15);
-
-  // if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
-  // else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
-  // if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
-  // else if(new_neck_position.position[1] < 1200) new_neck_position.position[1] = 1200;
-
-  // RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
-
-  // set_neck_position_publisher_->publish(new_neck_position);
 }
 
 uint64_t NeckNode::Millis() {
@@ -139,42 +121,22 @@ void NeckNode::main_callback()
 {
   switch (this->robot_state)
   {
-  case State::follow_ball:
-    //RCLCPP_INFO(this->get_logger(), "following the ball");
-    this->follow_ball();
-    break;
-
   case State::search_ball:
     //RCLCPP_INFO(this->get_logger(), "Searching the ball");
     this->search_ball();
     break;
   }
 
-  // if(lost_ball_timer.delayNR(2000) && this->robot_state == State::follow_ball)
-  // {
-  //   this->robot_state = State::search_ball;
-  //   search_ball_timer.reset();
-  //   this->search_ball_state = 0;
-  // }
-  // else if (!lost_ball_timer.delayNR(2000))
-  // {
-  //   this->robot_state = State::follow_ball;
-  // }
-
-  // if(this->ball.detected && this->robot_state != State::follow_ball)
-  // {
-  //   this->robot_state = State::follow_ball;
-  //   this->cont_lost_ball = 0;
-  //   this->search_ball_state = 0;
-  // }
-  // else if(!this->ball.detected && this->robot_state != State::search_ball)
-  // {
-  //   this->cont_lost_ball += 1;
-  // }
-  // if(this->cont_lost_ball > 200)
-  // {
-  //   this->robot_state = State::search_ball;
-  // }
+  if(lost_ball_timer.delayNR(2000) && this->robot_state == State::follow_ball)
+  {
+    this->robot_state = State::search_ball;
+    search_ball_timer.reset();
+    this->search_ball_state = 0;
+  }
+  else if (!lost_ball_timer.delayNR(2000))
+  {
+    this->robot_state = State::follow_ball;
+  }
 }
 
 
