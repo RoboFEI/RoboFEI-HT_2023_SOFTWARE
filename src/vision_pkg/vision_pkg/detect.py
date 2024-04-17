@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+
 import cv2
 from ultralytics import YOLO
 import os
@@ -9,17 +10,22 @@ from math import hypot
 from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
 
-from .submodules.utils import draw_lines, position
+from .submodules.utils import draw_lines, position, recise_image
 from .submodules.ClassConfig import *
+
+REDUCE_IMG_QLTY = 80 #[%]
 
 class BallDetection(Node):
     def __init__(self):
 
         super().__init__("image_topic")
-
+        
+        self.original_dim = np.array([640, 480])
+        self.redued_dim = self.original_dim * REDUCE_IMG_QLTY / 100
+        
         self.cap = cv2.VideoCapture(0)
-        self.cap.set(3, 640)
-        self.cap.set(4, 480)
+        self.cap.set(3, self.original_dim[0])
+        self.cap.set(4, self.original_dim[1])
 
         self.timer = self.create_timer(0.008, self.main_callbalck)
 
@@ -55,7 +61,7 @@ class BallDetection(Node):
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
-        result = self.model(fake_image, device=self.device, verbose=False)
+        result = self.model(fake_image, device=self.device, verbose=False, imgsz=list(self.redued_dim))
         classes = result[0].names
         value_classes = {value: key for key, value in classes.items()}
         return value_classes   
@@ -66,7 +72,10 @@ class BallDetection(Node):
 
 
         if(ret):
-            self.results = self.predict_image(self.img) # predict image 
+            
+            self.results = self.predict_image(recise_image(self.img, REDUCE_IMG_QLTY)) # predict image 
+
+            self.get_logger().info(f"{self.img.shape}")
         
             if self.show_divisions:
                 self.img = draw_lines(self.img, self.config)  #Draw camera divisions
@@ -78,7 +87,7 @@ class BallDetection(Node):
             cv2.waitKey(1)
     
     def predict_image(self, img):
-        results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False)
+        results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False, imgsz=img.shape[:2])
         return results[0]
 
     def ball_detection(self):
@@ -99,7 +108,7 @@ class BallDetection(Node):
         if ball_detection.size > 0:
             ball_pos = Point2D()
 
-            ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() #get the most conf ball detect box in xyxy format
+            ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() * 100 / REDUCE_IMG_QLTY  #get the most conf ball detect box in xyxy format
             array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
 
             ball_pos.x = (array_box_xyxy[0] + array_box_xyxy[2]) / 2
