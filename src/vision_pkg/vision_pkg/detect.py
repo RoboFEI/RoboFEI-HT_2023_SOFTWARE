@@ -87,7 +87,7 @@ class BallDetection(Node):
             cv2.waitKey(1)
     
     def predict_image(self, img):
-        results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=True, imgsz=img.shape[:2])
+        results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False, imgsz=img.shape[:2])
         return results[0]
 
     def ball_detection(self):
@@ -108,13 +108,16 @@ class BallDetection(Node):
         if ball_detection.size > 0:
             ball_pos = Point2D()
 
-            ball_box_xyxy = self.results.boxes[ball_detection[0]].xyxy.numpy() * 100 / REDUCE_IMG_QLTY  #get the most conf ball detect box in xyxy format
-            array_box_xyxy = np.reshape(ball_box_xyxy, -1)  #convert matriz to array
+            ball_box_xywh = self.results.boxes[ball_detection[0]].xywh.numpy() * 100 / REDUCE_IMG_QLTY  #get the most conf ball detect box in xyxy format
+            array_box_xywh = np.reshape(ball_box_xywh, -1)  #convert matriz to array
 
-            ball_pos.x = (array_box_xyxy[0] + array_box_xyxy[2]) / 2
-            ball_pos.y = (array_box_xyxy[1] + array_box_xyxy[3]) / 2
+            ball_pos.x = float(array_box_xywh[0])
+            ball_pos.y = float(array_box_xywh[1])
+
+            self.get_logger().info(f"x: {ball_pos.x} | y:{ball_pos.y}")
+            self.get_logger().info(f"XYWH: {self.results.boxes[ball_detection[0]].xywh.numpy() * 100 / REDUCE_IMG_QLTY}")
             
-            raio_ball       = int((array_box_xyxy[2] - array_box_xyxy[0]) / 2)
+            raio_ball       = int((array_box_xywh[2]+array_box_xywh[3]) / 4)
 
             cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), abs(raio_ball), (255, 0, 0), 2)
             cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), 5, (255, 0, 0), -1)
