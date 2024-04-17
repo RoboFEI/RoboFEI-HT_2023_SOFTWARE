@@ -104,20 +104,19 @@ class BallDetection(Node):
     def find_ball(self):
         ball_detection = (self.results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
         
-        
         if ball_detection.size > 0:
             ball_pos = Point2D()
 
-            ball_box_xywh = self.results.boxes[ball_detection[0]].xywh.numpy() * 100 / REDUCE_IMG_QLTY  #get the most conf ball detect box in xyxy format
+            ball_box_xywh = self.results.boxes[ball_detection[0]].xywhn.numpy() #get the most conf ball detect box in xyxy format
             array_box_xywh = np.reshape(ball_box_xywh, -1)  #convert matriz to array
 
-            ball_pos.x = float(array_box_xywh[0])
-            ball_pos.y = float(array_box_xywh[1])
+            ball_pos.x = float(array_box_xywh[0] * self.img.shape[1])
+            ball_pos.y = float(array_box_xywh[1] * self.img.shape[0])
 
             self.get_logger().info(f"x: {ball_pos.x} | y:{ball_pos.y}")
             self.get_logger().info(f"XYWH: {self.results.boxes[ball_detection[0]].xywh.numpy() * 100 / REDUCE_IMG_QLTY}")
             
-            raio_ball       = int((array_box_xywh[2]+array_box_xywh[3]) / 4)
+            raio_ball       = int((array_box_xywh[2] * self.img.shape[1] +array_box_xywh[3] * self.img.shape[0]) / 4)
 
             cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), abs(raio_ball), (255, 0, 0), 2)
             cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), 5, (255, 0, 0), -1)
