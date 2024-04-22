@@ -86,7 +86,6 @@ class NeckNode : public rclcpp::Node
     void listener_callback_vision_px(const Point2d::SharedPtr msg);
     void listener_callback_neck(const NeckPosition::SharedPtr msg); 
     void search_ball();
-    uint64_t Millis();
     void main_callback();
        
 

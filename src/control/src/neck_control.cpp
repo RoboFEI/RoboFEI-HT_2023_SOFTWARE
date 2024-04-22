@@ -93,11 +93,6 @@ void NeckNode::listener_callback_neck(const NeckPosition::SharedPtr msg)
   //RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
 }
 
-uint64_t NeckNode::Millis() {
-  using namespace std::chrono;
-  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-}
-
 void NeckNode::search_ball()
 {
   
