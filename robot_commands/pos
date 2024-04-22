@@ -1,0 +1,83 @@
+#!/bin/bash
+
+cd ~/RoboFEI-HT_2023_SOFTWARE
+clear
+source install/setup.bash
+
+if [ -z $1 ]; then
+	echo 'Lista de movimentos:'
+	echo 'Movimento 1- Stand Still'
+	echo 'Movimento 2- Greeting'
+	echo 'Movimento 3- Right Kick'
+	echo 'Movimento 4- Left Kick'
+	echo 'Movimento 5- Turn Right'
+	echo 'Movimento 6- Turn Left'
+	echo 'Movimento 7- Goodbye'
+	echo 'Movimento 8- Search Ball'
+	echo 'Movimento 13- Goalkeeper Middle'
+	echo 'Movimento 14- Walking'
+	echo 'Movimento 15- Gait'
+	echo 'Movimento 16- Stand Up Back'
+	echo 'Movimento 17- Stand Up Front'
+	echo 'Movimento 18- Stand Up Left'
+	echo 'Movimento 19- Stand Up Right'
+	read n
+	clear
+	if [ $n = 1 ]; then
+		echo '1- Stand Still'
+		echo ''
+	fi
+	if [ $n = 2 ]; then
+		echo '2- Greeting'
+		echo ''
+	fi
+	if [ $n = 3 ]; then
+		echo '3- Right Kick'
+		echo ''
+	fi
+	if [ $n = 4 ]; then
+		echo '4- Left Kick'
+		echo ''
+	fi
+	if [ $n = 5 ]; then
+		echo '5- Turn Right'
+		echo ''
+	fi
+	if [ $n = 6 ]; then
+		echo '6- Turn Left'
+		echo ''
+	fi
+	if [ $n = 7 ]; then
+		echo '7- Goodbye'
+		echo ''
+	fi
+	if [ $n = 8 ]; then
+		echo '8- Search Ball'
+		echo ''
+	fi
+	if [ $n = 13 ]; then
+		echo '13- Goalkeeper Middle'
+		echo ''
+	fi
+	if [ $n = 14 ]; then
+		echo '14- Walking'
+		echo ''
+	fi
+	if [ $n = 15 ]; then
+		echo '15- Gait'
+		echo ''
+	fi
+	if [ $n = 16 ]; then
+		echo '16- Stand Up Back'
+		echo ''
+	fi
+	if [ $n = 17 ]; then
+		echo '16- Stand Up Front'
+		echo ''
+	fi
+else
+	 n=$1  
+
+fi
+
+ros2 action send_goal  /control_action custom_interfaces/action/Control "{action_number: $n}"

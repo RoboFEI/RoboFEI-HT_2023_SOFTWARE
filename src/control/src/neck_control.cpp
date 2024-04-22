@@ -31,6 +31,13 @@ NeckNode::NeckNode()
 
    lost_ball_timer.reset(); 
    search_ball_timer.reset();
+
+  this->declare_parameter("x_p_gain", 0.4);
+  this->declare_parameter("y_p_gain", 0.25);
+
+  this->get_parameter("x_p_gain", x_p_gain);
+  this->get_parameter("y_p_gain", y_p_gain);
+  
 }
 
 NeckNode::~NeckNode()
@@ -51,8 +58,8 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
     new_neck_position.id.push_back(19);
     new_neck_position.id.push_back(20);
 
-    new_neck_position.position.push_back(neck.pan - ball_pos_px.x * 0.2);
-    new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * 0.15);
+    new_neck_position.position.push_back(neck.pan - ball_pos_px.x * x_p_gain); // 0.2
+    new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * y_p_gain); //0.15
 
     if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
     else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;

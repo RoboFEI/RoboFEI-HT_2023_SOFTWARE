@@ -78,9 +78,10 @@ class NeckNode : public rclcpp::Node
 
     AssyncTimer lost_ball_timer;
     AssyncTimer search_ball_timer;
+
+    float x_p_gain;
+    float y_p_gain;
     
-
-
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_vision_px(const Point2d::SharedPtr msg);
     void listener_callback_neck(const NeckPosition::SharedPtr msg); 

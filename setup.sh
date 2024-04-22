@@ -74,47 +74,48 @@ echo -e "${blue} setup new rules for usb names${NC}"
 
 #Bind Comand
 echo -e "${blue} commands setup${NC}"
-    #goalkeeper fast conection 
-    sudo rm /usr/local/bin/gol
-    sudo touch /usr/local/bin/gol && sudo chmod 777 /usr/local/bin/gol
-    echo -e "${bashshel}\n\nssh -X robo@192.168.7.2" >> /usr/local/bin/gol 
+
+    #Run Robot
+    sudo rm /usr/local/bin/robot_bringup
+    sudo cp robot_commands/robot_bringup /usr/local/bin && sudo chmod 777 /usr/local/bin/robot_bringup
+
+    #Send movements
+    sudo rm /usr/local/bin/pos
+    sudo cp robot_commands/pos /usr/local/bin && sudo chmod 777 /usr/local/bin/pos
+
+    #Robot ssh fast conection 
+    sudo rm /usr/local/bin/connect
+    sudo cp robot_commands/connect /usr/local/bin && sudo chmod 777 /usr/local/bin/connect
 
     #Comand for compile 
     sudo rm /usr/local/bin/compile
-    sudo touch /usr/local/bin/compile && sudo chmod 777 /usr/local/bin/compile
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \ncolcon build --symlink-install \nsource install/setup.bash" >> /usr/local/bin/compile 
+    sudo cp robot_commands/compile /usr/local/bin && sudo chmod 777 /usr/local/bin/compile
 
     #Comand for run IMU
     sudo rm /usr/local/bin/imu
-    sudo touch /usr/local/bin/imu && sudo chmod 777 /usr/local/bin/imu
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run um7 um7_node" >> /usr/local/bin/imu 
+    sudo cp robot_commands/imu /usr/local/bin && sudo chmod 777 /usr/local/bin/imu
 
     #Comand for run control
     sudo rm /usr/local/bin/control
-    sudo touch /usr/local/bin/control && sudo chmod 777 /usr/local/bin/control
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 launch control action.launch.py" >> /usr/local/bin/control
+    sudo cp robot_commands/control /usr/local/bin && sudo chmod 777 /usr/local/bin/control
 
     #Comand for run vision
     sudo rm /usr/local/bin/vision
-    sudo touch /usr/local/bin/vision && sudo chmod 777 /usr/local/bin/vision
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run vision_yolov7 detect" >> /usr/local/bin/vision
+    sudo cp robot_commands/vision /usr/local/bin && sudo chmod 777 /usr/local/bin/vision
 
     #Comand for run decision
     sudo rm /usr/local/bin/decision
-    sudo touch /usr/local/bin/decision && sudo chmod 777 /usr/local/bin/decision
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run decision_pkg decision_node" >> /usr/local/bin/decision
+    sudo cp robot_commands/decision /usr/local/bin && sudo chmod 777 /usr/local/bin/decision
 
     #Comand for run Gamecontroller
     sudo rm /usr/local/bin/gamecontroller
-    sudo touch /usr/local/bin/gamecontroller && sudo chmod 777 /usr/local/bin/gamecontroller
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run game_controller connect" >> /usr/local/bin/gamecontroller
+    sudo cp robot_commands/gamecontroller /usr/local/bin && sudo chmod 777 /usr/local/bin/gamecontroller
 
     #Comand for run motors
     sudo rm /usr/local/bin/motors
-    sudo touch /usr/local/bin/motors && sudo chmod 777 /usr/local/bin/motors
-    echo -e "${bashshel} \n\ncd ~/RoboFEI-HT_2023_SOFTWARE \nsource install/setup.bash \nros2 run dynamixel_sdk_examples read_write_node" >> /usr/local/bin/motors
+    sudo cp robot_commands/motors /usr/local/bin && sudo chmod 777 /usr/local/bin/motors
 
-    sudo chown root: /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors
+    sudo chown root: /usr/local/bin/pos /usr/local/bin/connect /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors 
 
 echo -e "${blue} Instaling Softwares${NC}"
     sudo apt update && sudo apt upgrade && sudo apt install snapd -y
