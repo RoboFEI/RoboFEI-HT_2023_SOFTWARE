@@ -3,6 +3,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     ld = LaunchDescription()
+    
     control = Node(
         package="control",
         executable="control",
@@ -50,5 +51,7 @@ def generate_launch_description():
     ld.add_action(vision_node)
     ld.add_action(gamecontroller)
     ld.add_action(motors)
+    ld.add_action(imu)
+    
     
     return ld

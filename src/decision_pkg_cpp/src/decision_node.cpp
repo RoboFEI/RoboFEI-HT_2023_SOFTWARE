@@ -144,7 +144,7 @@ void DecisionNode::send_goal(const Move &order)
   {
     if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
     {
-      if(goal_handle_ != nullptr)
+      if(goal_handle_ != nullptr && !robot.finished_move)
       {
         auto goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle_);
         goal_handle_future_.wait_for(1500ms);

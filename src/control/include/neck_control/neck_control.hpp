@@ -72,7 +72,6 @@ class NeckNode : public rclcpp::Node
     State robot_state = State::follow_ball;
     BallPositionPx ball_pos_px;
     int cont_lost_ball = 0;
-    uint64_t atual_time = this->Millis();
     int search_ball_pos[9][2] = {{2270,1300}, {2048, 1300}, {1826, 1300}, {1528, 1550}, {2048, 1550}, {2568, 1550}, {2866, 1800}, {2048, 1800},{1230, 1800}};
     int search_ball_state = 0;
 
