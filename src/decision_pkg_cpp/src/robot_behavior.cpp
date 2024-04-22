@@ -77,17 +77,18 @@ void RobotBehavior::player_normal_game() // fazer
     switch (robot.state)
     {
     case searching_ball:
+        RCLCPP_INFO(this->get_logger(), "Searching ball");
         if(ball_found()) robot.state = aligning_with_the_ball; // conferir
         else if(lost_ball_timer.delay(MAX_LOST_BALL_TIME)) turn_to_ball();
         else send_goal(gait);
         break;
     
     case aligning_with_the_ball:
+        RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
     //     if(robot_align_with_the_ball()) robot.state = ball_approach; // fazer
-    //     else if(vision_stable()) turn_to_ball();
+    //     else if(ball_is_locked()) turn_to_ball();
     //     else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-    //     break;
-
+    
         if(!robot.camera_ball_position.detected) robot.state = searching_ball;
         break;
 
@@ -120,12 +121,12 @@ bool RobotBehavior::ball_found() // feito locked on ball
     if(robot.camera_ball_position.detected)
     {
         lost_ball_timer.reset();
-        if(vision_stable()) return true;
+        if(ball_is_locked()) return true;
     }
     return false;
 }
 
-bool RobotBehavior::vision_stable()// feito
+bool RobotBehavior::ball_is_locked()// feito  vision_stable 
 {
     if(ball_in_camera_center() || ball_in_robot_limits())
     {
