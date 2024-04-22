@@ -78,7 +78,7 @@ void RobotBehavior::player_normal_game() // fazer
     {
     case searching_ball:
         RCLCPP_INFO(this->get_logger(), "Searching ball");
-        if(ball_found()) robot.state = aligning_with_the_ball; // conferir
+        if(ball_is_locked()) robot.state = aligning_with_the_ball; // conferir
         else if(lost_ball_timer.delay(MAX_LOST_BALL_TIME)) turn_to_ball();
         else send_goal(gait);
         break;
@@ -116,17 +116,17 @@ bool RobotBehavior::centered_neck() // feito
     return abs(robot.neck_pos.position19 - NECK_TILT_CENTER) < NECK_CENTER_TH;
 }
 
-bool RobotBehavior::ball_found() // feito locked on ball
+bool RobotBehavior::ball_is_locked() // feito locked on ball ball_found
 {
     if(robot.camera_ball_position.detected)
     {
         lost_ball_timer.reset();
-        if(ball_is_locked()) return true;
+        if(vision_stable()) return true;
     }
     return false;
 }
 
-bool RobotBehavior::ball_is_locked()// feito  vision_stable 
+bool RobotBehavior::vision_stable()// feito   
 {
     if(ball_in_camera_center() || ball_in_robot_limits())
     {
