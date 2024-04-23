@@ -78,9 +78,13 @@ void RobotBehavior::player_normal_game() // fazer
     {
     case searching_ball:
         RCLCPP_INFO(this->get_logger(), "Searching ball");
-        if(ball_is_locked()) robot.state = aligning_with_the_ball; // conferir
-        else if(lost_ball_timer.delay(MAX_LOST_BALL_TIME)) turn_to_ball();
-        else send_goal(gait);
+        if(ball_is_locked())
+        {
+            robot.state = aligning_with_the_ball; // conferir
+            send_goal(gait); //gait
+        }
+        else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) turn_to_ball();
+        else send_goal(gait); // gait
         break;
     
     case aligning_with_the_ball:
@@ -116,7 +120,7 @@ bool RobotBehavior::centered_neck() // feito
     return abs(robot.neck_pos.position19 - NECK_TILT_CENTER) < NECK_CENTER_TH;
 }
 
-bool RobotBehavior::ball_is_locked() // feito locked on ball ball_found
+bool RobotBehavior::ball_is_locked() // feito 
 {
     if(robot.camera_ball_position.detected)
     {
@@ -136,17 +140,21 @@ bool RobotBehavior::vision_stable()// feito
     return false;
 }
 
-void RobotBehavior::detect_ball_position() // feito
+void RobotBehavior::detect_ball_position() // Não Funciona centro e direita
 {
+    RCLCPP_INFO(this->get_logger(), "debug 1: centered_neck %d", centered_neck());
+    RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_left %d", neck_to_left());
+    RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_right %d", neck_to_right());
+    
     if(centered_neck()) robot.ball_position = center;
     else if(neck_to_left()) robot.ball_position = left;
     else if(neck_to_right()) robot.ball_position = right;
     RCLCPP_INFO(this->get_logger(), "ball side %d", robot.ball_position);
 }
 
-bool RobotBehavior::neck_to_right() // feito
+bool RobotBehavior::neck_to_right() // feito ajustar parametros
 {
-    return (NECK_RIGHT_LIMIT - NECK_RIGHT_TH) > robot.neck_pos.position19;
+    return (NECK_RIGHT_LIMIT + NECK_RIGHT_TH) > robot.neck_pos.position19;
 }
 
 bool RobotBehavior::neck_to_left() // feito
