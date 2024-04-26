@@ -1,14 +1,15 @@
 #include "decision_pkg_cpp/robot_behavior.hpp"
 #include "decision_node.cpp"
 
+#define NECK_TILT_CENTER 2048
+#define NECK_CENTER_TH 185
 #define NECK_LEFT_LIMIT 2650
-#define NECK_LEFT_TH 400
+#define NECK_LEFT_TH (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH))
 #define NECK_RIGHT_LIMIT 1350
-#define NECK_RIGHT_TH 400
+#define NECK_RIGHT_TH (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT
 #define NECK_CLOSE_LIMIT 1340
 #define LIMIT_TH 40
-#define NECK_TILT_CENTER 2048
-#define NECK_CENTER_TH 40
+
 
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
 
@@ -89,6 +90,7 @@ void RobotBehavior::player_normal_game() // fazer
     
     case aligning_with_the_ball:
         RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
+        ball_is_locked();
     //     if(robot_align_with_the_ball()) robot.state = ball_approach; // fazer
     //     else if(ball_is_locked()) turn_to_ball();
     //     else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
@@ -115,8 +117,11 @@ void RobotBehavior::turn_to_ball()
     if(robot.ball_position == right) send_goal(turn_right);
 }
 
-bool RobotBehavior::centered_neck() // feito
+bool RobotBehavior::centered_neck() // feito nn funciona
 {
+    RCLCPP_INFO(this->get_logger(), "debug 2: neck center  %d", abs(robot.neck_pos.position19 - NECK_TILT_CENTER));
+    RCLCPP_INFO(this->get_logger(), "debug 2: neck center th  %d", NECK_CENTER_TH);
+    
     return abs(robot.neck_pos.position19 - NECK_TILT_CENTER) < NECK_CENTER_TH;
 }
 
@@ -157,7 +162,7 @@ bool RobotBehavior::neck_to_right() // feito ajustar parametros
     return (NECK_RIGHT_LIMIT + NECK_RIGHT_TH) > robot.neck_pos.position19;
 }
 
-bool RobotBehavior::neck_to_left() // feito
+bool RobotBehavior::neck_to_left() // feito errado
 {
     return (NECK_LEFT_LIMIT - NECK_LEFT_TH) < robot.neck_pos.position19;
 }
@@ -180,7 +185,7 @@ bool RobotBehavior::ball_in_right_limit() // feito
     return abs(robot.neck_pos.position19 - NECK_RIGHT_LIMIT) < LIMIT_TH;
 }
 
-bool RobotBehavior::ball_in_left_limit() // feito
+bool RobotBehavior::ball_in_left_limit() // feito 
 {
     return abs(robot.neck_pos.position19 - NECK_LEFT_LIMIT) < LIMIT_TH;
 }

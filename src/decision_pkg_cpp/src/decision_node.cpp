@@ -5,6 +5,8 @@ using namespace std::chrono_literals;
 #define FALL_ACCEL_TH 7.0
 #define FALSES_FALLEN_TH 30
 
+#define ONLY_NECK true
+
 DecisionNode::DecisionNode() : Node("decision_node")
 {
     RCLCPP_INFO(this->get_logger(), "Running Decision Node"); 
@@ -128,7 +130,7 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
 void DecisionNode::send_goal(const Move &order)
 {
   // this->main_timer_->cancel();
-
+  if(ONLY_NECK) return;
   auto goal_msg = ControlActionMsg::Goal();
 
   if (!this->action_client_->wait_for_action_server()) {
