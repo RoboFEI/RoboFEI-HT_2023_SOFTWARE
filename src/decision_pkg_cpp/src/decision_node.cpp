@@ -225,7 +225,7 @@ void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & resu
       return;
   }
   robot.finished_move = true;
-  // RCLCPP_INFO(this->get_logger(), "Goal finish");
+  RCLCPP_INFO(this->get_logger(), "Goal finish");
 }
 
 // int main(int argc, char * argv[])

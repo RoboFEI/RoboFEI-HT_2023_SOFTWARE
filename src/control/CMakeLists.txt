@@ -25,6 +25,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp_action REQUIRED)
+
 include_directories(${CURSES_INCLUDE_DIR})
 
 find_library(LIBRT rt) 
@@ -72,6 +73,20 @@ set(CMAKE_C_FLAGS " -lncurses")
 #  Curses
 #)
 #target_link_libraries(action ${CURSES_LIBRARY})
+
+add_executable(robot_joy_control src/robot_joy_control.cpp)
+ament_target_dependencies(robot_joy_control
+  rclcpp
+  rclcpp_action
+
+  sensor_msgs
+
+  custom_interfaces
+)
+
+install(TARGETS
+  robot_joy_control
+  DESTINATION lib/${PROJECT_NAME})
 
 #Neck control definitions
 add_executable(neck_control src/neck_control.cpp)
