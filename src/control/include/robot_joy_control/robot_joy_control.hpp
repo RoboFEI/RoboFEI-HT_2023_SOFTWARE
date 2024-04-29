@@ -63,7 +63,7 @@ class JoyRobotNode : public rclcpp::Node
         bool finished_move = true;
 
         JoyMsg joy_info;
-        bool gait_mode = true;
+        bool gait_mode = false;
 
 };
 

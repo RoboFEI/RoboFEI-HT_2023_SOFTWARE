@@ -48,18 +48,19 @@ void JoyRobotNode::button_reactions(const JoyMsg old_joy_info, const JoyMsg new_
 {
     if((new_joy_info.buttons[SELECT] != old_joy_info.buttons[SELECT]) && new_joy_info.buttons[SELECT])
     {
-        gait_mode = !gait_mode;
-        RCLCPP_INFO(this->get_logger(), "Gait Mode: %d", gait_mode);
+      gait_mode = !gait_mode;
+      RCLCPP_INFO(this->get_logger(), "Gait Mode: %d", gait_mode);
     }   
 
 
     if(new_joy_info.buttons[A_BUTTON])
     {
-        send_goal(stand_still); 
-        gait_mode = false;
+      send_goal(stand_still); 
+      gait_mode = false;
     } 
     else if(new_joy_info.buttons[X_BUTTON]) send_goal(left_kick); // Left kick
     else if(new_joy_info.buttons[B_BUTTON]) send_goal(right_kick); // Right kick
+    else if(new_joy_info.buttons[Y_BUTTON]) send_goal(goodbye);
     else if(new_joy_info.axes[LS_VERTICAL] > 0.90)  send_goal(walk);
     else if(new_joy_info.axes[LS_VERTICAL] < -0.90) RCLCPP_INFO(this->get_logger(), "send walk back");
     else if(new_joy_info.axes[LS_HORIZONTAL] > 0.90) RCLCPP_INFO(this->get_logger(), "send walk left side");
