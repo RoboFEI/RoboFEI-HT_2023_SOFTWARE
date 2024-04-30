@@ -93,15 +93,15 @@ void RobotBehavior::player_normal_game() // fazer
     case aligning_with_the_ball:
         RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
         ball_is_locked();
-    //     if(robot_align_with_the_ball()) robot.state = ball_approach; // fazer
-    //     else if(ball_is_locked()) turn_to_ball();
-    //     else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-    
-        if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        if(robot_align_with_the_ball()) robot.state = ball_approach; // testar
+        else if(ball_is_locked()) turn_to_ball();
+        else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
         break;
 
-    // case ball_approach:
-    //     break;
+    case ball_approach:
+        send_goal(walk);
+        break;
+
     default:
         break;
     }
@@ -109,7 +109,7 @@ void RobotBehavior::player_normal_game() // fazer
 
 bool RobotBehavior::robot_align_with_the_ball() // fazer a parte de virar para a posição da bola
 {
-    if(ball_in_camera_center() && centered_neck()) return true;
+    if(ball_in_camera_center() && full_centered_neck()) return true;
     return false;
 }
 
@@ -118,6 +118,12 @@ void RobotBehavior::turn_to_ball()
     if(robot.ball_position == left) send_goal(turn_left);
     if(robot.ball_position == right) send_goal(turn_right);
 }
+
+bool RobotBehavior::full_centered_neck()
+{
+    return abs(robot.neck_pos.position19 - NECK_TILT_CENTER) < 50;
+}
+
 
 bool RobotBehavior::centered_neck() // feito nn funciona
 {

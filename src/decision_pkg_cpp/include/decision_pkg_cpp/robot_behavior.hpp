@@ -26,6 +26,7 @@ class RobotBehavior : public DecisionNode
         bool ball_in_close_limit();
         bool robot_align_with_the_ball();
         bool centered_neck();
+        bool full_centered_neck();
         void detect_ball_position();
         bool neck_to_left();
         bool neck_to_right();

@@ -76,7 +76,7 @@ class DecisionNode : public rclcpp::Node
 
         GoalHandleControl::SharedPtr goal_handle_;
 
-        bool only_neck_;
+        bool body_activate_;
 
 };
 
