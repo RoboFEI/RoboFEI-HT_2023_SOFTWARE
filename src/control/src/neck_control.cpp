@@ -1,3 +1,5 @@
+// ros2 run control neck_control --ros-args -p only_body:=true
+
 #include "neck_control/neck_control.hpp"
 
 
@@ -37,6 +39,10 @@ NeckNode::NeckNode()
 
   this->get_parameter("x_p_gain", x_p_gain);
   this->get_parameter("y_p_gain", y_p_gain);
+
+  only_body_ = this->declare_parameter("only_body", false);
+  RCLCPP_INFO(this->get_logger(), "only body %d", only_body_);
+
   
 }
 
@@ -68,7 +74,7 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
 
     RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
-    if(!ONLY_BODY) set_neck_position_publisher_->publish(new_neck_position);
+    if(!only_body_) set_neck_position_publisher_->publish(new_neck_position);
   }
 }
 
@@ -108,7 +114,7 @@ void NeckNode::search_ball()
     
     RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.position[0], new_neck_position.position[1]);
 
-    if(!ONLY_BODY) set_neck_position_publisher_->publish(new_neck_position);
+    if(!only_body_) set_neck_position_publisher_->publish(new_neck_position);
     this->search_ball_state += 1;
 
     if(this->search_ball_state >= 8)

@@ -24,8 +24,6 @@ ament_target_dependencies(decision
   sensor_msgs
 )
 
-
-
 add_executable(robot_behavior src/robot_behavior.cpp)
 ament_target_dependencies(robot_behavior
   rclcpp
