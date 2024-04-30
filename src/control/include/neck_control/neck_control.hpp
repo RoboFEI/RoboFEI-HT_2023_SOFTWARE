@@ -81,7 +81,7 @@ class NeckNode : public rclcpp::Node
     float x_p_gain;
     float y_p_gain;
 
-    bool only_body_;
+    bool neck_activate_;
     
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_vision_px(const Point2d::SharedPtr msg);

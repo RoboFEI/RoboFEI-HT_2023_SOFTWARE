@@ -40,10 +40,8 @@ NeckNode::NeckNode()
   this->get_parameter("x_p_gain", x_p_gain);
   this->get_parameter("y_p_gain", y_p_gain);
 
-  only_body_ = this->declare_parameter("only_body", false);
-  RCLCPP_INFO(this->get_logger(), "only body %d", only_body_);
-
-  
+  neck_activate_ = this->declare_parameter("neck_activate", true);
+  RCLCPP_INFO(this->get_logger(), "neck activate %d", neck_activate_);
 }
 
 NeckNode::~NeckNode()
@@ -74,7 +72,7 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
 
     RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 
-    if(!only_body_) set_neck_position_publisher_->publish(new_neck_position);
+    if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
   }
 }
 
@@ -114,7 +112,8 @@ void NeckNode::search_ball()
     
     RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.position[0], new_neck_position.position[1]);
 
-    if(!only_body_) set_neck_position_publisher_->publish(new_neck_position);
+    if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
+
     this->search_ball_state += 1;
 
     if(this->search_ball_state >= 8)

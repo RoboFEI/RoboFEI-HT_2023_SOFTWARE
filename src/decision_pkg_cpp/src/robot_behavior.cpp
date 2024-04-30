@@ -1,3 +1,5 @@
+// ros2 run decision_pkg_cpp decision --ros-args -p body_activate_:=false
+
 #include "decision_pkg_cpp/robot_behavior.hpp"
 #include "decision_node.cpp"
 

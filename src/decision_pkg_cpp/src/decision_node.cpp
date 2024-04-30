@@ -1,5 +1,3 @@
-// ros2 run decision_pkg_cpp decision --ros-args -p only_neck:=false
-
 #include "decision_pkg_cpp/decision_node.hpp"
 
 using namespace std::chrono_literals;
@@ -58,7 +56,7 @@ DecisionNode::DecisionNode() : Node("decision_node")
     
     goal_handle_ = nullptr;
 
-    only_neck_ = this->declare_parameter("only_neck", false);
+    body_activate_ = this->declare_parameter("body_activate", true);
 }
 
 DecisionNode::~DecisionNode()
@@ -130,7 +128,7 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
 
 void DecisionNode::send_goal(const Move &order)
 {
-  if(only_neck_) return;
+  if(!body_activate_) return;
   auto goal_msg = ControlActionMsg::Goal();
 
   if (!this->action_client_->wait_for_action_server()) {

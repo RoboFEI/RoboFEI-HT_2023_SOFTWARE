@@ -1,0 +1,3 @@
+/neck_node:
+  ros__parameters:
+    neck_activate: false
