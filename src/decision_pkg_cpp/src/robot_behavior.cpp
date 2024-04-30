@@ -99,7 +99,9 @@ void RobotBehavior::player_normal_game() // fazer
         break;
 
     case ball_approach:
-        send_goal(walk);
+        if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        else send_goal(walk);
         break;
 
     default:
@@ -109,8 +111,11 @@ void RobotBehavior::player_normal_game() // fazer
 
 bool RobotBehavior::robot_align_with_the_ball() // fazer a parte de virar para a posição da bola
 {
-    if(ball_in_camera_center() && full_centered_neck()) return true;
-    return false;
+    if(ball_in_camera_center())
+    {
+        if(robot.state == ball_approach) return centered_neck();
+        else return full_centered_neck();
+    }
 }
 
 void RobotBehavior::turn_to_ball()
