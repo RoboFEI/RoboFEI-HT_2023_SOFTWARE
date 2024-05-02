@@ -26,6 +26,7 @@ class BallDetection(Node):
         self.cap = cv2.VideoCapture(0)
         self.cap.set(3, self.original_dim[0])
         self.cap.set(4, self.original_dim[1])
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         self.timer = self.create_timer(0.008, self.main_callbalck)
 
