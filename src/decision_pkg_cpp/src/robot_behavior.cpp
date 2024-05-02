@@ -175,7 +175,7 @@ bool RobotBehavior::neck_to_right() // feito ajustar parametros
     return (NECK_RIGHT_LIMIT + NECK_RIGHT_TH) > robot.neck_pos.position19;
 }
 
-bool RobotBehavior::neck_to_left() // feito errado
+bool RobotBehavior::neck_to_left() // feito
 {
     return (NECK_LEFT_LIMIT - NECK_LEFT_TH) < robot.neck_pos.position19;
 }

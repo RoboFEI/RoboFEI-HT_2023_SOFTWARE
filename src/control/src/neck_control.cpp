@@ -34,8 +34,8 @@ NeckNode::NeckNode()
    lost_ball_timer.reset(); 
    search_ball_timer.reset();
 
-  this->declare_parameter("x_p_gain", 0.4);
-  this->declare_parameter("y_p_gain", 0.25);
+  this->declare_parameter("x_p_gain", 0.7);
+  this->declare_parameter("y_p_gain", 0.35);
 
   this->get_parameter("x_p_gain", x_p_gain);
   this->get_parameter("y_p_gain", y_p_gain);
