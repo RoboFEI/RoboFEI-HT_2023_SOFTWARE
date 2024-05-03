@@ -17,7 +17,8 @@ def generate_launch_description():
     control = Node(
         package="control",
         executable="control",
-        output = 'screen'
+        output = 'screen',
+        parameters = [control_config]
     )
 
     gait = Node(
