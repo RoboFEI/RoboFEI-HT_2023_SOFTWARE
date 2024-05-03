@@ -10,7 +10,7 @@ uint8 GAMESTATE_READY=1
 uint8 GAMESTATE_SET=2
 uint8 GAMESTATE_PLAYING=3
 uint8 GAMESTATE_FINISHED=4
-uint8 game_state
+uint8 game_state 3
 
 # Secondary state, penaltyshoot is penalty shootout at the end of the game,
 # penaltykick is a kick during the game
@@ -24,7 +24,7 @@ uint8 STATE_PENALTYKICK = 6
 uint8 STATE_CORNER_KICK = 7
 uint8 STATE_GOAL_KICK = 8
 uint8 STATE_THROW_IN = 9
-uint8 secondary_state
+uint8 secondary_state 0
 
 # For newest version of game controller
 # Tells which team has the free kick or penalty kick

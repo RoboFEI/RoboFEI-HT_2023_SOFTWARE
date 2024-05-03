@@ -384,7 +384,8 @@ class DecisionNode(Node):
                             self.save_ball_left = False
                             self.save_ball_right = False
                             self.get_logger().info('BALL DETECTED')
-                            if(self.BALL_FAR)
+                            if(self.BALL_FAR):
+                                pass
 
                             #CONTINUAR DAQUI
 

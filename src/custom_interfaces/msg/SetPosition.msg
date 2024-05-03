@@ -1,3 +1,3 @@
 # Messages
-int32[] id
+uint8[] id
 int32[] position

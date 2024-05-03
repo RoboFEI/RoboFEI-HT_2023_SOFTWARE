@@ -34,30 +34,36 @@ class DecisionNode(Node):
     def __init__(self):
         super().__init__('decision_node')
         self.get_logger().info('Running Decision Node')
+        
         # Subscriber do Game Controller
         self.subscription = self.create_subscription(
             GC,
             'gamestate',
             self.listener_callback,
             10)
+        
         # Subscriber da visão 
         self.subscription_vision = self.create_subscription(
             Vision, 
             '/ball_position',
             self.listener_callback_vision,
             10)
+        
         # Subscriber da visão para detecção de robôs inimigos
         self.subscription_robot = self.create_subscription(
             VisionRobot, 
             '/robot_position_enemy',
             self.listener_callback_robot,
             10)
+        
         # Subscriber da posição dos motores do pescoço
         self.subscription_neck = self.create_subscription(
             NeckPosition, 
             '/neck_position',
             self.listener_callback_neck,
             10) 
+        
+        # Subscriber da IMU
         self.subscription_imu_gyro = self.create_subscription(
             Vector3Stamped, 
             'imu/rpy',
@@ -68,8 +74,10 @@ class DecisionNode(Node):
             'imu/data',
             self.listener_callback_imu_accel,
             10) 
+        
         self.timer=self.create_timer(0.008,self.timer_callback)
         self._action_client = ActionClient(self, Control, 'control_action')
+        
         self.subscription  
         self.subscription_vision
         self.subscription_neck
@@ -384,13 +392,7 @@ class DecisionNode(Node):
                             self.save_ball_left = False
                             self.save_ball_right = False
                             self.get_logger().info('BALL DETECTED')
-                            if(self.BALL_LEFT and self.neck_position[0] < 2650):
-                                self.turn_head_left()
-                                self.save_ball_left = True
-                            elif(self.BALL_RIGHT and self.neck_position[0] > 1350):
-                                self.turn_head_right()
-                                self.save_ball_right = True
-                            elif (self.neck_position[0] < 1700):
+                            if (self.neck_position[0] < 1700):
                                 self.turn_right()
                             elif (self.neck_position[0] > 2300):
                                 self.turn_left()

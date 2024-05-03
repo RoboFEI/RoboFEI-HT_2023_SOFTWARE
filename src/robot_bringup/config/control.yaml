@@ -1,0 +1,10 @@
+/neck_node:
+  ros__parameters:
+    neck_activate: true
+    x_p_gain: 0.7
+    y_p_gain: 0.35
+
+control:
+  ros__parameters:
+    body_activate : false
+    robot_number  : 2

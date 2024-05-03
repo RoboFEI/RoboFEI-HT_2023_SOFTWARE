@@ -80,7 +80,6 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	subscription_imu = this->create_subscription<sensor_msgs::msg::Imu>("imu/data", 10, std::bind(&MotionManager::topic_callback, this, _1));
 	subscription_walk = this->create_subscription<custom_interfaces::msg::Walk>("walking", 10, std::bind(&MotionManager::topic_callback_walk, this, _1));
 	subscription_positions = this->create_subscription<custom_interfaces::msg::SetPosition>("set_position", 10, std::bind(&MotionManager::topic_callback_positions, this, _1));
-	subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>("/set_neck_position", 10, std::bind(&MotionManager::topic_callback_neck, this, _1));
 	publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
 	publisher_fase_zero = this->create_publisher<std_msgs::msg::Bool>("/fase_zero", 10); 
 	publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
@@ -94,12 +93,6 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	ini = new minIni((char *)INI_FILE_PATH);
 	
 }
-
-void MotionManager::topic_callback_neck(const std::shared_ptr<custom_interfaces::msg::NeckPosition> neck_msg) const
-    {
-      neck_sides = neck_msg->position19;
-      neck_up = neck_msg->position20;
-    }
 
 void MotionManager::update_loop(void)
 {
@@ -464,7 +457,7 @@ void MotionManager::Process()
 			auto message = custom_interfaces::msg::SetPosition();  
 			int param[JointData::NUMBER_OF_JOINTS * MX28::PARAM_BYTES];
 			int joint_num = 0;
-			int pos[18];
+			int pos[19];
 			for(int id=JointData::ID_MIN; id<=JointData::ID_MAX-2; id++) // loop que vai de 1 até 18
 					{
 					param[id] = id;
@@ -474,8 +467,8 @@ void MotionManager::Process()
 					if(DEBUG_PRINT == true)
 					fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
 					}
-			message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};          
-			message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18], neck_sides, neck_up};   
+			message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};          
+			message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18]};   
 			publisher_->publish(message);
 
 		}
