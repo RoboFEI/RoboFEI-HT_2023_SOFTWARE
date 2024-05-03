@@ -50,29 +50,32 @@ NeckNode::~NeckNode()
 
 void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
 {
-  ball_pos_px.x = msg->x - 640/2;
-  ball_pos_px.y = msg->y - 480/2;
-
-  lost_ball_timer.reset(); 
-
-  if( this->robot_state == State::follow_ball)
+  if(neck_activate_)
   {
-    auto new_neck_position = SetPosition();
+    ball_pos_px.x = msg->x - 640/2;
+    ball_pos_px.y = msg->y - 480/2;
 
-    new_neck_position.id.push_back(19);
-    new_neck_position.id.push_back(20);
+    lost_ball_timer.reset(); 
 
-    new_neck_position.position.push_back(neck.pan - ball_pos_px.x * x_p_gain); // 0.2
-    new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * y_p_gain); //0.15
+    if( this->robot_state == State::follow_ball)
+    {
+      auto new_neck_position = SetPosition();
 
-    if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
-    else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
-    if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
-    else if(new_neck_position.position[1] < 1200) new_neck_position.position[1] = 1200;
+      new_neck_position.id.push_back(19);
+      new_neck_position.id.push_back(20);
 
-    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
+      new_neck_position.position.push_back(neck.pan - ball_pos_px.x * x_p_gain);
+      new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * y_p_gain);
 
-    if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
+      if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
+      else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
+      if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
+      else if(new_neck_position.position[1] < 1200) new_neck_position.position[1] = 1200;
+
+      RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
+
+      set_neck_position_publisher_->publish(new_neck_position);
+    }
   }
 }
 
@@ -100,7 +103,7 @@ void NeckNode::listener_callback_neck(const NeckPosition::SharedPtr msg)
 void NeckNode::search_ball()
 {
   
-  if(search_ball_timer.delay(2000))
+  if(search_ball_timer.delay(1000 + (325 * (search_ball_state/3))))
   {
     auto new_neck_position = SetPosition();
 
@@ -116,10 +119,7 @@ void NeckNode::search_ball()
 
     this->search_ball_state += 1;
 
-    if(this->search_ball_state >= 8)
-    {
-      this->search_ball_state = 0;
-    }
+    if(this->search_ball_state >= 8) this->search_ball_state = 0;
   }
 }
 

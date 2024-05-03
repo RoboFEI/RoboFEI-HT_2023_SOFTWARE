@@ -12,7 +12,6 @@
 #define NECK_CLOSE_LIMIT 1340
 #define LIMIT_TH 40
 
-
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
 
 RobotBehavior::RobotBehavior()
