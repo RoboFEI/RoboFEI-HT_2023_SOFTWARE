@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <future>
+#include <cmath>
 
 #include "attributes.h"
 
@@ -19,9 +20,6 @@
 
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "sensor_msgs/msg/imu.hpp"
-
-#define FALL_ACCEL_TH 7.0
-#define FALSES_FALLEN_TH 30
 
 using namespace std::placeholders;
 
@@ -54,6 +52,16 @@ class DecisionNode : public rclcpp::Node
         void listener_callback_vision(const VisionMsg::SharedPtr vision_info);       
         
         void send_goal(const Move &move);
+
+        float FALL_ACCEL_TH;
+        int FALSES_FALLEN_TH;
+
+        int NECK_TILT_CENTER = 2048;
+        int NECK_CENTER_TH  = 185;
+        int NECK_LEFT_LIMIT = 2650;
+        int NECK_LEFT_TH  = (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH));
+        int NECK_RIGHT_LIMIT = 1350;
+        int NECK_RIGHT_TH = (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT;
         
         DecisionNode();
         virtual ~DecisionNode();
@@ -75,9 +83,6 @@ class DecisionNode : public rclcpp::Node
         void result_callback(const GoalHandleControl::WrappedResult & result);
 
         GoalHandleControl::SharedPtr goal_handle_;
-
-        bool body_activate_;
-
 };
 
 

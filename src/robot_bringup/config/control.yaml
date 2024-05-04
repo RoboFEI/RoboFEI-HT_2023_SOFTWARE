@@ -8,3 +8,4 @@ control:
   ros__parameters:
     body_activate : false
     robot_number  : 2
+

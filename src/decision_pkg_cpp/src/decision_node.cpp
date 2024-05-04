@@ -2,8 +2,12 @@
 
 using namespace std::chrono_literals;
 
-#define FALL_ACCEL_TH 7.0
-#define FALSES_FALLEN_TH 30
+// #define NECK_TILT_CENTER 2048
+// #define NECK_CENTER_TH 185
+// #define NECK_LEFT_LIMIT 2650
+// #define NECK_LEFT_TH (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH))
+// #define NECK_RIGHT_LIMIT 1350
+// #define NECK_RIGHT_TH (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT
 
 DecisionNode::DecisionNode() : Node("decision_node")
 {
@@ -56,7 +60,8 @@ DecisionNode::DecisionNode() : Node("decision_node")
     
     goal_handle_ = nullptr;
 
-    body_activate_ = this->declare_parameter("body_activate", true);
+    FALL_ACCEL_TH = this->declare_parameter("FALL_ACCEL_TH", 7.0);
+    FALSES_FALLEN_TH = this->declare_parameter("FALSES_FALLEN_TH", 30);
 }
 
 DecisionNode::~DecisionNode()
@@ -123,12 +128,29 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_info)
 {
   this->robot.camera_ball_position = *vision_info;
+  if(robot.neck_pos.position20 < 1750)
+  {
+    NECK_LEFT_LIMIT = (int) 1.0474e-3 * pow(robot.neck_pos.position20, 2) - 4.0864 * robot.neck_pos.position20 + 6160;
+    NECK_CENTER_TH = NECK_LEFT_LIMIT - NECK_TILT_CENTER;
+    NECK_LEFT_TH  = (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH));
+    NECK_RIGHT_LIMIT = 4096 - NECK_LEFT_LIMIT;
+    NECK_RIGHT_TH = (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT;
+  }
+  else
+  {
+    NECK_TILT_CENTER = 2048;
+    NECK_CENTER_TH  = 185;
+    NECK_LEFT_LIMIT = 2650;
+    NECK_LEFT_TH  = (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH));
+    NECK_RIGHT_LIMIT = 1350;
+    NECK_RIGHT_TH = (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT;
+  }
+
   // RCLCPP_INFO(this->get_logger(), "Recive Vision Info");
 }
 
 void DecisionNode::send_goal(const Move &order)
 {
-  if(!body_activate_) return;
   auto goal_msg = ControlActionMsg::Goal();
 
   if (!this->action_client_->wait_for_action_server()) {

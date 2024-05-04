@@ -13,7 +13,6 @@ using namespace std::chrono_literals;
 class RobotBehavior : public DecisionNode
 {
     public:
-
         void players_behavior();
         void normal_game();
         void player_normal_game();

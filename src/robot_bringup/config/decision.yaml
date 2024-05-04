@@ -1,0 +1,5 @@
+decision_node:
+  ros__parameters:
+    FALL_ACCEL_TH: 7.0
+    FALSES_FALLEN_TH: 30
+    
