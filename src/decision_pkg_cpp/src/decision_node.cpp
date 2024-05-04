@@ -130,20 +130,15 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
   this->robot.camera_ball_position = *vision_info;
   if(robot.neck_pos.position20 < 1750)
   {
-    NECK_LEFT_LIMIT = (int) 1.0474e-3 * pow(robot.neck_pos.position20, 2) - 4.0864 * robot.neck_pos.position20 + 6160;
-    NECK_CENTER_TH = NECK_LEFT_LIMIT - NECK_TILT_CENTER;
-    NECK_LEFT_TH  = (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH));
-    NECK_RIGHT_LIMIT = 4096 - NECK_LEFT_LIMIT;
-    NECK_RIGHT_TH = (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT;
+    NECK_CENTER_TH = get_center_th(robot.neck_pos.position20);
+    NECK_LEFT_TH = NECK_TILT_CENTER + NECK_CENTER_TH;
+    NECK_RIGHT_TH = NECK_TILT_CENTER - NECK_CENTER_TH;
   }
   else
   {
-    NECK_TILT_CENTER = 2048;
     NECK_CENTER_TH  = 185;
-    NECK_LEFT_LIMIT = 2650;
-    NECK_LEFT_TH  = (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH));
-    NECK_RIGHT_LIMIT = 1350;
-    NECK_RIGHT_TH = (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT;
+    NECK_LEFT_TH = NECK_TILT_CENTER + NECK_CENTER_TH;
+    NECK_RIGHT_TH = NECK_TILT_CENTER - NECK_CENTER_TH;
   }
 
   // RCLCPP_INFO(this->get_logger(), "Recive Vision Info");

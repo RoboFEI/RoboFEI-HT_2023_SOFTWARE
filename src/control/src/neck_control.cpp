@@ -42,6 +42,11 @@ NeckNode::NeckNode()
 
   neck_activate_ = this->declare_parameter("neck_activate", true);
   RCLCPP_INFO(this->get_logger(), "neck activate %d", neck_activate_);
+
+  neck_up_limit = this->declare_parameter("neck_up_limit", 2048);
+  neck_down_limit = this->declare_parameter("neck_down_limit", 1350);
+  neck_left_limit = this->declare_parameter("neck_left_limit", 2650);
+  neck_right_limit = this->declare_parameter("neck_right_limit", 1350);
 }
 
 NeckNode::~NeckNode()
@@ -67,10 +72,10 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
       new_neck_position.position.push_back(neck.pan - ball_pos_px.x * x_p_gain);
       new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * y_p_gain);
 
-      if(new_neck_position.position[0] > 2650) new_neck_position.position[0] = 2650;
-      else if(new_neck_position.position[0] < 1350) new_neck_position.position[0] = 1350;
-      if(new_neck_position.position[1] > 2048) new_neck_position.position[1] = 2048;
-      else if(new_neck_position.position[1] < 1350) new_neck_position.position[1] = 1350;
+      if(new_neck_position.position[0] > neck_left_limit) new_neck_position.position[0] = neck_left_limit;
+      else if(new_neck_position.position[0] < neck_right_limit) new_neck_position.position[0] = neck_right_limit;
+      if(new_neck_position.position[1] > neck_up_limit) new_neck_position.position[1] = neck_up_limit;
+      else if(new_neck_position.position[1] < neck_down_limit) new_neck_position.position[1] = neck_down_limit;
 
       RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
 

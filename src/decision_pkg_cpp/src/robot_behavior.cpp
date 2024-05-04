@@ -6,11 +6,11 @@
 // #define NECK_TILT_CENTER 2048
 // #define NECK_CENTER_TH 185
 // #define NECK_LEFT_LIMIT 2650
-// #define NECK_LEFT_TH (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH))
+// // #define NECK_LEFT_TH (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH))
 // #define NECK_RIGHT_LIMIT 1350
-// #define NECK_RIGHT_TH (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT
-#define NECK_CLOSE_LIMIT 1340
-#define LIMIT_TH 40
+// // #define NECK_RIGHT_TH (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT
+// #define NECK_CLOSE_LIMIT 1340
+// #define LIMIT_TH 40
 
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
 
@@ -129,12 +129,9 @@ bool RobotBehavior::full_centered_neck()
 }
 
 
-bool RobotBehavior::centered_neck() // feito nn funciona
-{
-    RCLCPP_INFO(this->get_logger(), "debug 2: neck center  %d", abs(robot.neck_pos.position19 - NECK_TILT_CENTER));
-    RCLCPP_INFO(this->get_logger(), "debug 2: neck center th  %d", NECK_CENTER_TH);
-    
-    return abs(robot.neck_pos.position19 - NECK_TILT_CENTER) < NECK_CENTER_TH;
+bool RobotBehavior::centered_neck() // feito
+{    
+    return !neck_to_left() && !neck_to_right();
 }
 
 bool RobotBehavior::ball_is_locked() // feito 
@@ -169,14 +166,14 @@ void RobotBehavior::detect_ball_position() // Não Funciona centro e direita
     RCLCPP_INFO(this->get_logger(), "ball side %d", robot.ball_position);
 }
 
-bool RobotBehavior::neck_to_right() // feito ajustar parametros
+bool RobotBehavior::neck_to_right() // testar
 {
-    return (NECK_RIGHT_LIMIT + NECK_RIGHT_TH) > robot.neck_pos.position19;
+    return NECK_RIGHT_TH > robot.neck_pos.position19;
 }
 
-bool RobotBehavior::neck_to_left() // feito
+bool RobotBehavior::neck_to_left() // testar
 {
-    return (NECK_LEFT_LIMIT - NECK_LEFT_TH) < robot.neck_pos.position19;
+    return NECK_LEFT_TH < robot.neck_pos.position19;
 }
 
 bool RobotBehavior::ball_in_robot_limits() // feito

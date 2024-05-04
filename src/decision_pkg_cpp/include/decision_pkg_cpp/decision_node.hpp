@@ -1,6 +1,12 @@
 #ifndef DECISION_NODE_HPP
 #define DECISION_NODE_HPP
 
+#define NECK_TILT_CENTER 2048
+#define NECK_LEFT_LIMIT 2650
+#define NECK_RIGHT_LIMIT 1350
+#define NECK_CLOSE_LIMIT 1340
+#define LIMIT_TH 40
+
 #include <cstdio>
 #include <memory>
 #include <string>
@@ -8,6 +14,7 @@
 #include <cmath>
 
 #include "attributes.h"
+#include "utils.h"
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -56,12 +63,9 @@ class DecisionNode : public rclcpp::Node
         float FALL_ACCEL_TH;
         int FALSES_FALLEN_TH;
 
-        int NECK_TILT_CENTER = 2048;
         int NECK_CENTER_TH  = 185;
-        int NECK_LEFT_LIMIT = 2650;
-        int NECK_LEFT_TH  = (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH));
-        int NECK_RIGHT_LIMIT = 1350;
-        int NECK_RIGHT_TH = (NECK_TILT_CENTER-NECK_CENTER_TH) - NECK_RIGHT_LIMIT;
+        int NECK_LEFT_TH = NECK_TILT_CENTER + NECK_CENTER_TH;
+        int NECK_RIGHT_TH = NECK_TILT_CENTER - NECK_CENTER_TH;
         
         DecisionNode();
         virtual ~DecisionNode();

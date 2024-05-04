@@ -1,8 +1,14 @@
 /neck_node:
   ros__parameters:
     neck_activate: true
+
     x_p_gain: 0.7
     y_p_gain: 0.35
+
+    neck_up_limit   : 2048
+    neck_down_limit : 1350
+    neck_left_limit : 2650
+    neck_right_limit: 1350
 
 control:
   ros__parameters:
