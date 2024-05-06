@@ -23,7 +23,7 @@ class BallDetection(Node):
         self.original_dim = np.array([640, 480])
         self.redued_dim = self.original_dim * REDUCE_IMG_QLTY / 100
         
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture("/dev/camera")
         self.cap.set(3, self.original_dim[0])
         self.cap.set(4, self.original_dim[1])
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
