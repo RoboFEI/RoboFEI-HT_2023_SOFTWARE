@@ -9,7 +9,8 @@ enum State
 {
     searching_ball = 1,
     aligning_with_the_ball = 2,
-    ball_approach = 3
+    ball_approach = 3,
+    kick_ball = 4
 };
 
 enum FallStatus
