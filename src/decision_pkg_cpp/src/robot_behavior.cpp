@@ -97,7 +97,7 @@ void RobotBehavior::player_normal_game() // fazer
         break;
 
     case ball_approach:
-        if(ball_in_close_limit() && ball_is_locked()) robot.state = kick_ball;
+        if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = kick_ball;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
         else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
         else send_goal(walk);
