@@ -154,12 +154,11 @@ bool RobotBehavior::vision_stable()// feito
     return false;
 }
 
-void RobotBehavior::detect_ball_position() // Não Funciona centro e direita
+void RobotBehavior::detect_ball_position() // Funciona
 {
-    RCLCPP_INFO(this->get_logger(), "debug 1: centered_neck %d", centered_neck());
-    RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_left %d", neck_to_left());
-    RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_right %d", neck_to_right());
-    RCLCPP_INFO(this->get_logger(), "debug 4: NECK_CENTER_TH %d", NECK_CENTER_TH);
+    // RCLCPP_INFO(this->get_logger(), "debug 1: centered_neck %d", centered_neck());
+    // RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_left %d", neck_to_left());
+    // RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_right %d", neck_to_right());
     
     if(centered_neck()) robot.ball_position = center;
     else if(neck_to_left()) robot.ball_position = left;
@@ -169,16 +168,11 @@ void RobotBehavior::detect_ball_position() // Não Funciona centro e direita
 
 bool RobotBehavior::neck_to_right() // testar
 {
-    RCLCPP_INFO(this->get_logger(), "debug 2: NECK_RIGHT_TH %d", NECK_RIGHT_TH);
-    RCLCPP_INFO(this->get_logger(), "debug 2: Neck pos 19 %d", robot.neck_pos.position19);
-
     return NECK_RIGHT_TH > robot.neck_pos.position19;
 }
 
 bool RobotBehavior::neck_to_left() // testar
 {
-    RCLCPP_INFO(this->get_logger(), "debug 3: NECK_LEFT_TH %d", NECK_LEFT_TH);
-    RCLCPP_INFO(this->get_logger(), "debug 3: Neck pos 19 %d", robot.neck_pos.position19);
     return NECK_LEFT_TH < robot.neck_pos.position19;
 }
 

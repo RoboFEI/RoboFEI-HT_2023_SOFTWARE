@@ -14,9 +14,10 @@ bool robot_fallen(const Robot &robot)
 }
 
 int get_center_th(const int &pos20)
-{
-    int left_limit = (int) 1.0474e-3 * pow(pos20, 2) - 4.0864 * pos20 + 6160;
-    return left_limit; 
+{   
+    printf("DDDDDDEEEEEEEEEEEBBBBBBBBBBUUUUUUUUUUUGGGGGGGGGGG pos20: %d", pos20);
+    int left_limit = (int) (1.0474e-3 * pow(pos20, 2) - 4.0864 * pos20 + 6160);
+    return left_limit-2048; 
 }
 
 #endif // UTILS_H
