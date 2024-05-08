@@ -277,6 +277,27 @@ private:
           parameters = false;
           section = "Right Kick Penalti";
           break;
+        case 31: 
+          RCLCPP_INFO(this->get_logger(), "Right Kick Variant R");
+          parameters = false;
+          section = "Right Kick Variant R";
+          break;
+        case 32: 
+          RCLCPP_INFO(this->get_logger(), "Right Kick Variant L");
+          parameters = false;
+          section = "Right Kick Variant L";
+          break;
+        case 33: 
+          RCLCPP_INFO(this->get_logger(), "Left Kick Variant R");
+          parameters = false;
+          section = "Left Kick Variant R";
+          break;
+        case 34: 
+          RCLCPP_INFO(this->get_logger(), "Left Kick Variant L");
+          parameters = false;
+          section = "Left Kick Variant L";
+          break;
+
       }
     }
 
