@@ -16,8 +16,8 @@
 
 control:
   ros__parameters:
-    body_activate : false
-    robot_number  :  1
+    body_activate : true
+    robot_number  :  2
 
 
 
