@@ -14,27 +14,12 @@ def generate_launch_description():
         'robot_config.yaml'
     )
 
-    control = Node(
-        package="control",
-        executable="control",
+    decision = Node(
+        package="decision_pkg_cpp",
+        executable="robot_behavior",
         output = 'screen',
         parameters = [control_config]
     )
 
-    gait = Node(
-        package="control",
-        executable="gait_publisher",
-        output = 'screen'
-    )
-    
-    neck_control = Node(
-        package="control",
-        executable="neck_control",
-        output = 'screen',
-        parameters = [control_config]
-    )
-
-    ld.add_action(control)
-    ld.add_action(gait)
-    ld.add_action(neck_control)
+    ld.add_action(decision)
     return ld

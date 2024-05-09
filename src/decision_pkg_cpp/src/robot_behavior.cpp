@@ -18,7 +18,7 @@ RobotBehavior::RobotBehavior()
 {
     robot_behavior_ = this->create_wall_timer(
         8ms,
-        std::bind(&RobotBehavior::players_behavior, this));
+        std::bind(&RobotBehavior::players_behavior, this));    
 }
 
 RobotBehavior::~RobotBehavior()

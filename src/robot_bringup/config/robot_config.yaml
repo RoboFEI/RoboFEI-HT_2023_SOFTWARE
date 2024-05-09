@@ -5,8 +5,6 @@
     neck_left_limit : 2650
     neck_right_limit: 1350
 
-
-
 /neck_node:
   ros__parameters:
     neck_activate: true
@@ -14,14 +12,12 @@
     x_p_gain: 0.7
     y_p_gain: 0.35
 
-control:
+/control:
   ros__parameters:
     body_activate : true
     robot_number  :  2
 
-
-
-# decision_node:
-#   ros__parameters:
-#     FALL_ACCEL_TH: 7.0
-#     FALSES_FALLEN_TH: 30
+/decision_node:
+  ros__parameters:
+    FALL_ACCEL_TH: 7.0
+    FALSES_FALLEN_TH: 30

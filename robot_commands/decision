@@ -2,4 +2,4 @@
 
 cd ~/RoboFEI-HT_2023_SOFTWARE 
 source install/setup.bash 
-ros2 run decision_pkg decision_node
+ros2 launch robot_bringup decision_bringup.launch.py

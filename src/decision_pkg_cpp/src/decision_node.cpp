@@ -62,6 +62,10 @@ DecisionNode::DecisionNode() : Node("decision_node")
 
     FALL_ACCEL_TH = this->declare_parameter("FALL_ACCEL_TH", 7.0);
     FALSES_FALLEN_TH = this->declare_parameter("FALSES_FALLEN_TH", 30);
+
+    NECK_LEFT_LIMIT = this->declare_parameter("neck_left_limit", 2650);
+    NECK_RIGHT_LIMIT = this->declare_parameter("neck_right_limit", 1350);
+    NECK_CLOSE_LIMIT = this->declare_parameter("neck_down_limit", 1350);
 }
 
 DecisionNode::~DecisionNode()
