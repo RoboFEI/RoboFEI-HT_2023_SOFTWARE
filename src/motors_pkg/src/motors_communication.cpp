@@ -117,7 +117,7 @@ ReadWriteNode::ReadWriteNode()
     {
       save_motors_position(msg);
     }
-    );
+  );
 
 
   set_position_subscriber_ =
@@ -128,90 +128,91 @@ ReadWriteNode::ReadWriteNode()
     {      
       save_motors_position(msg);
     }
-    );
+  );
 
 
-    set_position_subscriber_single =
-    this->create_subscription<SetPositionOriginal>(
-    "set_position_single",
-    QOS_RKL10V,
-    [this](const SetPositionOriginal::SharedPtr msg) -> void
-    {
-      uint8_t dxl_error = 0;
+  set_position_subscriber_single =
+  this->create_subscription<SetPositionOriginal>(
+  "set_position_single",
+  QOS_RKL10V,
+  [this](const SetPositionOriginal::SharedPtr msg) -> void
+  {
+    uint8_t dxl_error = 0;
 
-      // Position Value of X series is 4 byte data.
-      // For AX & MX(1.0) use 2 byte data(uint16_t) for the Position Value.
-      uint32_t goal_position = (unsigned int)msg->position;  // Convert int32 -> uint32
-      uint32_t ADDR_GOAL = (unsigned int)msg->address;
+    // Position Value of X series is 4 byte data.
+    // For AX & MX(1.0) use 2 byte data(uint16_t) for the Position Value.
+    uint32_t goal_position = (unsigned int)msg->position;  // Convert int32 -> uint32
+    uint32_t ADDR_GOAL = (unsigned int)msg->address;
 
-      if(ADDR_GOAL == 102){
-        // Write Goal Position (length : 4 bytes)
-        // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
-        dxl_comm_result =
-        packetHandler->write2ByteTxRx(
-          portHandler,
-          (uint8_t) msg->id,
-          ADDR_GOAL,
-          goal_position,
-          &dxl_error
-        );
-
-        if (dxl_comm_result != COMM_SUCCESS) {
-          RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
-        } else if (dxl_error != 0) {
-          RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
-        } else {
-          //RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Position: %d] [Address: %d]", msg->id, msg->position, msg->address);
-        }
-      }
-
-      else{
-        // Write Goal Position (length : 4 bytes)
-        // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
-        dxl_comm_result =
-        packetHandler->write4ByteTxRx(
-          portHandler,
-          (uint8_t) msg->id,
-          ADDR_GOAL,
-          goal_position,
-          &dxl_error
-        );
-
-        if (dxl_comm_result != COMM_SUCCESS) {
-          RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
-        } else if (dxl_error != 0) {
-          RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
-        } else {
-          //RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Position: %d] [Address: %d]", msg->id, msg->position, msg->address);
-        }
-      }
-    }
-    );
-
-    auto get_present_position =
-    [this](
-    const std::shared_ptr<GetPosition::Request> request,
-    std::shared_ptr<GetPosition::Response> response) -> void
-    {
-      // Read Present Position (length : 4 bytes) and Convert uint32 -> int32
-      // When reading 2 byte data from AX / MX(1.0), use read2ByteTxRx() instead.
-      dxl_comm_result = packetHandler->read4ByteTxRx(
+    if(ADDR_GOAL == 102){
+      // Write Goal Position (length : 4 bytes)
+      // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
+      dxl_comm_result =
+      packetHandler->write2ByteTxRx(
         portHandler,
-        (uint8_t) request->id,
-        ADDR_PRESENT_POSITION,
-        reinterpret_cast<uint32_t *>(&present_position),
+        (uint8_t) msg->id,
+        ADDR_GOAL,
+        goal_position,
+        &dxl_error
+        );
+    }
+    else if(ADDR_GOAL == ADDR_TORQUE_ENABLE)
+    {
+      dxl_comm_result = packetHandler->write1ByteTxRx(
+        portHandler,
+        (uint8_t) msg->id,
+        ADDR_TORQUE_ENABLE,
+        goal_position,
         &dxl_error
       );
-
-      RCLCPP_INFO(
-        this->get_logger(),
-        "Get [ID: %d] [Present Position: %d]",
-        request->id,
-        present_position
+    }
+    else{
+      // Write Goal Position (length : 4 bytes)
+      // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
+      dxl_comm_result =
+      packetHandler->write4ByteTxRx(
+        portHandler,
+        (uint8_t) msg->id,
+        ADDR_GOAL,
+        goal_position,
+        &dxl_error
       );
+    }
 
-      response->position = present_position;
-    };
+    if (dxl_comm_result != COMM_SUCCESS) {
+      RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+    } else if (dxl_error != 0) {
+      RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+    } else {
+      //RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Position: %d] [Address: %d]", msg->id, msg->position, msg->address);
+    }
+  }
+  );
+
+  auto get_present_position =
+  [this](
+  const std::shared_ptr<GetPosition::Request> request,
+  std::shared_ptr<GetPosition::Response> response) -> void
+  {
+    // Read Present Position (length : 4 bytes) and Convert uint32 -> int32
+    // When reading 2 byte data from AX / MX(1.0), use read2ByteTxRx() instead.
+    dxl_comm_result = packetHandler->read4ByteTxRx(
+      portHandler,
+      (uint8_t) request->id,
+      ADDR_PRESENT_POSITION,
+      reinterpret_cast<uint32_t *>(&present_position),
+      &dxl_error
+    );
+
+    RCLCPP_INFO(
+      this->get_logger(),
+      "Get [ID: %d] [Present Position: %d]",
+      request->id,
+      present_position
+    );
+
+    response->position = present_position;
+  };
   get_position_server_ = create_service<GetPosition>("get_position", get_present_position);
 
 }
