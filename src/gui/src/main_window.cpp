@@ -13,8 +13,6 @@
 // limitations under the License.
 
 #include <QApplication>
-#include <QIntValidator>
-
 #include "main_window.hpp"
 #include "ui_main_window.h"
 
@@ -35,18 +33,11 @@ MainWindow::MainWindow(
 
   this->ui_->setupUi(this);
 
-
   for (auto checkBox : findChildren<QCheckBox *>()) {
-    this->connect(
-      checkBox, &QCheckBox::stateChanged,
-      this, &MainWindow::torque_checkbox_changed);
-  }
-  
-  for(auto lineEdit : findChildren<QLineEdit *>())
-  {
-    lineEdit->setValidator(new QIntValidator(0, 4095, lineEdit));
-  }
-
+      this->connect(
+        checkBox, &QCheckBox::stateChanged,
+        this, &MainWindow::torque_checkbox_changed);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -59,7 +50,13 @@ void MainWindow::torque_checkbox_changed()
   QCheckBox* torque_checkbox = qobject_cast<QCheckBox*>(sender());
   int id = torque_checkbox->objectName().remove("torque_id_").toInt();
 
-  send_torque_info(id, torque_checkbox->isChecked());  
+  send_torque_info(id, torque_checkbox->isChecked());
+  // if (torque_checkbox->isChecked())
+  // {
+  //   RCLCPP_INFO(this->get_logger(), "Torque ativado id: %d", id);
+  // }
+  // else RCLCPP_INFO(this->get_logger(), "Torque desativado id: %d", id);
+  
 }
 
 void MainWindow::publishJointStates()
