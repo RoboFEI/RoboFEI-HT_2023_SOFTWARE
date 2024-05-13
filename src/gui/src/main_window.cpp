@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include <QApplication>
+#include <QIntValidator>
+
 #include "main_window.hpp"
 #include "ui_main_window.h"
 
@@ -34,10 +36,16 @@ MainWindow::MainWindow(
   this->ui_->setupUi(this);
 
   for (auto checkBox : findChildren<QCheckBox *>()) {
-      this->connect(
-        checkBox, &QCheckBox::stateChanged,
-        this, &MainWindow::torque_checkbox_changed);
-    }
+    this->connect(
+      checkBox, &QCheckBox::stateChanged,
+      this, &MainWindow::torque_checkbox_changed);
+  }
+  
+  for(auto lineEdit : findChildren<QLineEdit *>())
+  {
+    lineEdit->setValidator(new QIntValidator(0, 4095, lineEdit));
+  }
+
 }
 
 MainWindow::~MainWindow()

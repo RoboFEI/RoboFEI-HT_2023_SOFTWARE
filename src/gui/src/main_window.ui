@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1092</width>
     <height>600</height>
    </rect>
   </property>
@@ -19,8 +19,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>141</width>
-      <height>261</height>
+      <width>201</width>
+      <height>331</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -34,8 +34,8 @@
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>121</width>
-       <height>261</height>
+       <width>184</width>
+       <height>326</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -44,7 +44,7 @@
         <item>
          <widget class="QLabel" name="label_id_1">
           <property name="text">
-           <string>ID 1</string>
+           <string>ID 01</string>
           </property>
          </widget>
         </item>
@@ -57,7 +57,17 @@
            <string>Torque</string>
           </property>
           <property name="checked">
-           <bool>false</bool>
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_1">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
+          </property>
+          <property name="maxLength">
+           <number>4</number>
           </property>
          </widget>
         </item>
@@ -68,7 +78,7 @@
         <item>
          <widget class="QLabel" name="label_id_2">
           <property name="text">
-           <string>ID 2</string>
+           <string>ID 02</string>
           </property>
          </widget>
         </item>
@@ -76,6 +86,22 @@
          <widget class="QCheckBox" name="torque_id_2">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_2">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="maxLength">
+           <number>4</number>
           </property>
          </widget>
         </item>
@@ -86,7 +112,7 @@
         <item>
          <widget class="QLabel" name="label_id_3">
           <property name="text">
-           <string>ID 3</string>
+           <string>ID 03</string>
           </property>
          </widget>
         </item>
@@ -94,6 +120,16 @@
          <widget class="QCheckBox" name="torque_id_3">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_3">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
           </property>
          </widget>
         </item>
@@ -104,7 +140,7 @@
         <item>
          <widget class="QLabel" name="label_id_4">
           <property name="text">
-           <string>ID 4</string>
+           <string>ID 04</string>
           </property>
          </widget>
         </item>
@@ -112,6 +148,16 @@
          <widget class="QCheckBox" name="torque_id_4">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_4">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
           </property>
          </widget>
         </item>
@@ -122,7 +168,7 @@
         <item>
          <widget class="QLabel" name="label_id_5">
           <property name="text">
-           <string>ID 5</string>
+           <string>ID 05</string>
           </property>
          </widget>
         </item>
@@ -130,6 +176,16 @@
          <widget class="QCheckBox" name="torque_id_5">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_5">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
           </property>
          </widget>
         </item>
@@ -140,7 +196,7 @@
         <item>
          <widget class="QLabel" name="label_id_6">
           <property name="text">
-           <string>ID 6</string>
+           <string>ID 06</string>
           </property>
          </widget>
         </item>
@@ -148,6 +204,16 @@
          <widget class="QCheckBox" name="torque_id_6">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_6">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
           </property>
          </widget>
         </item>
@@ -158,7 +224,7 @@
         <item>
          <widget class="QLabel" name="label_id_7">
           <property name="text">
-           <string>ID 7</string>
+           <string>ID 07</string>
           </property>
          </widget>
         </item>
@@ -166,6 +232,16 @@
          <widget class="QCheckBox" name="torque_id_7">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_7">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
           </property>
          </widget>
         </item>
@@ -176,7 +252,7 @@
         <item>
          <widget class="QLabel" name="label_id_8">
           <property name="text">
-           <string>ID 8</string>
+           <string>ID 08</string>
           </property>
          </widget>
         </item>
@@ -184,6 +260,16 @@
          <widget class="QCheckBox" name="torque_id_8">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_8">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
           </property>
          </widget>
         </item>
@@ -194,7 +280,7 @@
         <item>
          <widget class="QLabel" name="label_id_9">
           <property name="text">
-           <string>ID 9</string>
+           <string>ID 09</string>
           </property>
          </widget>
         </item>
@@ -202,6 +288,16 @@
          <widget class="QCheckBox" name="torque_id_9">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_9">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
           </property>
          </widget>
         </item>
@@ -221,6 +317,16 @@
           <property name="text">
            <string>Torque</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_10">
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
+          </property>
          </widget>
         </item>
        </layout>
@@ -231,10 +337,10 @@
    <widget class="QFrame" name="frame_2">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>230</x>
       <y>0</y>
-      <width>141</width>
-      <height>261</height>
+      <width>201</width>
+      <height>331</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -248,8 +354,8 @@
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>121</width>
-       <height>261</height>
+       <width>184</width>
+       <height>326</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -271,7 +377,17 @@
            <string>Torque</string>
           </property>
           <property name="checked">
-           <bool>false</bool>
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_11">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
+          </property>
+          <property name="maxLength">
+           <number>4</number>
           </property>
          </widget>
         </item>
@@ -291,6 +407,16 @@
           <property name="text">
            <string>Torque</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_12">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
+          </property>
          </widget>
         </item>
        </layout>
@@ -308,6 +434,16 @@
          <widget class="QCheckBox" name="torque_id_13">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_13">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
           </property>
          </widget>
         </item>
@@ -327,6 +463,16 @@
           <property name="text">
            <string>Torque</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_14">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
+          </property>
          </widget>
         </item>
        </layout>
@@ -344,6 +490,16 @@
          <widget class="QCheckBox" name="torque_id_15">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_15">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
           </property>
          </widget>
         </item>
@@ -363,6 +519,16 @@
           <property name="text">
            <string>Torque</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_16">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
+          </property>
          </widget>
         </item>
        </layout>
@@ -380,6 +546,16 @@
          <widget class="QCheckBox" name="torque_id_17">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_17">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
           </property>
          </widget>
         </item>
@@ -399,6 +575,16 @@
           <property name="text">
            <string>Torque</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_18">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
+          </property>
          </widget>
         </item>
        </layout>
@@ -416,6 +602,16 @@
          <widget class="QCheckBox" name="torque_id_19">
           <property name="text">
            <string>Torque</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_19">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
           </property>
          </widget>
         </item>
@@ -435,6 +631,16 @@
           <property name="text">
            <string>Torque</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="pos_id_20">
+          <property name="inputMethodHints">
+           <set>Qt::ImhDigitsOnly</set>
+          </property>
          </widget>
         </item>
        </layout>
@@ -448,7 +654,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1092</width>
      <height>22</height>
     </rect>
    </property>
