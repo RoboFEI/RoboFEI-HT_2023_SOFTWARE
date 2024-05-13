@@ -1,13 +1,22 @@
+import os
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
     ld = LaunchDescription()
+
+    control_config = os.path.join(
+        get_package_share_directory('robot_bringup'),
+        'config',
+        'robot_config.yaml'
+    )
     
     control = Node(
         package="control",
         executable="control",
-        output = 'screen'
+        output = 'screen',
+        parameters = [control_config]
     )
     gait = Node(
         package="control",
@@ -17,7 +26,8 @@ def generate_launch_description():
     neck_control = Node(
         package="control",
         executable="neck_control",
-        output = 'screen'
+        output = 'screen',
+        parameters = [control_config]
     )
 
     vision_node = Node(
