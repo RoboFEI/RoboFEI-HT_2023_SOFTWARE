@@ -40,9 +40,13 @@ public:
 
   void timer_callback();
   void save_motors_position(const SetPosition::SharedPtr msg);
+  int get_position(const int &id);
+  bool set_position(const int &id, const int &position);
 
   uint8_t motores[21][4];
   uint32_t motores2[21];
+
+  // std::vector<bool> torque_status(21, 1); 
 
   ReadWriteNode();
   virtual ~ReadWriteNode();
@@ -56,7 +60,6 @@ private:
 
   rclcpp::TimerBase::SharedPtr timer_; // declaration of timer to publish the neck position
 
-  int present_position;
   int max_limit_position;
   int min_limit_position;
   int motor[2];
