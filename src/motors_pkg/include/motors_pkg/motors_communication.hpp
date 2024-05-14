@@ -57,12 +57,15 @@ private:
   rclcpp::Subscription<SetPosition>::SharedPtr set_neck_position_subscriber_;
   rclcpp::Service<GetPosition>::SharedPtr get_position_server_;
   rclcpp::Publisher<NeckPosition>::SharedPtr neck_position_publisher;
+  rclcpp::Publisher<SetPosition>::SharedPtr all_joint_positions_publisher;
 
   rclcpp::TimerBase::SharedPtr timer_; // declaration of timer to publish the neck position
 
   int max_limit_position;
   int min_limit_position;
-  int motor[2];
+  // std::vector<int> motors;
+  int motors [21];
+  std::vector<u_int8_t> id { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 };
   
 };
 

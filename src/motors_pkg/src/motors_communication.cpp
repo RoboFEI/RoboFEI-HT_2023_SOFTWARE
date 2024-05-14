@@ -106,6 +106,8 @@ ReadWriteNode::ReadWriteNode()
   //Create a publisher to send the neck position for vision.py
   neck_position_publisher = this->create_publisher<NeckPosition>("neck_position", 10);
 
+  all_joint_positions_publisher = this->create_publisher<SetPosition>("all_positions", 10);
+
   timer_ = this->create_wall_timer(
   8ms, std::bind(&ReadWriteNode::timer_callback, this));
    
@@ -239,8 +241,6 @@ void ReadWriteNode::save_motors_position(const SetPosition::SharedPtr msg)
 
 void ReadWriteNode::timer_callback()
 {
-  auto message = custom_interfaces::msg::NeckPosition();
-
   uint8_t dxl_error = 0;
 
   for(int i=1; i<21; i++)
@@ -266,25 +266,34 @@ void ReadWriteNode::timer_callback()
     //msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
   }
 
-
   groupSyncWrite.clearParam();
 
-  for(int i=0; i<2; i++)
+  auto neck_message = custom_interfaces::msg::NeckPosition();
+
+  for(int i=1; i<21; i++)
   {
     dxl_comm_result = packetHandler->read4ByteTxRx(
       portHandler,
-      (uint8_t) (19+i), //for motor with id 19 and 20
+      (uint8_t) (i), //for motors with id 19 and 20
       ADDR_PRESENT_POSITION,
-      reinterpret_cast<uint32_t *>(&motor[i]),
+      reinterpret_cast<uint32_t *>(&motors[i]),
       &dxl_error
     );
   }
   
-  message.position19 = motor[0];
-  message.position20 = motor[1];
+  neck_message.position19 = motors[19];
+  neck_message.position20 = motors[20];
 
-  neck_position_publisher->publish(message);
+  neck_position_publisher->publish(neck_message);
 
+  auto all_motors = SetPosition();
+
+  std::vector<int> motors_vec(motors, motors + 21);
+  motors_vec.erase(motors_vec.begin());
+  all_motors.position = motors_vec;
+  all_motors.id = id;
+
+  all_joint_positions_publisher->publish(all_motors);
 }
 
 ReadWriteNode::~ReadWriteNode()
