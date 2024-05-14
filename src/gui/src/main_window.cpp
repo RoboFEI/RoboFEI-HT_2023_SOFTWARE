@@ -33,6 +33,7 @@ MainWindow::MainWindow(
 
   this->ui_->setupUi(this);
 
+
   for (auto checkBox : findChildren<QCheckBox *>()) {
       this->connect(
         checkBox, &QCheckBox::stateChanged,
@@ -50,13 +51,7 @@ void MainWindow::torque_checkbox_changed()
   QCheckBox* torque_checkbox = qobject_cast<QCheckBox*>(sender());
   int id = torque_checkbox->objectName().remove("torque_id_").toInt();
 
-  send_torque_info(id, torque_checkbox->isChecked());
-  // if (torque_checkbox->isChecked())
-  // {
-  //   RCLCPP_INFO(this->get_logger(), "Torque ativado id: %d", id);
-  // }
-  // else RCLCPP_INFO(this->get_logger(), "Torque desativado id: %d", id);
-  
+  send_torque_info(id, torque_checkbox->isChecked());  
 }
 
 void MainWindow::publishJointStates()
