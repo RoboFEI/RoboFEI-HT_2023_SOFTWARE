@@ -270,6 +270,7 @@ void ReadWriteNode::timer_callback()
 
   auto neck_message = custom_interfaces::msg::NeckPosition();
 
+
   for(int i=1; i<21; i++)
   {
     dxl_comm_result = packetHandler->read4ByteTxRx(
