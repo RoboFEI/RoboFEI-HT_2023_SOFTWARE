@@ -1,4 +1,4 @@
-# $ ros2 launch robot_bringup control_bringup.launch.py
+# $ ros2 launch robot_bringup decision_bringup.launch.py
 
 import os
 from ament_index_python.packages import get_package_share_directory
