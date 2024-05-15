@@ -106,7 +106,7 @@ void RobotBehavior::player_normal_game() // fazer
     case kick_ball:
         if((robot.neck_pos.position19 - 2048) > 0) send_goal(left_kick);
         else send_goal(right_kick);
-        robot.state = ball_approach;
+        robot.state = searching_ball;
         break;
     default:
         break;
@@ -115,7 +115,7 @@ void RobotBehavior::player_normal_game() // fazer
 
 bool RobotBehavior::robot_align_with_the_ball() // fazer a parte de virar para a posição da bola
 {
-    if(ball_in_camera_center())
+    if(vision_stable())
     {
         if(robot.state == ball_approach) return centered_neck();
         else return full_centered_neck();
@@ -164,11 +164,19 @@ void RobotBehavior::detect_ball_position() // Funciona
     // RCLCPP_INFO(this->get_logger(), "debug 1: centered_neck %d", centered_neck());
     // RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_left %d", neck_to_left());
     // RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_right %d", neck_to_right());
-    
-    if(centered_neck()) robot.ball_position = center;
-    else if(neck_to_left()) robot.ball_position = left;
-    else if(neck_to_right()) robot.ball_position = right;
-    RCLCPP_INFO(this->get_logger(), "ball side %d", robot.ball_position);
+    if(robot.state == aligning_with_the_ball)
+    {
+        if(robot.neck_pos.position19 > NECK_TILT_CENTER) robot.ball_position = left;
+        else robot.ball_position = right;
+    }
+    else
+    {
+        if(centered_neck()) robot.ball_position = center;
+        else if(neck_to_left()) robot.ball_position = left;
+        else if(neck_to_right()) robot.ball_position = right;
+        RCLCPP_INFO(this->get_logger(), "ball side %d", robot.ball_position);
+    }
+
 }
 
 bool RobotBehavior::neck_to_right() // testar
