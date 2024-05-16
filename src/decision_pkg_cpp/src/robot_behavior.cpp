@@ -100,7 +100,7 @@ void RobotBehavior::player_normal_game() // fazer
     case kick_ball:
         if((robot.neck_pos.position19 - 2048) > 0) send_goal(left_kick);
         else send_goal(right_kick);
-        robot.state = searching_ball;
+        robot.state = ball_approach;
         break;
     default:
         break;
