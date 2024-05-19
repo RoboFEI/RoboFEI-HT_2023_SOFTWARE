@@ -1,5 +1,4 @@
-// Protocol version
-#define PROTOCOL_VERSION 1.0  // Protocol for the old robots
+// #define PROTOCOL_VERSION 1.0 
 
 // Control table address for RX28
 #define ADDR_TORQUE_ENABLE      24      // 1 Byte
