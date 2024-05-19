@@ -1,5 +1,13 @@
 #include "new_motors_pkg/motors_communication.hpp"
 
+#define PROTOCOL_VERSION 1
+
+#if PROTOCOL_VERSION == 2
+    #include "new_motors_pkg/protocol2.h"
+#else
+    #include "new_motors_pkg/protocol1.h"
+#endif
+
 // Default setting
 #define BAUDRATE 1000000  // Default Baudrate of DYNAMIXEL X series
 #define DEVICE_NAME "/dev/motors"  // [Linux]: "/dev/ttyUSB", [Windows]: "COM*"
@@ -9,7 +17,7 @@ PortHandler *portHandler = PortHandler::getPortHandler(DEVICE_NAME);
 MotorsCommunication::MotorsCommunication()
 : Node("read_write_node")
 {
-    RCLCPP_INFO(this->get_logger(), "Run read write node");
+    RCLCPP_INFO(this->get_logger(), "Run read write node");        
 
     timer_ = this->create_wall_timer(
     8ms, std::bind(&MotorsCommunication::timer_callback, this));
@@ -21,7 +29,7 @@ MotorsCommunication::~MotorsCommunication()
 
 void MotorsCommunication::timer_callback()
 {
-  RCLCPP_INFO_ONCE(this->get_logger(), "node fine");
+    RCLCPP_INFO_ONCE(this->get_logger(), "Protocol %f", (float)PROTOCOL_VERSION);
 }
 
 bool openSerialPort()
@@ -52,7 +60,7 @@ int main(int argc, char * argv[])
     sprintf(string1,"echo 123456| sudo -S renice -20 -p %d", getpid());
     system(string1);//prioridade
 
-    if(!openSerialPort()) return -1;
+    // if(!openSerialPort()) return -1;
 
     rclcpp::init(argc, argv);
 

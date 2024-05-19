@@ -1,5 +1,4 @@
-// Protocol version
-#define PROTOCOL_VERSION 2.0  // Default Protocol version of DYNAMIXEL X series.
+// #define PROTOCOL_VERSION 2.0 
 
 // Control table address for X series (except XL-320)
 #define ADDR_OPERATING_MODE     11      // 1 Byte (testar remover)
