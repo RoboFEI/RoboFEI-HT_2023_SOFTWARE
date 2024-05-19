@@ -1,6 +1,9 @@
+// $ ros2 topic pub -1 /set_joint_topic custom_interfaces/JointState "{id: {1, 2, 5, 6}, info: {2500, 1900, 2048, 2048}, type: {1, 2, 5, 6}}"
+
+
 #include "new_motors_pkg/motors_communication.hpp"
 
-#define PROTOCOL_VERSION 1
+#define PROTOCOL_VERSION 2
 
 #if PROTOCOL_VERSION == 2
     #include "new_motors_pkg/protocol2.h"
@@ -17,7 +20,13 @@ PortHandler *portHandler = PortHandler::getPortHandler(DEVICE_NAME);
 MotorsCommunication::MotorsCommunication()
 : Node("read_write_node")
 {
-    RCLCPP_INFO(this->get_logger(), "Run read write node");        
+    packetHandler = PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+    groupSyncWritePos = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_GOAL_POSITION, LEN_GOAL_POSITION);
+
+    RCLCPP_INFO(this->get_logger(), "Run read write node");   
+
+    joint_state_subscription_ = this->create_subscription<JointStateMsg>(
+      "set_joint_topic", 10, std::bind(&MotorsCommunication::joint_state_callback, this, _1));     
 
     timer_ = this->create_wall_timer(
     8ms, std::bind(&MotorsCommunication::timer_callback, this));
@@ -27,9 +36,29 @@ MotorsCommunication::~MotorsCommunication()
 {
 }
 
+void MotorsCommunication::joint_state_callback(const JointStateMsg::SharedPtr joint_state_info)
+{
+    setJoints(*joint_state_info);
+}
+
 void MotorsCommunication::timer_callback()
 {
-    RCLCPP_INFO_ONCE(this->get_logger(), "Protocol %f", (float)PROTOCOL_VERSION);
+    for(int i=1; i<21; i++)
+    {
+        RCLCPP_INFO(this->get_logger(), "Position %d | %d",i, joints.position[i]);
+    }
+
+    RCLCPP_INFO(this->get_logger(), "-------------------");
+}
+
+void MotorsCommunication::setJoints(JointStateMsg jointInfo)
+{
+    for(int i=0; i<(int)jointInfo.id.size(); i++)
+    {
+        if(jointInfo.type[i] == JointStateMsg::POSITION) 
+            joints.position[jointInfo.id[i]] = jointInfo.info[i];
+        // else if(jointInfo.type[i] == JointStateMsg::VELOCITY) setVelocity()
+    }
 }
 
 bool openSerialPort()

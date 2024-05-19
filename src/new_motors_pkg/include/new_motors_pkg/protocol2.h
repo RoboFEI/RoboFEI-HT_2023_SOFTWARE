@@ -6,3 +6,6 @@
 #define ADDR_PROFILE_VELOCITY   112     // 4 Byte
 #define ADDR_GOAL_POSITION      116     // 4 Byte
 #define ADDR_PRESENT_POSITION   132     // 4 Byte
+     
+#define LEN_PROFILE_VELOCITY    4
+#define LEN_GOAL_POSITION       4
