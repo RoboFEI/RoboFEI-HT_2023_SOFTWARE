@@ -22,7 +22,8 @@ MotorsCommunication::MotorsCommunication()
 {
     packetHandler = PacketHandler::getPacketHandler(PROTOCOL_VERSION);
     groupSyncWritePos = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_GOAL_POSITION, LEN_GOAL_POSITION);
-
+    groupSyncWriteVel = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_PROFILE_VELOCITY, LEN_PROFILE_VELOCITY);
+    
     RCLCPP_INFO(this->get_logger(), "Run read write node");   
 
     joint_state_subscription_ = this->create_subscription<JointStateMsg>(
@@ -57,7 +58,30 @@ void MotorsCommunication::setJoints(JointStateMsg jointInfo)
     {
         if(jointInfo.type[i] == JointStateMsg::POSITION) 
             joints.position[jointInfo.id[i]] = jointInfo.info[i];
+        else if(jointInfo.type[i] == JointStateMsg::VELOCITY)
+        {
+            if(jointInfo.id[i] == BROADCAST_ID) setJointVel(jointInfo.id[i], jointInfo.info[i]);
+            groupSyncWriteVel.addParam((uint8_t)i, /*motores[i] ARRUMAR*/);
+        }
+        else if(jointInfo.type[i] == JointStateMsg::TORQUE)
+        {
+
+        }
         // else if(jointInfo.type[i] == JointStateMsg::VELOCITY) setVelocity()
+    }
+}
+
+void MotorsCommunication::setJointVel(int id, int goalVel)
+{
+    int dxl_comm_result = COMM_TX_FAIL;
+    uint8_t dxl_error = 0;
+
+    dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, (uint8_t) id, ADDR_PROFILE_VELOCITY, (uint32_t) goalVel, &dxl_error);
+
+    if (dxl_comm_result != COMM_SUCCESS) {
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+    } else if (dxl_error != 0) {
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
     }
 }
 

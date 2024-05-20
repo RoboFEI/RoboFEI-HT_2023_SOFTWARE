@@ -32,6 +32,7 @@ public:
 
   PacketHandler * packetHandler;
   GroupSyncWrite *groupSyncWritePos;
+  GroupSyncWrite *groupSyncWriteVel;
 
   Joints joints;
   
@@ -39,6 +40,7 @@ public:
   void timer_callback();
 
   void setJoints(JointStateMsg jointInfo);
+  void setJointVel(int id, int goalVel);
 
   MotorsCommunication();
   virtual ~MotorsCommunication();
