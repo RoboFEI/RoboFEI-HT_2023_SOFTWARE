@@ -4,6 +4,7 @@
 #include <chrono>
 #include <memory>
 #include <vector>
+#include <numeric>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"
@@ -34,7 +35,10 @@ public:
   GroupSyncRead  *groupSyncReadPos;
   
   Joints joints;
+  std::vector<int> allIds = std::vector<int>(20);
+
   int dxl_comm_result = COMM_TX_FAIL;
+
 
   
   void joint_state_callback(const JointStateMsg::SharedPtr joint_state_info);
@@ -55,6 +59,8 @@ public:
 
 private:
   rclcpp::Subscription<JointStateMsg>::SharedPtr joint_state_subscription_;
+  rclcpp::Publisher<JointStateMsg>::SharedPtr all_joints_position_publisher;
+
 
   rclcpp::TimerBase::SharedPtr timer_;
   
