@@ -45,6 +45,8 @@ public:
   void setJointVel(int id, int goalVel);
   void setJointTorque(int id, int goalTorque);
   void setAllJointPos();
+  void getNoTorquePos();
+
 
   uint8_t* convertInfo(int jointInfo);
 
