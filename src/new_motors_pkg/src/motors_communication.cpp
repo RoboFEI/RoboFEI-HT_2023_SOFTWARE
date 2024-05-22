@@ -84,13 +84,52 @@ void MotorsCommunication::joint_state_callback(const JointStateMsg::SharedPtr jo
 void MotorsCommunication::timer_callback()
 {
     setAllJointPos();
-    
+
+    getNoTorquePos();
+
     for(int i=1; i<21; i++)
     {
         RCLCPP_INFO(this->get_logger(), "Torque %d | %d",i, joints.torque[i]);
     }
 
     RCLCPP_INFO(this->get_logger(), "-------------------");
+
+        for(int i=1; i<21; i++)
+    {
+        RCLCPP_INFO(this->get_logger(), "Position %d | %d",i, joints.position[i]);
+    }
+}
+
+void MotorsCommunication::getNoTorquePos()
+{
+    int dxl_addparam_result = COMM_TX_FAIL;
+    std::vector<int> idPositionReaded;
+
+    for(int i=1; i<21; i++)
+    {
+        if(joints.torque[i] == 0)
+        {
+            dxl_addparam_result = groupSyncReadPos->addParam((uint8_t)i);
+
+            if (dxl_addparam_result != true)
+            {
+                RCLCPP_INFO(this->get_logger(), "[ID:%03d] groupSyncReadPos addparam failed", i);
+            }else idPositionReaded.push_back(i);
+
+        }
+        
+    }
+    if(!idPositionReaded.empty())
+        dxl_comm_result = groupSyncReadPos->txRxPacket();
+
+    for(auto id : idPositionReaded)
+    {
+        joints.position[id] = groupSyncReadPos->getData(id, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION);
+    }
+
+    groupSyncReadPos->clearParam();
+
+
 }
 
 void MotorsCommunication::setAllJointPos()
