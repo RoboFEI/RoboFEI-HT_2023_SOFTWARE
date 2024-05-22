@@ -8,3 +8,5 @@
 
 #define LEN_PROFILE_VELOCITY    2
 #define LEN_GOAL_POSITION       2
+
+#define LEN_PRESENT_POSITION    2

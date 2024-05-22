@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rcutils/cmdline_parser.h"
 #include "dynamixel_sdk/dynamixel_sdk.h"
 
 #include "custom_interfaces/msg/joint_state.hpp"
@@ -15,11 +16,9 @@ using namespace dynamixel;
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-int dxl_comm_result = COMM_TX_FAIL;
-
 typedef struct Joints
 {
-  std::vector<std::uint32_t> position = std::vector<std::uint32_t>(21, 2048) ;
+  std::vector<std::uint32_t> position = std::vector<std::uint32_t>(21, 2048);
   std::vector<std::uint32_t> velocity = std::vector<std::uint32_t>(21, 0);
   std::vector<std::uint8_t> torque = std::vector<std::uint8_t>(21, 1);
 }Joints;
@@ -30,17 +29,24 @@ class MotorsCommunication : public rclcpp::Node
 public:
   using JointStateMsg = custom_interfaces::msg::JointState;
 
-  PacketHandler * packetHandler;
+  PacketHandler  *packetHandler;
   GroupSyncWrite *groupSyncWritePos;
-  GroupSyncWrite *groupSyncWriteVel;
-
+  GroupSyncRead  *groupSyncReadPos;
+  
   Joints joints;
+  int dxl_comm_result = COMM_TX_FAIL;
+
   
   void joint_state_callback(const JointStateMsg::SharedPtr joint_state_info);
   void timer_callback();
 
+  void initialMotorsSetup(int id);
   void setJoints(JointStateMsg jointInfo);
   void setJointVel(int id, int goalVel);
+  void setJointTorque(int id, int goalTorque);
+  void setAllJointPos();
+
+  uint8_t* convertInfo(int jointInfo);
 
   MotorsCommunication();
   virtual ~MotorsCommunication();
