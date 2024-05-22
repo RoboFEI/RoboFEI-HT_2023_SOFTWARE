@@ -22,6 +22,8 @@ PortHandler *portHandler = PortHandler::getPortHandler(DEVICE_NAME);
 MotorsCommunication::MotorsCommunication()
 : Node("read_write_node")
 {
+    std::iota (std::begin(allIds), std::end(allIds), 1);
+
     packetHandler = PacketHandler::getPacketHandler(PROTOCOL_VERSION);
     groupSyncWritePos = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_GOAL_POSITION, LEN_GOAL_POSITION);
     groupSyncReadPos  = new dynamixel::GroupSyncRead(portHandler, packetHandler, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION);
@@ -39,7 +41,9 @@ MotorsCommunication::MotorsCommunication()
         rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
 
     joint_state_subscription_ = this->create_subscription<JointStateMsg>(
-      "set_joint_topic", QOS_RKL10V, std::bind(&MotorsCommunication::joint_state_callback, this, _1));     
+      "set_joint_topic", QOS_RKL10V, std::bind(&MotorsCommunication::joint_state_callback, this, _1)); 
+
+    all_joints_position_publisher = this->create_publisher<JointStateMsg>("all_joints_position", 10);    
 
     timer_ = this->create_wall_timer(
     8ms, std::bind(&MotorsCommunication::timer_callback, this));
@@ -84,7 +88,6 @@ void MotorsCommunication::joint_state_callback(const JointStateMsg::SharedPtr jo
 void MotorsCommunication::timer_callback()
 {
     setAllJointPos();
-
     getNoTorquePos();
 
     for(int i=1; i<21; i++)
@@ -98,6 +101,17 @@ void MotorsCommunication::timer_callback()
     {
         RCLCPP_INFO(this->get_logger(), "Position %d | %d",i, joints.position[i]);
     }
+
+    auto allJointsPos = JointStateMsg();
+
+    for(int i=0; i<21; i++)
+    {
+        allJointsPos.id.push_back(i);
+        allJointsPos.info.push_back((int) joints.position[i]);
+        allJointsPos.type.push_back(JointStateMsg::POSITION); 
+    }
+
+    all_joints_position_publisher->publish(allJointsPos);
 }
 
 void MotorsCommunication::getNoTorquePos()
