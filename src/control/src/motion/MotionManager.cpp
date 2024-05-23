@@ -386,39 +386,40 @@ void MotionManager::Process()
 			else
 				m_torque_count = 2047 ;
 
-			//m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
+			// //m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
 
-			auto message_single = custom_interfaces::msg::SetPositionOriginal(); 
-			message_single.id = BROADCAST_ID;
-			message_single.address = MX28::P_GOAL_CURRENT;
-			message_single.position = m_torque_count;
-			publisher_single->publish(message_single);
-			// m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, m_torque_count, &dxl_error);
+			// // auto message_single = custom_interfaces::msg::SetPositionOriginal(); 
+			// auto setJointInfoMsg = JointStateMsg();			
+			// message_single.id = BROADCAST_ID;
+			// message_single.address = MX28::P_GOAL_CURRENT;
+			// message_single.position = m_torque_count;
+			// publisher_single->publish(message_single);
+			// // m_CM730->write2ByteTxRx(portHandler, BROADCAST_ID, MX28::P_GOAL_CURRENT, m_torque_count, &dxl_error);
 			
-			if(m_torque_count == 2047)
-			{
-				RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "torque 2047");
-				message_single.id = 3;
-				message_single.address = MX28::P_GOAL_CURRENT;
-				message_single.position = 1941;
-				publisher_single->publish(message_single);
-				//m_CM730->write2ByteTxRx(portHandler, 3, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
-				message_single.id = 4;
-				message_single.address = MX28::P_GOAL_CURRENT;
-				message_single.position = 1941;
-				publisher_single->publish(message_single);
-				//m_CM730->write2ByteTxRx(portHandler, 4, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
-				message_single.id = 5;
-				message_single.address = MX28::P_GOAL_CURRENT;
-				message_single.position = 1941;
-				publisher_single->publish(message_single);
-				//m_CM730->write2ByteTxRx(portHandler, 5, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
-				message_single.id = 6;
-				message_single.address = MX28::P_GOAL_CURRENT;
-				message_single.position = 1941;
-				publisher_single->publish(message_single);
-				//m_CM730->write2ByteTxRx(portHandler, 6, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
-			}
+			// if(m_torque_count == 2047)
+			// {
+			// 	RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "torque 2047");
+			// 	message_single.id = 3;
+			// 	message_single.address = MX28::P_GOAL_CURRENT;
+			// 	message_single.position = 1941;
+			// 	publisher_single->publish(message_single);
+			// 	//m_CM730->write2ByteTxRx(portHandler, 3, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+			// 	message_single.id = 4;
+			// 	message_single.address = MX28::P_GOAL_CURRENT;
+			// 	message_single.position = 1941;
+			// 	publisher_single->publish(message_single);
+			// 	//m_CM730->write2ByteTxRx(portHandler, 4, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+			// 	message_single.id = 5;
+			// 	message_single.address = MX28::P_GOAL_CURRENT;
+			// 	message_single.position = 1941;
+			// 	publisher_single->publish(message_single);
+			// 	//m_CM730->write2ByteTxRx(portHandler, 5, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+			// 	message_single.id = 6;
+			// 	message_single.address = MX28::P_GOAL_CURRENT;
+			// 	message_single.position = 1941;
+			// 	publisher_single->publish(message_single);
+			// 	//m_CM730->write2ByteTxRx(portHandler, 6, MX28::P_GOAL_CURRENT, 1941, &dxl_error);
+			// }
 		}
 		// if(m_fadeIn && m_torque_count < DEST_TORQUE) {
 		//     m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
@@ -455,7 +456,7 @@ void MotionManager::Process()
 				// MotionStatus::m_CurrentJoints.SetValue(id, (*i)->m_Joint.GetValue(id));
 				}
 			}
-			auto message = custom_interfaces::msg::SetPosition();  
+			// auto message = custom_interfaces::msg::SetPosition();  
 			int param[JointData::NUMBER_OF_JOINTS * MX28::PARAM_BYTES];
 			int joint_num = 0;
 			int pos[19];
@@ -468,10 +469,14 @@ void MotionManager::Process()
 					if(DEBUG_PRINT == true)
 					fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
 					}
-			message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};          
-			message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18]};   
-			publisher_->publish(message);
+			// message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};          
+			// message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18]};   
+			// publisher_->publish(message);
 
+			auto setJointInfoMsg = JointStateMsg();
+			setJointInfoMsg.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};  
+			setJointInfoMsg.info = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18]};
+			setJointInfoMsg.type = std::vector<std::uint8_t>(18, 0);
 		}
 		else
 			RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "nao entrou no segundo if");
