@@ -51,6 +51,7 @@ MotorsCommunication::MotorsCommunication()
 
 MotorsCommunication::~MotorsCommunication()
 {
+    setJointTorque(BROADCAST_ID, 0);
 }
 
 void MotorsCommunication::initialMotorsSetup(int id)
