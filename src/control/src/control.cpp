@@ -389,12 +389,12 @@ private:
                 address_name = address_name + std::to_string(i);
                 if (j[section][address_name] == 112){
                   RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
+                  auto setJointInfoMsg = JointStateMsg();
                   id_name = id_name + std::to_string(i);
                   setJointInfoMsg.id.push_back(j[section][id_name]);
                   // message_single.id = j[section][id_name];
                   vel_name = vel_name + std::to_string(i);
 
-                  auto setJointInfoMsg = JointStateMsg();
                   setJointInfoMsg.info.push_back(j[section][vel_name]);
                   setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
                   pubisher_body_joints_->publish(setJointInfoMsg);
