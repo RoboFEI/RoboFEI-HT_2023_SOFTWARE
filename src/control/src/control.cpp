@@ -76,7 +76,9 @@ std::string section = "Stand Still";
 class Control : public rclcpp::Node
 {
 public:
-  using JointStateMsg = custom_interfaces::msg::JointState;  int robot_number_;
+  using JointStateMsg = custom_interfaces::msg::JointState;
+  
+  int robot_number_;
 
   bool body_activate_;
 
@@ -415,7 +417,7 @@ private:
 
                   RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
                   pubisher_body_joints_->publish(setJointInfoMsg);
-                  
+
                   // publisher_->publish(message);
                   sleep_name = sleep_name + std::to_string(i);
                   sleep_sec = j[section][sleep_name];
