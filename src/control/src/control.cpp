@@ -24,19 +24,20 @@
 #include "MotionManager.h"
 #include "Walking.h"
 #include "rclcpp/rclcpp.hpp"
-#include "custom_interfaces/msg/set_position.hpp"
+// #include "custom_interfaces/msg/set_position.hpp"
 #include "custom_interfaces/msg/decision.hpp"
 #include "custom_interfaces/msg/walk.hpp"
 #include "custom_interfaces/msg/vision.hpp"
 #include "sensor_msgs/msg/imu.hpp"
-#include "custom_interfaces/msg/neck_position.hpp"
+// #include "custom_interfaces/msg/neck_position.hpp"
 #include "std_msgs/msg/bool.hpp"
 #include "GaitMove.hpp"
-#include "custom_interfaces/msg/set_position_original.hpp"
+// #include "custom_interfaces/msg/set_position_original.hpp"
 #include "custom_interfaces/srv/reset.hpp"
 #include "custom_interfaces/action/control.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "json/single_include/nlohmann/json.hpp"
+#include "custom_interfaces/msg/joint_state.hpp"
 
 namespace fs = std::filesystem;
 
@@ -72,13 +73,11 @@ std::string position_name = "position";
 std::string sleep_name = "sleep";
 std::string section = "Stand Still";
 
-// ifstream fJson(folder_path + "/src/control/Data/motion" + std::to_string(2) + ".json");
-// json j = json::parse(fJson);
-
 class Control : public rclcpp::Node
 {
 public:
-  int robot_number_;
+  using JointStateMsg = custom_interfaces::msg::JointState;  int robot_number_;
+
   bool body_activate_;
 
   json j;
@@ -87,9 +86,10 @@ public:
   : Node("control")
   {
     RCLCPP_INFO(this->get_logger(), "Running action node");
-    subscriber_fase_zero = this->create_subscription<std_msgs::msg::Bool>("/fase_zero", 10, std::bind(&Control::topic_callback_fase, this, _1));
-    publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
-    publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
+    subscriber_fase_zero = this->create_subscription<std_msgs::msg::Bool>("/fase_zero", 1, std::bind(&Control::topic_callback_fase, this, _1));
+    // publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
+    // publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
+    pubisher_body_joints_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
     publisher_walk = this->create_publisher<custom_interfaces::msg::Walk>("walking", 10); 
 
     using namespace std::placeholders;
@@ -113,7 +113,7 @@ public:
 
   
 
-  vector<u_int8_t> motors { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 };
+  vector<int> allIds { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
   vector<vector<int>> position;
   
 private:
@@ -304,8 +304,8 @@ private:
     void execute(const std::shared_ptr<GoalHandleAction> goal_handle)
     {   
         auto message_walk = custom_interfaces::msg::Walk();  
-        auto message = custom_interfaces::msg::SetPosition();   
-        auto message_single = custom_interfaces::msg::SetPositionOriginal();
+        // auto message = custom_interfaces::msg::SetPosition();   
+        // auto message_single = custom_interfaces::msg::SetPositionOriginal();
         
         const auto goal = goal_handle->get_goal();
         movement = goal->action_number;
@@ -314,15 +314,20 @@ private:
         auto & movements_remaining = feedback->movements_remaining;
         auto result = std::make_shared<Control_action::Result>();
 
-        if(body_activate_ || movement == 1)
+        if(body_activate_ || movement == 1) // when body deactivate only recive move 1
         {
 
           RCLCPP_INFO(this->get_logger(), "Executing goal");
 
-          message_single.id = 254;
-          message_single.address = 112;
-          message_single.position = 128;
-          publisher_single->publish(message_single);
+          // message_single.id = 254;
+          // message_single.address = 112;
+          // message_single.position = 128;
+          // publisher_single->publish(message_single);
+          auto setJointInfoMsg = JointStateMsg();
+          setJointInfoMsg.id.push_back(254);
+          setJointInfoMsg.info.push_back(112);
+          setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
+          pubisher_body_joints_->publish(setJointInfoMsg);
 
           if (movement != last_movement && (movement == 5 || movement == 6 || movement == 14)) {
             do_gait = true;
@@ -357,7 +362,7 @@ private:
             if (fase_zero) {
               message_walk.walk_number = 0; 
               publisher_walk->publish(message_walk);
-              message.id = motors;
+              // message.id = motors;
 
               number_of_mov = j[section]["number of movements"];
               
@@ -383,21 +388,35 @@ private:
                 if (j[section][address_name] == 112){
                   RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
                   id_name = id_name + std::to_string(i);
-                  message_single.id = j[section][id_name];
+                  setJointInfoMsg.id.push_back(j[section][id_name]);
+                  // message_single.id = j[section][id_name];
                   vel_name = vel_name + std::to_string(i);
-                  message_single.position = j[section][vel_name];
-                  message_single.address = j[section][address_name];
-                  publisher_single->publish(message_single);
+
+                  auto setJointInfoMsg = JointStateMsg();
+                  setJointInfoMsg.info.push_back(j[section][vel_name]);
+                  setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
+                  pubisher_body_joints_->publish(setJointInfoMsg);
+
+                  // message_single.position = j[section][vel_name];
+                  // message_single.address = j[section][address_name];
+                  // publisher_single->publish(message_single);
                   usleep(500000);
                 }
                 else if (j[section][address_name] == 116){
                   position_name = position_name + std::to_string(i);
                   position.push_back(j[section][position_name]);
-                  
-                  message.position = position.front();
+
+                  auto setJointInfoMsg = JointStateMsg();
+                  setJointInfoMsg.info = position.front();
+                  setJointInfoMsg.id = allIds;
+                  setJointInfoMsg.type = std::vector<std::uint8_t>(20, 0);
+  
+                  // message.position = position.front();
 
                   RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
-                  publisher_->publish(message);
+                  pubisher_body_joints_->publish(setJointInfoMsg);
+                  
+                  // publisher_->publish(message);
                   sleep_name = sleep_name + std::to_string(i);
                   sleep_sec = j[section][sleep_name];
                   RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
@@ -418,11 +437,11 @@ private:
       RCLCPP_INFO(this->get_logger(), "Goal succeeded");
     }
 
-    rclcpp::Subscription<custom_interfaces::msg::NeckPosition>::SharedPtr subscription_neck;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscriber_fase_zero;
-    rclcpp::Publisher<custom_interfaces::msg::SetPosition>::SharedPtr publisher_; 
-    rclcpp::Publisher<custom_interfaces::msg::SetPositionOriginal>::SharedPtr publisher_single; 
-    rclcpp::Publisher<custom_interfaces::msg::Walk>::SharedPtr publisher_walk;      
+    // rclcpp::Publisher<custom_interfaces::msg::SetPosition>::SharedPtr publisher_; 
+    // rclcpp::Publisher<custom_interfaces::msg::SetPositionOriginal>::SharedPtr publisher_single; 
+    rclcpp::Publisher<JointStateMsg>::SharedPtr pubisher_body_joints_;
+    rclcpp::Publisher<custom_interfaces::msg::Walk>::SharedPtr publisher_walk; 
     rclcpp::Client<custom_interfaces::srv::Reset>::SharedPtr client;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp_action::Server<Control_action>::SharedPtr action_server_;
