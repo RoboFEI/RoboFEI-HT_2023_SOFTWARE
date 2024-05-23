@@ -33,8 +33,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
-#include "custom_interfaces/msg/set_position.hpp"
-#include "custom_interfaces/msg/set_position_original.hpp"
+// #include "custom_interfaces/msg/set_position.hpp"
+// #include "custom_interfaces/msg/set_position_original.hpp"
 #include "custom_interfaces/srv/get_position.hpp"
 #include "custom_interfaces/msg/walk.hpp"
 #include "custom_interfaces/msg/neck_position.hpp"
@@ -60,8 +60,8 @@ float Y_AMPLITUDE = 0;
 float A_AMPLITUDE = 0;
 int last_movement = 0;
 int walk=0;
-int neck_up = 2047;
-int neck_sides = 2047;
+// int neck_up = 2047;
+// int neck_sides = 2047;
 
 MotionManager* MotionManager::m_UniqueInstance = new MotionManager(options);
 
@@ -78,10 +78,11 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	
 	subscription_imu = this->create_subscription<sensor_msgs::msg::Imu>("imu/data", 10, std::bind(&MotionManager::topic_callback, this, _1));
 	subscription_walk = this->create_subscription<custom_interfaces::msg::Walk>("walking", 10, std::bind(&MotionManager::topic_callback_walk, this, _1));
-	subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>("/neck_position", 10, std::bind(&MotionManager::topic_callback_neck, this, _1));
-	publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
-	publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
-	client = this->create_client<custom_interfaces::srv::GetPosition>("get_position");
+	// subscription_neck = this->create_subscription<custom_interfaces::msg::NeckPosition>("/neck_position", 10, std::bind(&MotionManager::topic_callback_neck, this, _1));
+	// publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
+	// publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
+	pubisher_body_joints_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
+	// client = this->create_client<custom_interfaces::srv::GetPosition>("get_position");
     timer_ = this->create_wall_timer(4ms, std::bind(&MotionManager::Process, this));
 	keep_walking = false;
 	for(int i = 0; i < JointData::NUMBER_OF_JOINTS; i++)
@@ -92,11 +93,11 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	
 }
 
-void MotionManager::topic_callback_neck(const std::shared_ptr<custom_interfaces::msg::NeckPosition> neck_msg) const
-    {
-      neck_sides = neck_msg->position19;
-      neck_up = neck_msg->position20;
-    }
+// void MotionManager::topic_callback_neck(const std::shared_ptr<custom_interfaces::msg::NeckPosition> neck_msg) const
+//     {
+//       neck_sides = neck_msg->position19;
+//       neck_up = neck_msg->position20;
+//     }
 
 void MotionManager::update_loop(void)
 {
@@ -461,17 +462,23 @@ void MotionManager::Process()
 			int joint_num = 0;
 			int pos[18];
 			for(int id=JointData::ID_MIN; id<=JointData::ID_MAX-2; id++) // loop que vai de 1 até 18
-					{
-					param[id] = id;
-					pos[id] = MotionStatus::m_CurrentJoints.GetValue(id)+ MotionManager::GetInstance()->m_Offset[id];
-					
-					
-					if(DEBUG_PRINT == true)
-					fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
-					}
-			message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};          
-			message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18], neck_sides, neck_up};   
-			publisher_->publish(message);
+			{
+				param[id] = id;
+				pos[id] = MotionStatus::m_CurrentJoints.GetValue(id)+ MotionManager::GetInstance()->m_Offset[id];
+				
+				
+				if(DEBUG_PRINT == true)
+				fprintf(stderr, "ID[%d] : %d \n", id, MotionStatus::m_CurrentJoints.GetValue(id));
+			}
+
+			// message.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};          
+			// message.position = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18]};   
+			setJointInfoMsg.id = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};  
+			setJointInfoMsg.info = {pos[1], pos[2], pos[3], pos[4], pos[5], pos[6], pos[7], pos[8], pos[9], pos[10], pos[11], pos[12], pos[13], pos[14], pos[15], pos[16], pos[17], pos[18]};
+			setJointInfoMsg.type = std::vector<std::uint8_t>(18, 0);
+
+			// publisher_->publish(message);
+			pubisher_body_joints_->publish(setJointInfoMsg);	
 
 		}
 		else

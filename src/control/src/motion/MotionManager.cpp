@@ -34,11 +34,11 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "std_msgs/msg/bool.hpp"
-#include "custom_interfaces/msg/set_position.hpp"
-#include "custom_interfaces/msg/set_position_original.hpp"
+// #include "custom_interfaces/msg/set_position.hpp"
+// #include "custom_interfaces/msg/set_position_original.hpp"
 #include "custom_interfaces/srv/get_position.hpp"
 #include "custom_interfaces/msg/walk.hpp"
-#include "custom_interfaces/msg/neck_position.hpp"
+// #include "custom_interfaces/msg/neck_position.hpp"
 
 #define INI_FILE_PATH       "src/control/Data/config_altair.ini"
 
@@ -61,8 +61,8 @@ float Y_AMPLITUDE = 0;
 float A_AMPLITUDE = 0;
 int last_movement = 0;
 int walk=0;
-int neck_up = 2047;
-int neck_sides = 2047;
+// int neck_up = 2047;
+// int neck_sides = 2047;
 
 MotionManager* MotionManager::m_UniqueInstance = new MotionManager(options);
 
@@ -79,11 +79,12 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
 	
 	subscription_imu = this->create_subscription<sensor_msgs::msg::Imu>("imu/data", 10, std::bind(&MotionManager::topic_callback, this, _1));
 	subscription_walk = this->create_subscription<custom_interfaces::msg::Walk>("walking", 10, std::bind(&MotionManager::topic_callback_walk, this, _1));
-	subscription_positions = this->create_subscription<custom_interfaces::msg::SetPosition>("set_position", 10, std::bind(&MotionManager::topic_callback_positions, this, _1));
-	publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
+	// subscription_positions = this->create_subscription<custom_interfaces::msg::SetPosition>("set_position", 10, std::bind(&MotionManager::topic_callback_positions, this, _1));
+	// publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
+	pubisher_body_joints_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
 	publisher_fase_zero = this->create_publisher<std_msgs::msg::Bool>("/fase_zero", 10); 
-	publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
-	client = this->create_client<custom_interfaces::srv::GetPosition>("get_position");
+	// publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10); 
+	// client = this->create_client<custom_interfaces::srv::GetPosition>("get_position");
     timer_ = this->create_wall_timer(4ms, std::bind(&MotionManager::Process, this));
 	keep_walking = false;
 	for(int i = 0; i < JointData::NUMBER_OF_JOINTS; i++)
@@ -113,11 +114,11 @@ void MotionManager::topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> 
         float IMU_GYRO_Y  = -imu_msg_->angular_velocity.y/10;
 	}
 
-void MotionManager::topic_callback_positions(const std::shared_ptr<custom_interfaces::msg::SetPosition> position_msg_) const
-    {
-		for (int i=0; i<20; i++)
-        	position[i] = position_msg_->position[i];
-	}
+// void MotionManager::topic_callback_positions(const std::shared_ptr<custom_interfaces::msg::SetPosition> position_msg_) const
+//     {
+// 		for (int i=0; i<20; i++)
+//         	position[i] = position_msg_->position[i];
+// 	}
 
 void MotionManager::GetIniParameter()
 {
