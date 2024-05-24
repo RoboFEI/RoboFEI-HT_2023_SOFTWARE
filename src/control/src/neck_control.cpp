@@ -18,7 +18,7 @@ NeckNode::NeckNode()
   vision_px_subscriber_ = this->create_subscription<Point2d>(
     "/ball_px_position", 10, std::bind(&NeckNode::listener_callback_vision_px, this, std::placeholders::_1), sub_opt);
     
-  neck_position_subscriber_ = this->create_subscription<NeckPosition>(
+  neck_position_subscriber_ = this->create_subscription<JointStateMsg>(
     "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
     
   set_neck_position_publisher_ = this->create_publisher<SetPosition>("/set_neck_position", 10);
@@ -98,10 +98,10 @@ void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
   ball.close        =   msg->close;
 }
 
-void NeckNode::listener_callback_neck(const NeckPosition::SharedPtr msg)
+void NeckNode::listener_callback_neck(const JointStateMsg::SharedPtr msg)
 {
-  neck.pan  = msg->position19;
-  neck.tilt = msg->position20;
+  neck.pan  = msg->info[19];
+  neck.tilt = msg->info[20];
   //RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
 }
 
