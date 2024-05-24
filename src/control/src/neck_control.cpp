@@ -13,15 +13,15 @@ NeckNode::NeckNode()
   auto sub_opt = rclcpp::SubscriptionOptions();
 
   vision_subscriber_ = this->create_subscription<VisionInfo>(
-    "/ball_position", 10, std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1), sub_opt);
+    "ball_position", 10, std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1), sub_opt);
   
   vision_px_subscriber_ = this->create_subscription<Point2d>(
-    "/ball_px_position", 10, std::bind(&NeckNode::listener_callback_vision_px, this, std::placeholders::_1), sub_opt);
+    "ball_px_position", 10, std::bind(&NeckNode::listener_callback_vision_px, this, std::placeholders::_1), sub_opt);
     
   neck_position_subscriber_ = this->create_subscription<JointStateMsg>(
-    "/neck_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
+    "all_joints_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
     
-  set_neck_position_publisher_ = this->create_publisher<SetPosition>("/set_neck_position", 10);
+  set_neck_position_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
 
 
   main_thread_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -64,20 +64,24 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
 
     if( this->robot_state == State::follow_ball)
     {
-      auto new_neck_position = SetPosition();
+      auto new_neck_position = JointStateMsg();
 
       new_neck_position.id.push_back(19);
       new_neck_position.id.push_back(20);
 
-      new_neck_position.position.push_back(neck.pan - ball_pos_px.x * x_p_gain);
-      new_neck_position.position.push_back(neck.tilt - ball_pos_px.y * y_p_gain);
+      new_neck_position.info.push_back(neck.pan - ball_pos_px.x * x_p_gain);
+      new_neck_position.info.push_back(neck.tilt - ball_pos_px.y * y_p_gain);
 
-      if(new_neck_position.position[0] > neck_left_limit) new_neck_position.position[0] = neck_left_limit;
-      else if(new_neck_position.position[0] < neck_right_limit) new_neck_position.position[0] = neck_right_limit;
-      if(new_neck_position.position[1] > neck_up_limit) new_neck_position.position[1] = neck_up_limit;
-      else if(new_neck_position.position[1] < neck_down_limit) new_neck_position.position[1] = neck_down_limit;
+      new_neck_position.type.push_back(JointStateMsg::POSITION);
+      new_neck_position.type.push_back(JointStateMsg::POSITION);
 
-      RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.position[0], new_neck_position.position[1]);
+
+      if(new_neck_position.info[0] > neck_left_limit) new_neck_position.info[0] = neck_left_limit;
+      else if(new_neck_position.info[0] < neck_right_limit) new_neck_position.info[0] = neck_right_limit;
+      if(new_neck_position.info[1] > neck_up_limit) new_neck_position.info[1] = neck_up_limit;
+      else if(new_neck_position.info[1] < neck_down_limit) new_neck_position.info[1] = neck_down_limit;
+
+      RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.info[0], new_neck_position.info[1]);
 
       set_neck_position_publisher_->publish(new_neck_position);
     }
@@ -110,15 +114,18 @@ void NeckNode::search_ball()
   
   if(search_ball_timer.delay(1000 + (325 * (search_ball_state/3))))
   {
-    auto new_neck_position = SetPosition();
+    auto new_neck_position = JointStateMsg();
 
     new_neck_position.id.push_back(19);
     new_neck_position.id.push_back(20);
   
-    new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][0]);
-    new_neck_position.position.push_back(this->search_ball_pos[search_ball_state][1]);
+    new_neck_position.info.push_back(this->search_ball_pos[search_ball_state][0]);
+    new_neck_position.info.push_back(this->search_ball_pos[search_ball_state][1]);
+
+    new_neck_position.type.push_back(JointStateMsg::POSITION);
+    new_neck_position.type.push_back(JointStateMsg::POSITION);
     
-    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.position[0], new_neck_position.position[1]);
+    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.info[0], new_neck_position.info[1]);
 
     if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
 
