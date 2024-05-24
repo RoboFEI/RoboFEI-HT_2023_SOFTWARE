@@ -1,427 +1,309 @@
-// Copyright 2021 ROBOTIS CO., LTD.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// $ ros2 topic pub -1 /set_joint_topic custom_interfaces/JointState "{id: {1, 2, 5, 6}, info: {2500, 1900, 2048, 2048}, type: {1, 2, 5, 6}}"
 
-/*******************************************************************************
-// This example is written for DYNAMIXEL X(excluding XL-320) and MX(2.0) series with U2D2.
-// For other series, please refer to the product eManual and modify the Control Table addresses and other definitions.
-// To test this example, please follow the commands below.
-//
-// Open terminal #1
-// $ ros2 run dynamixel_sdk_examples read_write_node
-// ros2 topic pub -1 decision custom_interfaces/Decision "{decision: 1}"
-//
-// Open terminal #2 (run one of below commands at a time)
-// $ ros2 topic pub -1 /set_position_single custom_interfaces/SetPositionOriginal "{id: 30, address: 116, position: 1000}"
-// $ ros2 topic pub -1 /set_position custom_interfaces/SetPosition "{id: {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, position: {2048, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2039, 2038, 2049, 2040, 2041, 2042, 2043, 2044, 2045, 2046, 2047, 2050}}"
-// $ ros2 topic pub -1 /set_position custom_interfaces/SetPosition "{id: {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, position: {2500, 1900, 2100, 2048, 2047, 2046, 2049, 2050, 2051, 2052, 2045, 2044}}"
-// $ ros2 topic pub -1 /set_position custom_interfaces/SetPosition "{id: {1, 2, 5, 6}, position: {2500, 1900, 2048, 2048}}"
-// $ ros2 service call /get_position custom_interfaces/srv/GetPosition "id: 1"
-//
-// Author: Will Son
-*******************************************************************************/
-
-#include <cstdio>
-#include <memory>
-#include <string>
-#include <unistd.h>
-#include <list>
-#include <chrono>
-#include <functional>
-
-#include "dynamixel_sdk/dynamixel_sdk.h"
-#include "custom_interfaces/msg/set_position.hpp"
-#include "custom_interfaces/msg/set_position_original.hpp"
-#include "custom_interfaces/srv/get_position.hpp"
-#include "custom_interfaces/msg/neck_position.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rcutils/cmdline_parser.h"
 
 #include "motors_pkg/motors_communication.hpp"
 
-// Control table address for X series (except XL-320)
-#define ADDR_OPERATING_MODE 11
-#define ADDR_TORQUE_ENABLE 64
-#define ADDR_GOAL_POSITION 116
-#define ADDR_PRESENT_POSITION 132
-#define MAX_POSITION_LIMIT 48
-#define MIN_POSITION_LIMIT 52
+#define PROTOCOL_VERSION 2   
 
-// Protocol version
-#define PROTOCOL_VERSION 2.0  // Default Protocol version of DYNAMIXEL X series.
+#if PROTOCOL_VERSION == 2
+    #include "motors_pkg/protocol2.h"
+#else
+    #include "motors_pkg/protocol1.h"
+#endif
 
 // Default setting
 #define BAUDRATE 1000000  // Default Baudrate of DYNAMIXEL X series
 #define DEVICE_NAME "/dev/motors"  // [Linux]: "/dev/ttyUSB", [Windows]: "COM*"
 
-using namespace dynamixel;
-
-using namespace std::chrono_literals;
-
-
-PortHandler * portHandler = PortHandler::getPortHandler(DEVICE_NAME);
-PacketHandler * packetHandler = PacketHandler::getPacketHandler(PROTOCOL_VERSION);
-GroupSyncWrite groupSyncWrite(portHandler, packetHandler, ADDR_GOAL_POSITION, 4);
-
-uint8_t dxl_error = 0;
-uint32_t goal_position[19] = {0};
 int dxl_comm_result = COMM_TX_FAIL;
-int dxl_addparam_result = false;
 
-ReadWriteNode::ReadWriteNode()
+PortHandler *portHandler = PortHandler::getPortHandler(DEVICE_NAME);
+
+MotorsCommunication::MotorsCommunication()
 : Node("read_write_node")
 {
-  RCLCPP_INFO(this->get_logger(), "Run read write node");
+    std::iota (std::begin(allIds), std::end(allIds), 1);
 
-  for(int i=1; i<21; i++)
-  {
-    uint32_t position[21] = {2048, 1676,2420,2217,1915,888,3208,2048,2087,2044,2078,1783,2350,2840,1300,2592,1560,2012,2082,2048,1750};
+    packetHandler = PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+    groupSyncWritePos = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_GOAL_POSITION, LEN_GOAL_POSITION);
+    groupSyncReadPos  = new dynamixel::GroupSyncRead(portHandler, packetHandler, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION);
+    
+    initialMotorsSetup(BROADCAST_ID);
 
-    motores[i][0] = DXL_LOBYTE(DXL_LOWORD(position[i]));
-    motores[i][1] = DXL_HIBYTE(DXL_LOWORD(position[i]));
-    motores[i][2] = DXL_LOBYTE(DXL_HIWORD(position[i]));
-    motores[i][3] = DXL_HIBYTE(DXL_HIWORD(position[i]));  
-  }
+    RCLCPP_INFO(this->get_logger(), "Run read write node"); 
 
+    this->declare_parameter("qos_depth", 10);
+    int8_t qos_depth = 0;
+    this->get_parameter("qos_depth", qos_depth);
+    
 
+    const auto QOS_RKL10V =
+        rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
 
-  this->declare_parameter("qos_depth", 10);
-  int8_t qos_depth = 0;
-  this->get_parameter("qos_depth", qos_depth);
-  
+    joint_state_subscription_ = this->create_subscription<JointStateMsg>(
+      "set_joint_topic", QOS_RKL10V, std::bind(&MotorsCommunication::joint_state_callback, this, _1)); 
 
-  const auto QOS_RKL10V =
-    rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
-  
-  //Create a publisher to send the neck position for vision.py
-  neck_position_publisher = this->create_publisher<NeckPosition>("neck_position", 10);
+    all_joints_position_publisher = this->create_publisher<JointStateMsg>("all_joints_position", 10);    
 
-  all_joint_positions_publisher = this->create_publisher<SetPosition>("all_positions", 10);
+    timer_ = this->create_wall_timer(
+    8ms, std::bind(&MotorsCommunication::timer_callback, this));
+}
 
-  timer_ = this->create_wall_timer(
-  8ms, std::bind(&ReadWriteNode::timer_callback, this));
-   
-  set_neck_position_subscriber_ =
-    this->create_subscription<SetPosition>(
-    "set_neck_position",
-    QOS_RKL10V,
-    [this](const std::shared_ptr<SetPosition> msg) -> void 
+MotorsCommunication::~MotorsCommunication()
+{
+    setJointTorque(BROADCAST_ID, 0);
+}
+
+void MotorsCommunication::initialMotorsSetup(int id)
+{
+    if(PROTOCOL_VERSION == 2)
     {
-      save_motors_position(msg);
-    }
-  );
-
-
-  set_position_subscriber_ =
-    this->create_subscription<SetPosition>(
-    "set_position",
-    QOS_RKL10V,
-    [this](const std::shared_ptr<SetPosition> msg) -> void 
-    {      
-      save_motors_position(msg);
-    }
-  );
-
-
-  set_position_subscriber_single =
-  this->create_subscription<SetPositionOriginal>(
-  "set_position_single",
-  QOS_RKL10V,
-  [this](const SetPositionOriginal::SharedPtr msg) -> void
-  {
-    uint8_t dxl_error = 0;
-
-    // Position Value of X series is 4 byte data.
-    // For AX & MX(1.0) use 2 byte data(uint16_t) for the Position Value.
-    uint32_t goal_position = (unsigned int)msg->position;  // Convert int32 -> uint32
-    uint32_t ADDR_GOAL = (unsigned int)msg->address;
-
-    if(ADDR_GOAL == 102){
-      // Write Goal Position (length : 4 bytes)
-      // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
-      dxl_comm_result =
-      packetHandler->write2ByteTxRx(
+        uint8_t dxl_error = 0;
+        
+        // Use Position Control Mode
+        dxl_comm_result = packetHandler->write1ByteTxRx(
         portHandler,
-        (uint8_t) msg->id,
-        ADDR_GOAL,
-        goal_position,
+        id,
+        11,
+        3,
         &dxl_error
         );
-    }
-    else if(ADDR_GOAL == ADDR_TORQUE_ENABLE)
-    {
-      if(goal_position == 1) set_position(msg->id, get_position(msg->id));
 
-      dxl_comm_result = packetHandler->write1ByteTxRx(
-        portHandler,
-        (uint8_t) msg->id,
-        ADDR_TORQUE_ENABLE,
-        goal_position,
-        &dxl_error
-      );
+        if (dxl_comm_result != COMM_SUCCESS) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to set Position Control Mode.");
+        } else {
+            RCLCPP_INFO(this->get_logger(), "Succeeded to set Position Control Mode.");
+        }
     }
-    else{
-      // Write Goal Position (length : 4 bytes)
-      // When writing 2 byte data to AX / MX(1.0), use write2ByteTxRx() instead.
-      dxl_comm_result =
-      packetHandler->write4ByteTxRx(
-        portHandler,
-        (uint8_t) msg->id,
-        ADDR_GOAL,
-        goal_position,
-        &dxl_error
-      );
+
+
+    // Enable Torque of DYNAMIXEL
+    setJointTorque(id, 1);
+}
+
+void MotorsCommunication::joint_state_callback(const JointStateMsg::SharedPtr joint_state_info)
+{
+    setJoints(*joint_state_info);
+}
+
+void MotorsCommunication::timer_callback()
+{
+    setAllJointPos();
+    getNoTorquePos();
+
+    for(int i=1; i<21; i++)
+    {
+        RCLCPP_INFO(this->get_logger(), "Torque %d | %d",i, joints.torque[i]);
     }
+
+    RCLCPP_INFO(this->get_logger(), "-------------------");
+
+        for(int i=1; i<21; i++)
+    {
+        RCLCPP_INFO(this->get_logger(), "Position %d | %d",i, joints.position[i]);
+    }
+
+    RCLCPP_INFO(this->get_logger(), "-------------------");
+
+        for(int i=1; i<21; i++)
+    {
+        RCLCPP_INFO(this->get_logger(), "Vel %d | %d",i, joints.velocity[i]);
+    }
+
+    auto allJointsPos = JointStateMsg();
+
+    for(int i=0; i<21; i++)
+    {
+        allJointsPos.id.push_back(i);
+        allJointsPos.info.push_back((int) joints.position[i]);
+        allJointsPos.type.push_back(JointStateMsg::POSITION); 
+    }
+
+    all_joints_position_publisher->publish(allJointsPos);
+}
+
+void MotorsCommunication::getNoTorquePos()
+{
+    int dxl_addparam_result = COMM_TX_FAIL;
+    std::vector<int> idPositionReaded;
+
+    for(int i=1; i<21; i++)
+    {
+        if(joints.torque[i] == 0)
+        {
+            dxl_addparam_result = groupSyncReadPos->addParam((uint8_t)i);
+
+            if (dxl_addparam_result != true)
+            {
+                RCLCPP_INFO(this->get_logger(), "[ID:%03d] groupSyncReadPos addparam failed", i);
+            }else idPositionReaded.push_back(i);
+
+        }
+        
+    }
+    if(!idPositionReaded.empty())
+        dxl_comm_result = groupSyncReadPos->txRxPacket();
+
+    for(auto id : idPositionReaded)
+    {
+        joints.position[id] = groupSyncReadPos->getData(id, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION);
+    }
+
+    groupSyncReadPos->clearParam();
+
+
+}
+
+void MotorsCommunication::setAllJointPos()
+{
+    uint8_t dxl_error = 0;
+
+    for(int i=1; i<21; i++)
+    {
+        groupSyncWritePos->addParam((uint8_t)i, convertInfo(joints.position[i]));
+    }
+
+    dxl_comm_result = groupSyncWritePos->txPacket();
 
     if (dxl_comm_result != COMM_SUCCESS) {
-      RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
-    } else if (dxl_error != 0) {
-      RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
-    } else {
-      //RCLCPP_INFO(this->get_logger(), "Set [ID: %d] [Goal Position: %d] [Address: %d]", msg->id, msg->position, msg->address);
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+    } 
+    else if (dxl_error != 0) {
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+    } 
+    else {
+        //RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d,%d,%d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d, %d,%d}]", 
+        //msg->id[0], msg->id[1], msg->id[2], msg->id[3], msg->id[4], msg->id[5], msg->id[6], msg->id[7], msg->id[8], msg->id[9], msg->id[10], msg->id[11], msg->id[12], msg->id[13], msg->id[14], msg->id[15], msg->id[16], msg->id[17], msg->id[18], msg->id[19],
+        //msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11], msg->position[12], msg->position[13], 
+        //msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
     }
-  }
-  );
 
-  auto get_present_position =
-  [this](
-  const std::shared_ptr<GetPosition::Request> request,
-  std::shared_ptr<GetPosition::Response> response) -> void
-  {
-    int present_position;
-    // Read Present Position (length : 4 bytes) and Convert uint32 -> int32
-    // When reading 2 byte data from AX / MX(1.0), use read2ByteTxRx() instead.
-    dxl_comm_result = packetHandler->read4ByteTxRx(
-      portHandler,
-      (uint8_t) request->id,
-      ADDR_PRESENT_POSITION,
-      reinterpret_cast<uint32_t *>(&present_position),
-      &dxl_error
-    );
-
-    RCLCPP_INFO(
-      this->get_logger(),
-      "Get [ID: %d] [Present Position: %d]",
-      request->id,
-      present_position
-    );
-
-    response->position = present_position;
-  };
-  get_position_server_ = create_service<GetPosition>("get_position", get_present_position);
-
+    groupSyncWritePos->clearParam();
 }
 
-void ReadWriteNode::save_motors_position(const SetPosition::SharedPtr msg)
+void MotorsCommunication::setJoints(JointStateMsg jointInfo)
 {
-  for(int i=0; i<(int)msg->position.size(); i++)
-  {
-    uint32_t position = (unsigned int)msg->position[i]; // Convert int32 -> uint32
+    for(int i=0; i<(int)jointInfo.id.size(); i++)
+    {
+        if(jointInfo.type[i] == JointStateMsg::POSITION) 
+            joints.position[jointInfo.id[i]] = jointInfo.info[i];
 
-    motores2[i] = position;
-    
-    RCLCPP_INFO(this->get_logger(), "set id%d: pos %d", msg->id[i], motores2[i]);
+        else if(jointInfo.type[i] == JointStateMsg::VELOCITY)
+        {
+            setJointVel(jointInfo.id[i], jointInfo.info[i]);
+            if(jointInfo.id[i] == BROADCAST_ID)
+            {
+                joints.velocity = std::vector<std::uint32_t>(21, jointInfo.info[i]);
+            } 
+            else
+            {
+                joints.velocity[jointInfo.id[i]] = jointInfo.info[i];
+            } 
+        }
 
-    motores[msg->id[i]][0] = DXL_LOBYTE(DXL_LOWORD(position));
-    motores[msg->id[i]][1] = DXL_HIBYTE(DXL_LOWORD(position));
-    motores[msg->id[i]][2] = DXL_LOBYTE(DXL_HIWORD(position));
-    motores[msg->id[i]][3] = DXL_HIBYTE(DXL_HIWORD(position)); 
-  }  
-}
-
-void ReadWriteNode::timer_callback()
-{
-  uint8_t dxl_error = 0;
-
-  for(int i=1; i<21; i++)
-  {
-    dxl_addparam_result = groupSyncWrite.addParam((uint8_t)i, motores[i]);
-    if (dxl_addparam_result != true) {
-      RCLCPP_INFO(this->get_logger(), "Failed to addparam to groupSyncWrite for Dynamixel ID %d", i);
+        else if(jointInfo.type[i] == JointStateMsg::TORQUE)
+        {
+            setJointTorque(jointInfo.id[i], jointInfo.info[i]);
+        }
     }
-  }
-
-  dxl_comm_result = groupSyncWrite.txPacket();
-
-  if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
-  } 
-  else if (dxl_error != 0) {
-    RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
-  } 
-  else {
-    //RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d,%d,%d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d, %d,%d}]", 
-    //msg->id[0], msg->id[1], msg->id[2], msg->id[3], msg->id[4], msg->id[5], msg->id[6], msg->id[7], msg->id[8], msg->id[9], msg->id[10], msg->id[11], msg->id[12], msg->id[13], msg->id[14], msg->id[15], msg->id[16], msg->id[17], msg->id[18], msg->id[19],
-    //msg->position[0], msg->position[1], msg->position[2], msg->position[3], msg->position[4], msg->position[5], msg->position[6], msg->position[7], msg->position[8], msg->position[9], msg->position[10], msg->position[11], msg->position[12], msg->position[13], 
-    //msg->position[14], msg->position[15], msg->position[16], msg->position[17],msg->position[18], msg->position[19]);
-  }
-
-  groupSyncWrite.clearParam();
-
-  auto neck_message = custom_interfaces::msg::NeckPosition();
-
-
-  for(int i=1; i<21; i++)
-  {
-    dxl_comm_result = packetHandler->read4ByteTxRx(
-      portHandler,
-      (uint8_t) (i), //for motors with id 19 and 20
-      ADDR_PRESENT_POSITION,
-      reinterpret_cast<uint32_t *>(&motors[i]),
-      &dxl_error
-    );
-  }
-  
-  neck_message.position19 = motors[19];
-  neck_message.position20 = motors[20];
-
-  neck_position_publisher->publish(neck_message);
-
-  auto all_motors = SetPosition();
-
-  std::vector<int> motors_vec(motors, motors + 21);
-  motors_vec.erase(motors_vec.begin());
-  all_motors.position = motors_vec;
-  all_motors.id = id;
-
-  all_joint_positions_publisher->publish(all_motors);
 }
 
-ReadWriteNode::~ReadWriteNode()
+void MotorsCommunication::setJointTorque(int id, int goalTorque)
 {
-}
+    uint8_t dxl_error = 0;
 
-int ReadWriteNode::get_position(const int &id)
-{
-  int present_position;
-
-  // Read Present Position (length : 4 bytes) and Convert uint32 -> int32
-  // When reading 2 byte data from AX / MX(1.0), use read2ByteTxRx() instead.
-  dxl_comm_result = packetHandler->read4ByteTxRx(
+    dxl_comm_result = packetHandler->write1ByteTxRx(
     portHandler,
     (uint8_t) id,
-    ADDR_PRESENT_POSITION,
-    reinterpret_cast<uint32_t *>(&present_position),
-    &dxl_error
-  );
-
-  return present_position;
-
-}
-
-bool ReadWriteNode::set_position(const int &id, const int &position)
-{
-  uint32_t goal_position = (unsigned int)position;
-
-  motores[id][0] = DXL_LOBYTE(DXL_LOWORD(goal_position));
-  motores[id][1] = DXL_HIBYTE(DXL_LOWORD(goal_position));
-  motores[id][2] = DXL_LOBYTE(DXL_HIWORD(goal_position));
-  motores[id][3] = DXL_HIBYTE(DXL_HIWORD(goal_position)); 
-
-  return true;
-}
-
-void setupDynamixel(uint8_t dxl_id)
-{
-  // Use Position Control Mode
-  dxl_comm_result = packetHandler->write1ByteTxRx(
-    portHandler,
-    dxl_id,
-    ADDR_OPERATING_MODE,
-    3,
-    &dxl_error
-  );
-
-  if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set Position Control Mode.");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set Position Control Mode.");
-  }
-
-  // Enable Torque of DYNAMIXEL
-  dxl_comm_result = packetHandler->write1ByteTxRx(
-    portHandler,
-    dxl_id,
     ADDR_TORQUE_ENABLE,
-    1,
+    (uint8_t) goalTorque,
     &dxl_error
-  );
+    );
 
-  if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to enable torque.");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to enable torque.");
-  }
+    if (dxl_comm_result != COMM_SUCCESS) {
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+        return;
+    } else if (dxl_error != 0) {
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+        return;
+    }
 
-  //Declarando o valor limite da velocidade usado pelo P_PROFILE_VELOCITY.
-  dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, BROADCAST_ID, 44, 1023, &dxl_error);
+    if(id == BROADCAST_ID) joints.torque = std::vector<std::uint8_t>(21, goalTorque);
+    else joints.torque[id] = goalTorque;
+}
 
-  if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to define limit velocity.");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to define limit velocity.");
-  }
+uint8_t *MotorsCommunication::convertInfo(int jointInfo)
+{
+    uint8_t *info = new uint8_t[LEN_GOAL_POSITION];
 
-  //Declarando o valor limite da aceleração usado pelo P_PROFILE_ACCELERATION.
-  dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, BROADCAST_ID, 40, 32767, &dxl_error);
+    if(LEN_GOAL_POSITION == 4)
+    {
+        info[0] = DXL_LOBYTE(DXL_LOWORD(jointInfo));
+        info[1] = DXL_HIBYTE(DXL_LOWORD(jointInfo));
+        info[2] = DXL_LOBYTE(DXL_HIWORD(jointInfo));
+        info[3] = DXL_HIBYTE(DXL_HIWORD(jointInfo));
+    } else
+    {
+        info[0] = DXL_LOBYTE(jointInfo);
+        info[1] = DXL_HIBYTE(jointInfo);
+    }
 
-  if (dxl_comm_result != COMM_SUCCESS) {
-    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to define limit acceleration.");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to define limit acceleration.");
-  }
+    return info;
+
+}
+void MotorsCommunication::setJointVel(int id, int goalVel)
+{
+    uint8_t dxl_error = 0;
+
+    if(LEN_PROFILE_VELOCITY == 4)
+        dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, (uint8_t) id, ADDR_PROFILE_VELOCITY, (uint32_t) goalVel, &dxl_error);
+    
+    else
+        dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, (uint8_t) id, ADDR_PROFILE_VELOCITY, (uint32_t) goalVel, &dxl_error);
+
+
+    if (dxl_comm_result != COMM_SUCCESS) {
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+    } else if (dxl_error != 0) {
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+    }
+}
+
+bool openSerialPort()
+{
+    dxl_comm_result = portHandler->openPort();
+    if (dxl_comm_result == false) {
+        RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to open the port!");
+        return false;
+    } else {
+        RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to open the port.");
+    }
+
+    // Set the baudrate of the serial port (use DYNAMIXEL Baudrate)
+    dxl_comm_result = portHandler->setBaudRate(BAUDRATE);
+    if (dxl_comm_result == false) {
+        RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set the baudrate!");
+        return false;
+    } else {
+        RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set the baudrate.");
+    }
+
+    return true;
 }
 
 int main(int argc, char * argv[])
-{
-  char string1[50]; //String
-  sprintf(string1,"echo 123456| sudo -S renice -20 -p %d", getpid());
-  system(string1);//prioridade
+{ 
+    char string1[50]; //String
+    sprintf(string1,"echo 123| sudo -S renice -20 -p %d", getpid());
+    system(string1);//prioridade
 
-  // Open Serial Port
-  dxl_comm_result = portHandler->openPort();
-  if (dxl_comm_result == false) {
-    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to open the port!");
-    return -1;
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to open the port.");
-  }
+    if(!openSerialPort()) return -1;
 
-  // Set the baudrate of the serial port (use DYNAMIXEL Baudrate)
-  dxl_comm_result = portHandler->setBaudRate(BAUDRATE);
-  if (dxl_comm_result == false) {
-    RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set the baudrate!");
-    return -1;
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set the baudrate.");
-  }
+    rclcpp::init(argc, argv);
 
-  setupDynamixel(BROADCAST_ID);
-  
-  rclcpp::init(argc, argv);
+    auto motorscomm = std::make_shared<MotorsCommunication>();
+    rclcpp::spin(motorscomm);
+    rclcpp::shutdown();
 
-  auto readwritenode = std::make_shared<ReadWriteNode>();
-  rclcpp::spin(readwritenode);
-  rclcpp::shutdown();
-
-  // Disable Torque of DYNAMIXEL
-  packetHandler->write1ByteTxRx(
-    portHandler,
-    BROADCAST_ID,
-    ADDR_TORQUE_ENABLE,
-    0,
-    &dxl_error
-  );
-
-  return 0;
+    return 0;
 }
