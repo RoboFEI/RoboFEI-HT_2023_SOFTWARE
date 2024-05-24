@@ -91,24 +91,24 @@ void MotorsCommunication::timer_callback()
     setAllJointPos();
     getNoTorquePos();
 
-    for(int i=1; i<21; i++)
-    {
-        RCLCPP_INFO(this->get_logger(), "Torque %d | %d",i, joints.torque[i]);
-    }
+    // for(int i=1; i<21; i++)
+    // {
+    //     RCLCPP_INFO(this->get_logger(), "Torque %d | %d",i, joints.torque[i]);
+    // }
 
-    RCLCPP_INFO(this->get_logger(), "-------------------");
+    // RCLCPP_INFO(this->get_logger(), "-------------------");
 
-        for(int i=1; i<21; i++)
-    {
-        RCLCPP_INFO(this->get_logger(), "Position %d | %d",i, joints.position[i]);
-    }
+    //     for(int i=1; i<21; i++)
+    // {
+    //     RCLCPP_INFO(this->get_logger(), "Position %d | %d",i, joints.position[i]);
+    // }
 
-    RCLCPP_INFO(this->get_logger(), "-------------------");
+    // RCLCPP_INFO(this->get_logger(), "-------------------");
 
-        for(int i=1; i<21; i++)
-    {
-        RCLCPP_INFO(this->get_logger(), "Vel %d | %d",i, joints.velocity[i]);
-    }
+    //     for(int i=1; i<21; i++)
+    // {
+    //     RCLCPP_INFO(this->get_logger(), "Vel %d | %d",i, joints.velocity[i]);
+    // }
 
     auto allJointsPos = JointStateMsg();
 
@@ -211,6 +211,8 @@ void MotorsCommunication::setJoints(JointStateMsg jointInfo)
 void MotorsCommunication::setJointTorque(int id, int goalTorque)
 {
     uint8_t dxl_error = 0;
+
+    RCLCPP_INFO(this->get_logger(), "id: %d | Torque %d", id, goalTorque);
 
     dxl_comm_result = packetHandler->write1ByteTxRx(
     portHandler,

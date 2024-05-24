@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QVector>
 #include <QLineEdit>
+#include <QLabel>
+#include <QShortcut>
 
 #include <string>
 #include <rclcpp/rclcpp.hpp>
@@ -38,7 +40,9 @@ public:
 private:
   Ui::MainWindow * ui_;
 
+  QVector<QLabel*> allPosLabel;
   QVector<QLineEdit*> allPosLineEdit;
+
 
   rclcpp::Publisher<JointStateMsg>::SharedPtr torque_publisher_;
   rclcpp::Subscription<JointStateMsg>::SharedPtr position_subscriber_;
@@ -50,4 +54,8 @@ private:
   void torque_checkbox_changed();
   void send_torque_info(int id, int torque);
   void publishJointStates();
+  void getAllPositions();
+  void printPos();
+
+
 };
