@@ -1,66 +1,69 @@
-// Copyright 2021 ROBOTIS CO., LTD.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 #ifndef MOTORS_COMMUNICATION_HPP_
 #define MOTORS_COMMUNICATION_HPP_
 
-#include <cstdio>
+#include <chrono>
 #include <memory>
-#include <string>
 #include <vector>
+#include <numeric>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"
 #include "dynamixel_sdk/dynamixel_sdk.h"
-#include "custom_interfaces/msg/set_position.hpp"
-#include "custom_interfaces/msg/set_position_original.hpp"
-#include "custom_interfaces/srv/get_position.hpp"
-#include "custom_interfaces/msg/neck_position.hpp"
+
+#include "custom_interfaces/msg/joint_state.hpp"
 
 
+using namespace dynamixel;
+using namespace std::chrono_literals;
+using std::placeholders::_1;
 
-class ReadWriteNode : public rclcpp::Node
+typedef struct Joints
+{
+  std::vector<std::uint32_t> position = std::vector<std::uint32_t>(21, 2048);
+  std::vector<std::uint32_t> velocity = std::vector<std::uint32_t>(21, 0);
+  std::vector<std::uint8_t> torque = std::vector<std::uint8_t>(21, 1);
+}Joints;
+
+
+class MotorsCommunication : public rclcpp::Node
 {
 public:
-  using SetPosition = custom_interfaces::msg::SetPosition;
-  using SetPositionOriginal = custom_interfaces::msg::SetPositionOriginal;
-  using GetPosition = custom_interfaces::srv::GetPosition;
-  using NeckPosition = custom_interfaces::msg::NeckPosition;
+  using JointStateMsg = custom_interfaces::msg::JointState;
 
+  PacketHandler  *packetHandler;
+  GroupSyncWrite *groupSyncWritePos;
+  GroupSyncRead  *groupSyncReadPos;
+  
+  Joints joints;
+  std::vector<int> allIds = std::vector<int>(20);
+
+  int dxl_comm_result = COMM_TX_FAIL;
+
+
+  
+  void joint_state_callback(const JointStateMsg::SharedPtr joint_state_info);
   void timer_callback();
-  void save_motors_position(const SetPosition::SharedPtr msg);
 
-  uint8_t motores[21][4];
-  uint32_t motores2[21];
+  void initialMotorsSetup(int id);
+  void setJoints(JointStateMsg jointInfo);
+  void setJointVel(int id, int goalVel);
+  void setJointTorque(int id, int goalTorque);
+  void setAllJointPos();
+  void getNoTorquePos();
 
-  ReadWriteNode();
-  virtual ~ReadWriteNode();
+
+  uint8_t* convertInfo(int jointInfo);
+
+  MotorsCommunication();
+  virtual ~MotorsCommunication();
 
 private:
-  rclcpp::Subscription<SetPosition>::SharedPtr set_position_subscriber_;
-  rclcpp::Subscription<SetPositionOriginal>::SharedPtr set_position_subscriber_single;
-  rclcpp::Subscription<SetPosition>::SharedPtr set_neck_position_subscriber_;
-  rclcpp::Service<GetPosition>::SharedPtr get_position_server_;
-  rclcpp::Publisher<NeckPosition>::SharedPtr neck_position_publisher;
+  rclcpp::Subscription<JointStateMsg>::SharedPtr joint_state_subscription_;
+  rclcpp::Publisher<JointStateMsg>::SharedPtr all_joints_position_publisher;
 
-  rclcpp::TimerBase::SharedPtr timer_; // declaration of timer to publish the neck position
 
-  int present_position;
-  int max_limit_position;
-  int min_limit_position;
-  int motor[2];
+  rclcpp::TimerBase::SharedPtr timer_;
   
 };
 
-#endif  // READ_WRITE_NODE_HPP_
+#endif  // MOTORS_COMMUNICATION_HPP_
