@@ -45,6 +45,12 @@ enum RobotBallPosition
     center
 };
 
+struct NeckPosition
+{
+    int position19;
+    int position20;
+};
+
 
 struct Robot
 {
@@ -53,7 +59,7 @@ struct Robot
 
     bool finished_move = true;
     State state = searching_ball;
-    custom_interfaces::msg::NeckPosition neck_pos;
+    NeckPosition neck_pos;
     custom_interfaces::msg::Vision camera_ball_position;
     RobotBallPosition ball_position = center;
 

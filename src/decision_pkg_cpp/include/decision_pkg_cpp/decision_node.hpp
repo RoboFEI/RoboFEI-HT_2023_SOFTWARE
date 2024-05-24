@@ -17,7 +17,8 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 
 #include "custom_interfaces/msg/humanoid_league_msgs.hpp"
-#include "custom_interfaces/msg/neck_position.hpp"
+// #include "custom_interfaces/msg/neck_position.hpp"
+#include "custom_interfaces/msg/joint_state.hpp"
 #include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/action/control.hpp"
 
@@ -31,7 +32,8 @@ class DecisionNode : public rclcpp::Node
 {
     public:
         using GameControllerMsg = custom_interfaces::msg::HumanoidLeagueMsgs;
-        using NeckPosMsg = custom_interfaces::msg::NeckPosition;
+        // using NeckPosMsg = custom_interfaces::msg::NeckPosition;
+        using JointStateMsg = custom_interfaces::msg::JointState;
         using ImuGyroMsg = geometry_msgs::msg::Vector3Stamped;
         using ImuAccelMsg = sensor_msgs::msg::Imu;
         using VisionMsg = custom_interfaces::msg::Vision;
@@ -47,7 +49,7 @@ class DecisionNode : public rclcpp::Node
         int falses_fallen_counter = 0;
 
         void listener_callback_GC(const GameControllerMsg::SharedPtr gc_info);
-        void listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos);
+        void listener_callback_neck_pos(const JointStateMsg::SharedPtr neck_pos);
         void listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro);
         void listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel);
         void robot_detect_fallen(const float &robot_accel_x,
@@ -72,7 +74,7 @@ class DecisionNode : public rclcpp::Node
 
     private:
         rclcpp::Subscription<GameControllerMsg>::SharedPtr gc_subscriber_;
-        rclcpp::Subscription<NeckPosMsg>::SharedPtr neck_position_subscriber_;
+        rclcpp::Subscription<JointStateMsg>::SharedPtr neck_position_subscriber_;
         rclcpp::Subscription<ImuGyroMsg>::SharedPtr imu_gyro_subscriber_;
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
         rclcpp::Subscription<VisionMsg>::SharedPtr vision_subscriber_;

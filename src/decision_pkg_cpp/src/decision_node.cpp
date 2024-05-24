@@ -20,8 +20,8 @@ DecisionNode::DecisionNode() : Node("decision_node")
         std::bind(&DecisionNode::listener_callback_GC, this, _1)
     );
 
-    neck_position_subscriber_ = this->create_subscription<NeckPosMsg>(
-        "neck_position",
+    neck_position_subscriber_ = this->create_subscription<JointStateMsg>(
+        "all_joints_position",
         rclcpp::QoS(10),
         std::bind(&DecisionNode::listener_callback_neck_pos, this, _1)
     );
@@ -80,9 +80,11 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
     // RCLCPP_INFO(this->get_logger(), "Secondary Game State: %d", this->gc_info.secondary_state);
 }
 
-void DecisionNode::listener_callback_neck_pos(const NeckPosMsg::SharedPtr neck_pos)
+void DecisionNode::listener_callback_neck_pos(const JointStateMsg::SharedPtr neck_pos)
 {
-    this->robot.neck_pos = *neck_pos;
+    this->robot.neck_pos.position19 = neck_pos->info[19];
+    this->robot.neck_pos.position20 = neck_pos->info[20];
+
     // RCLCPP_INFO(this->get_logger(), "Recive Neck Pos Info");
     // RCLCPP_INFO(this->get_logger(), "Id 19: %d  |  Id 20: %d", robot.neck_pos.position19, robot.neck_pos.position20);
 }

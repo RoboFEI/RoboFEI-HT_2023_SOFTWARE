@@ -10,7 +10,8 @@
 #include "AssyncTimer.hpp"
 
 #include "custom_interfaces/msg/vision.hpp"
-#include "custom_interfaces/msg/neck_position.hpp"
+// #include "custom_interfaces/msg/neck_position.hpp"
+#include "custom_interfaces/msg/joint_state.hpp"
 #include "custom_interfaces/msg/set_position.hpp"
 #include "std_msgs/msg/multi_array_dimension.hpp"
 #include "vision_msgs/msg/point2_d.hpp"
@@ -61,7 +62,8 @@ class NeckNode : public rclcpp::Node
 {
   public:
     using VisionInfo = custom_interfaces::msg::Vision;
-    using NeckPosition = custom_interfaces::msg::NeckPosition;
+    // using NeckPosition = custom_interfaces::msg::NeckPosition;
+    using JointStateMsg = custom_interfaces::msg::JointState;
     using SetPosition = custom_interfaces::msg::SetPosition;
     using MultArrDim = std_msgs::msg::MultiArrayDimension;
     using Point2d = vision_msgs::msg::Point2D;
@@ -90,7 +92,7 @@ class NeckNode : public rclcpp::Node
     
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_vision_px(const Point2d::SharedPtr msg);
-    void listener_callback_neck(const NeckPosition::SharedPtr msg); 
+    void listener_callback_neck(const JointStateMsg::SharedPtr msg); 
     void search_ball();
     void main_callback();
        
@@ -104,7 +106,7 @@ class NeckNode : public rclcpp::Node
 
     rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
     rclcpp::Subscription<Point2d>::SharedPtr vision_px_subscriber_;
-    rclcpp::Subscription<NeckPosition>::SharedPtr neck_position_subscriber_;
+    rclcpp::Subscription<JointStateMsg>::SharedPtr neck_position_subscriber_;
     rclcpp::Publisher<SetPosition>::SharedPtr set_neck_position_publisher_;
     rclcpp::TimerBase::SharedPtr main_timer_;
     
