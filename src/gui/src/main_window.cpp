@@ -26,13 +26,23 @@ MainWindow::MainWindow(
   prefix_(this->declare_parameter("prefix", ""))
 {
   using namespace std::chrono_literals;
+ 
   this->timer_ = this->create_wall_timer(
     100ms, std::bind(&MainWindow::publishJointStates, this));
 
-  torque_publisher_ = this->create_publisher<SinglePositionMsg>("set_position_single", 10);
+  torque_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
+
+  position_subscriber_ = this->create_subscription<JointStateMsg>(
+    "all_joints_position", 10,
+    std::bind(&MainWindow::jointPositionCallback, this, _1) 
+  );
 
   this->ui_->setupUi(this);
 
+  allPosLineEdit << ui_->pos_id_1  << ui_->pos_id_2  << ui_->pos_id_3  << ui_->pos_id_4  << ui_->pos_id_5;
+  allPosLineEdit << ui_->pos_id_6  << ui_->pos_id_7  << ui_->pos_id_8  << ui_->pos_id_9  << ui_->pos_id_10;
+  allPosLineEdit << ui_->pos_id_11 << ui_->pos_id_12 << ui_->pos_id_13 << ui_->pos_id_14 << ui_->pos_id_15;
+  allPosLineEdit << ui_->pos_id_16 << ui_->pos_id_17 << ui_->pos_id_18 << ui_->pos_id_19 << ui_->pos_id_20;
 
   for (auto checkBox : findChildren<QCheckBox *>()) {
       this->connect(
@@ -44,6 +54,14 @@ MainWindow::MainWindow(
 MainWindow::~MainWindow()
 {
   delete this->ui_;
+}
+
+void MainWindow::jointPositionCallback(const JointStateMsg::SharedPtr all_joints_position)
+{
+  for(int i=0; i<20; i++)
+  { 
+    allPosLineEdit[i]->setText(QString("%1").arg(all_joints_position->info[i+1]));
+  }
 }
 
 void MainWindow::torque_checkbox_changed()
@@ -63,10 +81,10 @@ void MainWindow::send_torque_info(int id, int torque)
 {
   RCLCPP_INFO(this->get_logger(), "Torque %d | id: %d", torque, id);
 
-  auto torque_info = SinglePositionMsg();
-  torque_info.address = 64;
-  torque_info.id = (uint8_t) id;
-  torque_info.position = torque;
+  auto torque_info = JointStateMsg();
+  torque_info.id.push_back(id);
+  torque_info.info.push_back(torque);
+  torque_info.type.push_back(JointStateMsg::TORQUE);
 
   torque_publisher_ ->publish(torque_info);
 }

@@ -2,13 +2,17 @@
 
 #include <QWidget>
 #include <QMainWindow>
-
+#include <QVector>
+#include <QLineEdit>
 
 #include <string>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int8.hpp>
 
-#include "custom_interfaces/msg/set_position_original.hpp"
+// #include "custom_interfaces/msg/set_position_original.hpp"
+#include "custom_interfaces/msg/joint_state.hpp"
+
+using std::placeholders::_1;
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -22,8 +26,9 @@ class MainWindow : public QMainWindow, public rclcpp::Node
   Q_OBJECT
 
 public:
-  using SinglePositionMsg = custom_interfaces::msg::SetPositionOriginal;
+  using JointStateMsg = custom_interfaces::msg::JointState;
   
+  void jointPositionCallback(const JointStateMsg::SharedPtr all_joints_position);
 
   explicit MainWindow(
     const rclcpp::NodeOptions & node_options,
@@ -33,7 +38,11 @@ public:
 private:
   Ui::MainWindow * ui_;
 
-  rclcpp::Publisher<SinglePositionMsg>::SharedPtr torque_publisher_;
+  QVector<QLineEdit*> allPosLineEdit;
+
+  rclcpp::Publisher<JointStateMsg>::SharedPtr torque_publisher_;
+  rclcpp::Subscription<JointStateMsg>::SharedPtr position_subscriber_;
+
   rclcpp::TimerBase::SharedPtr timer_;
 
   const std::string prefix_;
