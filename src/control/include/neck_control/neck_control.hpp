@@ -107,7 +107,7 @@ class NeckNode : public rclcpp::Node
     rclcpp::Subscription<VisionInfo>::SharedPtr vision_subscriber_;
     rclcpp::Subscription<Point2d>::SharedPtr vision_px_subscriber_;
     rclcpp::Subscription<JointStateMsg>::SharedPtr neck_position_subscriber_;
-    rclcpp::Publisher<SetPosition>::SharedPtr set_neck_position_publisher_;
+    rclcpp::Publisher<JointStateMsg>::SharedPtr set_neck_position_publisher_;
     rclcpp::TimerBase::SharedPtr main_timer_;
     
 };
