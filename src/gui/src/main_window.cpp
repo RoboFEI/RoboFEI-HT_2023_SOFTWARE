@@ -30,7 +30,7 @@ MainWindow::MainWindow(
   this->timer_ = this->create_wall_timer(
     100ms, std::bind(&MainWindow::publishJointStates, this));
 
-  torque_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
+  joint_state_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
 
   position_subscriber_ = this->create_subscription<JointStateMsg>(
     "all_joints_position", 10,
@@ -50,11 +50,16 @@ MainWindow::MainWindow(
   allPosLineEdit << ui_->pos_id_16 << ui_->pos_id_17 << ui_->pos_id_18 << ui_->pos_id_19 << ui_->pos_id_20;
 
 
-  QShortcut *sC1 = new QShortcut(QKeySequence("Space"), this);
+  QShortcut *sC1 = new QShortcut(QKeySequence("Ctrl+Space"), this);
   this->connect(sC1, &QShortcut::activated, this, &MainWindow::getAllPositions);
 
-  QShortcut *sC2 = new QShortcut(QKeySequence("Ctrl+G"), this);
+  QShortcut *sC2 = new QShortcut(QKeySequence("Ctrl+Return"), this);
   this->connect(sC2, &QShortcut::activated, this, &MainWindow::printPos);
+
+  for(auto PosLineEdit : allPosLineEdit)
+  {
+    this->connect(PosLineEdit, &QLineEdit::returnPressed, this, &MainWindow::sendSinglePos);
+  }
 
 
   for (auto checkBox : findChildren<QCheckBox *>()) {
@@ -67,6 +72,21 @@ MainWindow::MainWindow(
 MainWindow::~MainWindow()
 {
   delete this->ui_;
+}
+
+void MainWindow::sendSinglePos()
+{
+  QLineEdit* posLineEdit = qobject_cast<QLineEdit*>(sender());
+  int id = posLineEdit->objectName().remove("pos_id_").toInt();
+  RCLCPP_INFO(this->get_logger(), "Sending for id %d", id);
+
+  auto pos = JointStateMsg();
+  pos.id.push_back(id);
+  pos.type.push_back(JointStateMsg::POSITION);
+  pos.info.push_back(posLineEdit->text().toInt());
+
+  joint_state_publisher_->publish(pos);
+
 }
 
 void MainWindow::printPos()
@@ -125,5 +145,5 @@ void MainWindow::send_torque_info(int id, int torque)
   torque_info.info.push_back(torque);
   torque_info.type.push_back(JointStateMsg::TORQUE);
 
-  torque_publisher_ ->publish(torque_info);
+  joint_state_publisher_ ->publish(torque_info);
 }

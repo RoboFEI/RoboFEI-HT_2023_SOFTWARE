@@ -44,7 +44,7 @@ private:
   QVector<QLineEdit*> allPosLineEdit;
 
 
-  rclcpp::Publisher<JointStateMsg>::SharedPtr torque_publisher_;
+  rclcpp::Publisher<JointStateMsg>::SharedPtr joint_state_publisher_;
   rclcpp::Subscription<JointStateMsg>::SharedPtr position_subscriber_;
 
   rclcpp::TimerBase::SharedPtr timer_;
@@ -55,6 +55,7 @@ private:
   void send_torque_info(int id, int torque);
   void publishJointStates();
   void getAllPositions();
+  void sendSinglePos();
   void printPos();
 
 
