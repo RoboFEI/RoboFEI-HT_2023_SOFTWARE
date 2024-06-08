@@ -103,7 +103,7 @@ void MainWindow::printPos()
 
   RCLCPP_INFO(this->get_logger(), saida.toUtf8().constData());
 
-  ui_->label_saida->setText(saida);
+  // ui_->label_saida->setText(saida);
 }
 
 void MainWindow::getAllPositions()
