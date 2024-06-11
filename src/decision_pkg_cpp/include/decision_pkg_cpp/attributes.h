@@ -40,9 +40,9 @@ enum Move
 
 enum RobotBallPosition
 {
-    left,
-    right,
-    center
+    left,   // 0
+    center, // 1
+    right   // 2
 };
 
 struct NeckPosition

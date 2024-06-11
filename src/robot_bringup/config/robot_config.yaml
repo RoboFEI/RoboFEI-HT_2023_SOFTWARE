@@ -9,12 +9,12 @@
   ros__parameters:
     neck_activate: true
 
-    x_p_gain: 0.7
+    x_p_gain: 0.3
     y_p_gain: 0.35
 
 /control:
   ros__parameters:
-    body_activate : true
+    body_activate : false
     robot_number  :  2
 
 /decision_node:
