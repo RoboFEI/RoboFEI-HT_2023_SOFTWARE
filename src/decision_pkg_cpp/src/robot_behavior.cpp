@@ -83,19 +83,18 @@ void RobotBehavior::player_normal_game() // fazer
     
     case aligning_with_the_ball:
         //RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
-        // if(robot_align_with_the_ball()) robot.state = ball_approach;
-        if(robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        if(robot_align_with_the_ball()) robot.state = ball_approach;
         else if(ball_is_locked()) turn_to_ball();
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
         else send_goal(gait);
         break;
 
-    // case ball_approach:
+    case ball_approach:
     //     if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = kick_ball;
-    //     else if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
-    //     else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
-    //     else send_goal(walk);
-    //     break;
+        if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
+        else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        else send_goal(walk);
+        break;
 
     // case kick_ball:
     //     if((robot.neck_pos.position19 - 2048) > 0) send_goal(left_kick);

@@ -161,7 +161,7 @@ void DecisionNode::send_goal(const Move &order)
 
   goal_msg.action_number = order;
 
-  //RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
+  RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
   if(order != this->robot.movement)
   {
