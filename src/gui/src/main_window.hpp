@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QShortcut>
+#include <QPushButton>
 
 #include <string>
 #include <rclcpp/rclcpp.hpp>
@@ -13,6 +14,7 @@
 
 // #include "custom_interfaces/msg/set_position_original.hpp"
 #include "custom_interfaces/msg/joint_state.hpp"
+#include "custom_interfaces/msg/humanoid_league_msgs.hpp"
 
 using std::placeholders::_1;
 
@@ -28,7 +30,8 @@ class MainWindow : public QMainWindow, public rclcpp::Node
   Q_OBJECT
 
 public:
-  using JointStateMsg = custom_interfaces::msg::JointState;
+  using JointStateMsg     = custom_interfaces::msg::JointState;
+  using GameControllerMsg = custom_interfaces::msg::HumanoidLeagueMsgs;
   
   void jointPositionCallback(const JointStateMsg::SharedPtr all_joints_position);
 
@@ -42,9 +45,10 @@ private:
 
   QVector<QLabel*> allPosLabel;
   QVector<QLineEdit*> allPosLineEdit;
-
-
+  QVector<QPushButton*> gameStateButtons;
+  
   rclcpp::Publisher<JointStateMsg>::SharedPtr joint_state_publisher_;
+  rclcpp::Publisher<GameControllerMsg>::SharedPtr fakeGameControlerPublisher_;
   rclcpp::Subscription<JointStateMsg>::SharedPtr position_subscriber_;
 
   rclcpp::TimerBase::SharedPtr timer_;
@@ -52,7 +56,9 @@ private:
   const std::string prefix_;
 
   void torque_checkbox_changed();
+  void gameStateVal();
   void send_torque_info(int id, int torque);
+  void sendGameControllerInfo();
   void publishJointStates();
   void getAllPositions();
   void sendSinglePos();

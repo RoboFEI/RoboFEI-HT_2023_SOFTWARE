@@ -30,7 +30,8 @@ MainWindow::MainWindow(
   this->timer_ = this->create_wall_timer(
     100ms, std::bind(&MainWindow::publishJointStates, this));
 
-  joint_state_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
+  joint_state_publisher_      = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
+  fakeGameControlerPublisher_ = this->create_publisher<GameControllerMsg>("gamestate", 10);
 
   position_subscriber_ = this->create_subscription<JointStateMsg>(
     "all_joints_position", 10,
@@ -49,6 +50,16 @@ MainWindow::MainWindow(
   allPosLineEdit << ui_->pos_id_11 << ui_->pos_id_12 << ui_->pos_id_13 << ui_->pos_id_14 << ui_->pos_id_15;
   allPosLineEdit << ui_->pos_id_16 << ui_->pos_id_17 << ui_->pos_id_18 << ui_->pos_id_19 << ui_->pos_id_20;
 
+  gameStateButtons << ui_->initial_button << ui_->playing_button << ui_->ready_button << ui_->penalized_button;
+
+  for(auto button : gameStateButtons)
+  {
+    this->connect( button, &QPushButton::clicked, this, &MainWindow::gameStateVal);
+  }
+
+  this->connect( ui_->normal_game_button, &QPushButton::clicked, this, &MainWindow::gameStateVal);
+  this->connect( ui_->penalty_button    , &QPushButton::clicked, this, &MainWindow::gameStateVal);
+  
 
   QShortcut *sC1 = new QShortcut(QKeySequence("Ctrl+Space"), this);
   this->connect(sC1, &QShortcut::activated, this, &MainWindow::getAllPositions);
@@ -63,15 +74,51 @@ MainWindow::MainWindow(
 
 
   for (auto checkBox : findChildren<QCheckBox *>()) {
-      this->connect(
-        checkBox, &QCheckBox::stateChanged,
-        this, &MainWindow::torque_checkbox_changed);
-    }
+    this->connect(
+      checkBox, &QCheckBox::stateChanged,
+      this, &MainWindow::torque_checkbox_changed);
+  }
 }
 
 MainWindow::~MainWindow()
 {
   delete this->ui_;
+}
+
+void MainWindow::gameStateVal()
+{
+  QPushButton* pushBottonCaller = qobject_cast<QPushButton*>(sender());
+
+  if(!pushBottonCaller->isChecked() && pushBottonCaller != ui_->penalized_button) pushBottonCaller->setChecked(true);
+  else if(pushBottonCaller == ui_->penalized_button);
+  else if(pushBottonCaller == ui_->normal_game_button)  ui_->penalty_button->setChecked(false);
+  else if(pushBottonCaller == ui_->penalty_button)      ui_->normal_game_button->setChecked(false);
+  else
+  {
+    for(auto button : gameStateButtons)
+    {
+      if(pushBottonCaller != button && button != ui_->penalized_button) button->setChecked(false);
+    }
+  }
+
+  sendGameControllerInfo();
+
+}
+
+void MainWindow::sendGameControllerInfo()
+{
+  auto gameControllerInfo = GameControllerMsg();
+
+  if(ui_->initial_button->isChecked()) gameControllerInfo.game_state = GameControllerMsg::GAMESTATE_INITAL;
+  else if(ui_->ready_button->isChecked()) gameControllerInfo.game_state = GameControllerMsg::GAMESTATE_READY;
+  
+  if(ui_->penalized_button->isChecked()) gameControllerInfo.penalized = true;
+  else gameControllerInfo.penalized = false;
+
+  if(ui_->penalty_button->isChecked()) gameControllerInfo.secondary_state = GameControllerMsg::STATE_PENALTYSHOOT;
+
+  fakeGameControlerPublisher_->publish(gameControllerInfo);
+
 }
 
 void MainWindow::sendSinglePos()
