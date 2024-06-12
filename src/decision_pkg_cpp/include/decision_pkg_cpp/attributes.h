@@ -10,7 +10,8 @@ enum State
     searching_ball = 1,
     aligning_with_the_ball = 2,
     ball_approach = 3,
-    kick_ball = 4
+    ball_close = 4,
+    kick_ball = 5
 };
 
 enum FallStatus
@@ -35,7 +36,9 @@ enum Move
     gait            = 15,
     stand_up_back   = 16,
     stand_up_front  = 17,
-    stand_up_side   = 18
+    stand_up_side   = 18,
+    walk_left       = 20,
+    walk_right      = 21
 };
 
 enum RobotBallPosition

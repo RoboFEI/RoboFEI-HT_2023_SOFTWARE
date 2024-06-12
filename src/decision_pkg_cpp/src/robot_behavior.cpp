@@ -2,6 +2,7 @@
 
 #include "decision_pkg_cpp/robot_behavior.hpp"
 #include "decision_node.cpp"
+#include<unistd.h> // apenas para delay, apagar
 
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
 
@@ -90,20 +91,43 @@ void RobotBehavior::player_normal_game() // fazer
         break;
 
     case ball_approach:
-    //     if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = kick_ball;
-        if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
+        if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = ball_close;
+        else if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
         else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
         else send_goal(walk);
         break;
 
-    // case kick_ball:
+    case ball_close:
+        if(robot_align_for_kick()) robot.state = kick_ball;
+        else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        else send_goal(gait);
+        break;
+
+    case kick_ball:
+        send_goal(stand_still);
+        usleep(3e6);
+
     //     if((robot.neck_pos.position19 - 2048) > 0) send_goal(left_kick);
     //     else send_goal(right_kick);
-    //     robot.state = ball_approach;
-    //     break;
+        robot.state = ball_approach;
+        break;
     default:
         break;
     }
+}
+
+bool RobotBehavior::robot_align_for_kick()
+{
+    if(ball_in_right_foot()) return true;
+    else send_goal(walk_left); 
+    return false;
+}
+
+bool RobotBehavior::ball_in_right_foot()
+{
+    if(ball_is_locked() && robot.neck_pos.position19 < 1890) return true;
+    return false;
 }
 
 bool RobotBehavior::robot_align_with_the_ball()
