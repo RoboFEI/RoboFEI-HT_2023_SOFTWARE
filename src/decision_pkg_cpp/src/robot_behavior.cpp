@@ -6,6 +6,8 @@
 
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
 
+int gambiarra = 0;
+
 RobotBehavior::RobotBehavior()
 {
     robot_behavior_ = this->create_wall_timer(
@@ -91,6 +93,7 @@ void RobotBehavior::player_normal_game() // fazer
         break;
 
     case ball_approach:
+        RCLCPP_INFO(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
         if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = ball_close;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
         else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
@@ -100,19 +103,46 @@ void RobotBehavior::player_normal_game() // fazer
     case ball_close:
         if(robot_align_for_kick()) robot.state = kick_ball;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-        else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        //else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
         else send_goal(gait);
         break;
 
     case kick_ball:
-        send_goal(stand_still);
-        usleep(3e6);
+	if(robot.movement != 3){
 
-    //     if((robot.neck_pos.position19 - 2048) > 0) send_goal(left_kick);
-    //     else send_goal(right_kick);
-        robot.state = ball_approach;
-        break;
+		if(gambiarra < 400) send_goal(stand_still);
+		else send_goal(right_kick);
+	}
+	   
+	  if(robot.finished_move)
+	  {
+           	robot.state = ball_approach;
+	   	gambiarra = 0;
+	   }
+        RCLCPP_INFO(this->get_logger(), "debug 1: gambiarra %d", gambiarra);
+	gambiarra++;
+	usleep(1000);
+
+
+	break;
+	
     default:
+	for(int i=0; i<100; i++)
+	{
+		send_goal(stand_still);
+		usleep(10000);
+	}
+        
+	for(int i=0; i<100; i++)
+	{
+		send_goal(right_kick);
+	}	
+	//usleep(10e6);
+        //send_goal(stand_still);
+        //usleep(1e6);
+    	//send_goal(right_kick);
+        robot.state = ball_approach;
+    
         break;
     }
 }
