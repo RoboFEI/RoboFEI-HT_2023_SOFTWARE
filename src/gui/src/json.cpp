@@ -17,6 +17,16 @@ int Json::openJson(std::string json_path)
 
 }
 
+std::vector<std::string> Json::getKeys()
+{
+    std::vector<std::string> keys;
+    for (auto it = j.begin(); it != j.end(); ++it)
+    {
+        keys.push_back(it.key());
+    }
+    return keys;
+}
+
 void Json::printJson()
 {
     for (auto it = j.begin(); it != j.end(); ++it)

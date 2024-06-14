@@ -30,7 +30,7 @@ MainWindow::MainWindow(
   robot_number_ = this->declare_parameter("robot_number", 2);
 
   motions.openJson(folder_path + "/src/control/Data/motion" + std::to_string(robot_number_) + ".json");
-  motions.printJson(); 
+
   using namespace std::chrono_literals;
  
   this->timer_ = this->create_wall_timer(
@@ -200,4 +200,15 @@ void MainWindow::send_torque_info(int id, int torque)
   torque_info.type.push_back(JointStateMsg::TORQUE);
 
   joint_state_publisher_ ->publish(torque_info);
+}
+
+void MainWindow::on_loadMoves_button_released()
+{
+  ui_->movesList->clear();  
+  ui_->movesList->addItem("No Move");
+
+  for(auto move : motions.getKeys())
+  {
+    ui_->movesList->addItem(QString::fromStdString(move));
+  }
 }

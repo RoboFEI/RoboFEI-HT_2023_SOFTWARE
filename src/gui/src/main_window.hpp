@@ -71,5 +71,9 @@ private:
   void sendSinglePos();
   void printPos();
 
+private slots:
+  void on_loadMoves_button_released();
+
+
 
 };
