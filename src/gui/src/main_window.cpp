@@ -16,6 +16,8 @@
 #include "main_window.hpp"
 #include "ui_main_window.h"
 
+std::string folder_path = fs::current_path();
+
 MainWindow::MainWindow(
   const rclcpp::NodeOptions & node_options,
   QWidget * parent
@@ -25,6 +27,10 @@ MainWindow::MainWindow(
   ui_(new Ui::MainWindow),
   prefix_(this->declare_parameter("prefix", ""))
 {
+  robot_number_ = this->declare_parameter("robot_number", 2);
+
+  motions.openJson(folder_path + "/src/control/Data/motion" + std::to_string(robot_number_) + ".json");
+  motions.printJson(); 
   using namespace std::chrono_literals;
  
   this->timer_ = this->create_wall_timer(
@@ -78,6 +84,7 @@ MainWindow::MainWindow(
       checkBox, &QCheckBox::stateChanged,
       this, &MainWindow::torque_checkbox_changed);
   }
+
 }
 
 MainWindow::~MainWindow()

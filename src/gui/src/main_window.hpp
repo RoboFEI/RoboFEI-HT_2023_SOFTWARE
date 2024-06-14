@@ -7,8 +7,11 @@
 #include <QLabel>
 #include <QShortcut>
 #include <QPushButton>
-
 #include <string>
+#include <filesystem>
+
+#include "json.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int8.hpp>
 
@@ -32,6 +35,10 @@ class MainWindow : public QMainWindow, public rclcpp::Node
 public:
   using JointStateMsg     = custom_interfaces::msg::JointState;
   using GameControllerMsg = custom_interfaces::msg::HumanoidLeagueMsgs;
+
+  int robot_number_;
+
+  Json motions;
   
   void jointPositionCallback(const JointStateMsg::SharedPtr all_joints_position);
 

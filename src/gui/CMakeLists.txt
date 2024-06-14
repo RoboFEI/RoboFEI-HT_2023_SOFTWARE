@@ -18,7 +18,8 @@ include_directories(include)
 ament_auto_add_executable(
   robot_gui
     ./src/main.cpp
-    ./src/main_window.cpp)
+    ./src/main_window.cpp
+    ./src/json.cpp)
 target_include_directories(
   robot_gui PRIVATE include ${Qt5Widgets_INCLUDE_DIRS})
 target_link_libraries(robot_gui Qt5::Widgets)
