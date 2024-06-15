@@ -257,7 +257,6 @@ void MainWindow::on_movesList_currentTextChanged(const QString &arg1)
 {
   if(arg1.compare("No Move") && arg1.compare(""))
   {
-    std::cout << "loading move: " << arg1.toStdString() << "\n";
     motions.getMove(arg1.toStdString());
     ui_->motion_frame->setEnabled(true);
   }

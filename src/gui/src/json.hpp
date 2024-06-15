@@ -16,7 +16,7 @@ class Json
     public:
         int openJson(std::string json_path);
         std::vector<std::string> getKeys();
-        void getMove(std::string move_name);
+        std::vector<std::vector<std::vector<int>>> getMove(std::string move_name);
         void printJson();
         void teste();
 
