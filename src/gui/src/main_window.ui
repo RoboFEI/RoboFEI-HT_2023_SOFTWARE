@@ -1081,7 +1081,7 @@
        <property name="geometry">
         <rect>
          <x>520</x>
-         <y>10</y>
+         <y>30</y>
          <width>364</width>
          <height>85</height>
         </rect>
@@ -1252,6 +1252,99 @@
        <property name="checkable">
         <bool>true</bool>
        </property>
+      </widget>
+      <widget class="QFrame" name="motion_frame">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>360</y>
+         <width>471</width>
+         <height>111</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_23">
+          <item>
+           <widget class="QPushButton" name="nextStep_button">
+            <property name="text">
+             <string>Next Step</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="prevStep_button">
+            <property name="text">
+             <string>Prev Step</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="saveStep_button">
+            <property name="text">
+             <string>Save Step</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_26">
+          <item>
+           <widget class="QPushButton" name="playStep_button">
+            <property name="text">
+             <string>Play Step</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="playMove_button">
+            <property name="text">
+             <string>Play Move</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="playUntilMove_button">
+            <property name="text">
+             <string>Play Until This Move</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_25">
+          <item>
+           <widget class="QPushButton" name="deletStep_button">
+            <property name="text">
+             <string>Delet Step</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="newStep_button">
+            <property name="text">
+             <string>New Step</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="saveMove_button">
+            <property name="text">
+             <string>Save Move</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
