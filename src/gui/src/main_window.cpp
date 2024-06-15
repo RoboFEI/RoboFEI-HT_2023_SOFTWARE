@@ -74,7 +74,7 @@ MainWindow::MainWindow(
 
   for(auto PosLineEdit : allPosLineEdit)
   {
-    this->connect(PosLineEdit, &QLineEdit::returnPressed, this, &MainWindow::sendSinglePos);
+    this->connect(PosLineEdit, &QLineEdit::returnPressed, this, &MainWindow::sendSingleInfo);
   }
 
 
@@ -127,7 +127,7 @@ void MainWindow::sendGameControllerInfo()
 
 }
 
-void MainWindow::sendSinglePos()
+void MainWindow::sendSingleInfo()
 {
   QLineEdit* posLineEdit = qobject_cast<QLineEdit*>(sender());
   int id = posLineEdit->objectName().remove("pos_id_").toInt();
@@ -135,7 +135,18 @@ void MainWindow::sendSinglePos()
 
   auto pos = JointStateMsg();
   pos.id.push_back(id);
-  pos.type.push_back(JointStateMsg::POSITION);
+  
+  if(mode == 0)
+  {
+    pos.type.push_back(JointStateMsg::POSITION);
+  }
+  else
+  {
+    pos.type.push_back(JointStateMsg::VELOCITY);
+    lastVelocitys[id-1] = posLineEdit->text().toInt();
+    allPosLabel[id-1]->setText(QString("%1").arg(lastVelocitys[id-1]));
+  }
+  
   pos.info.push_back(posLineEdit->text().toInt());
 
   joint_state_publisher_->publish(pos);

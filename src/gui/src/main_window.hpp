@@ -73,7 +73,7 @@ private:
   void sendGameControllerInfo();
   void publishJointStates();
   void getAllPositions();
-  void sendSinglePos();
+  void sendSingleInfo();
   void printPos();
 
 private slots:
