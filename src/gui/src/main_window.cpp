@@ -257,11 +257,30 @@ void MainWindow::on_movesList_currentTextChanged(const QString &arg1)
 {
   if(arg1.compare("No Move") && arg1.compare(""))
   {
-    motions.getMove(arg1.toStdString());
-    ui_->motion_frame->setEnabled(true);
+    atualMovesList = motions.getMove(arg1.toStdString());
+    setMotionEditorScreen(true);
   }
   else
   {
-    ui_->motion_frame->setEnabled(false);
+    setMotionEditorScreen(false);
   }
 }
+
+void MainWindow::setMotionEditorScreen(bool arg)
+{
+  if(arg)
+  {
+    atualStep = 1;
+    ui_->motion_frame->setEnabled(true);
+    ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
+  }
+  else
+  {
+    atualStep = 0;
+    ui_->motion_frame->setEnabled(false);
+    ui_->statusbar->clearMessage();
+  }
+  
+
+}
+

@@ -51,12 +51,15 @@ private:
   Ui::MainWindow * ui_;
 
   int mode = 0; //0 = Position mode    1 = Velocity mode
+  int atualStep = 0;
 
   QVector<QLabel*> allPosLabel;
   QVector<QLineEdit*> allPosLineEdit;
   QVector<QPushButton*> gameStateButtons;
   std::vector<int> lastVelocitys = std::vector<int>(20, 32);
   std::vector<int> lastPositions = std::vector<int>(20, 2048);
+  std::vector<std::vector<std::vector<int>>> atualMovesList;
+
   
   
   rclcpp::Publisher<JointStateMsg>::SharedPtr joint_state_publisher_;
@@ -75,6 +78,7 @@ private:
   void getAllPositions();
   void sendSingleInfo();
   void printPos();
+  void setMotionEditorScreen(bool arg);
 
 private slots:
   void on_loadMoves_button_released();
