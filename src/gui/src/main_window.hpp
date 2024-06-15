@@ -50,9 +50,14 @@ public:
 private:
   Ui::MainWindow * ui_;
 
+  int mode = 0; //0 = Position mode    1 = Velocity mode
+
   QVector<QLabel*> allPosLabel;
   QVector<QLineEdit*> allPosLineEdit;
   QVector<QPushButton*> gameStateButtons;
+  std::vector<int> lastVelocitys = std::vector<int>(20, 32);
+  std::vector<int> lastPositions = std::vector<int>(20, 2048);
+  
   
   rclcpp::Publisher<JointStateMsg>::SharedPtr joint_state_publisher_;
   rclcpp::Publisher<GameControllerMsg>::SharedPtr fakeGameControlerPublisher_;
@@ -73,7 +78,9 @@ private:
 
 private slots:
   void on_loadMoves_button_released();
-
+  void on_movesList_currentTextChanged(const QString &arg1);
+  void on_pos_button_clicked();
+  void on_vel_button_clicked();
 
 
 };

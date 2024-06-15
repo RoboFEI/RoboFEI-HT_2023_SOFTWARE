@@ -1192,15 +1192,23 @@
         <rect>
          <x>10</x>
          <y>0</y>
-         <width>121</width>
+         <width>171</width>
          <height>25</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <item>
+        <property name="text">
+         <string>No Move</string>
+        </property>
+       </item>
       </widget>
       <widget class="QPushButton" name="loadMoves_button">
        <property name="geometry">
         <rect>
-         <x>150</x>
+         <x>190</x>
          <y>0</y>
          <width>89</width>
          <height>25</height>
@@ -1208,6 +1216,41 @@
        </property>
        <property name="text">
         <string>Load Moves</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pos_button">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>0</y>
+         <width>89</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Position</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="vel_button">
+       <property name="geometry">
+        <rect>
+         <x>400</x>
+         <y>0</y>
+         <width>89</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Velocity</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>

@@ -28,7 +28,6 @@ MainWindow::MainWindow(
   prefix_(this->declare_parameter("prefix", ""))
 {
   robot_number_ = this->declare_parameter("robot_number", 2);
-
   motions.openJson(folder_path + "/src/control/Data/motion" + std::to_string(robot_number_) + ".json");
 
   using namespace std::chrono_literals;
@@ -210,5 +209,44 @@ void MainWindow::on_loadMoves_button_released()
   for(auto move : motions.getKeys())
   {
     ui_->movesList->addItem(QString::fromStdString(move));
+  }
+}
+
+void MainWindow::on_pos_button_clicked()
+{
+  if(!ui_->pos_button->isChecked()) ui_->pos_button->setChecked(true);
+  else 
+  {
+    ui_->vel_button->setChecked(false);
+    mode = 0;
+
+    for(int i=0; i<20; i++)
+    { 
+      allPosLabel[i]->setText(QString("%1").arg(lastPositions[i]));
+    }
+  }  
+}
+
+void MainWindow::on_vel_button_clicked()
+{
+  if(!ui_->vel_button->isChecked()) ui_->vel_button->setChecked(true);
+  else 
+  {
+    ui_->pos_button->setChecked(false);
+    mode = 1;
+    for(int i=0; i<20; i++)
+    { 
+      allPosLabel[i]->setText(QString("%1").arg(lastVelocitys[i]));
+    }
+  }
+}
+
+
+void MainWindow::on_movesList_currentTextChanged(const QString &arg1)
+{
+  if(arg1.compare("No Move") && arg1.compare(""))
+  {
+    std::cout << "loading move: " << arg1.toStdString() << "\n";
+    motions.getMove(arg1.toStdString());
   }
 }
