@@ -56,8 +56,8 @@ private:
   QVector<QLabel*> allPosLabel;
   QVector<QLineEdit*> allPosLineEdit;
   QVector<QPushButton*> gameStateButtons;
-  std::vector<int> lastVelocitys = std::vector<int>(20, 32);
-  std::vector<int> lastPositions = std::vector<int>(20, 2048);
+  std::vector<int> lastVelocitys = std::vector<int>(18, 32);
+  std::vector<int> lastPositions = std::vector<int>(18, 2048);
   std::vector<std::vector<std::vector<int>>> atualMovesList;
 
   
@@ -79,6 +79,7 @@ private:
   void sendSingleInfo();
   void printPos();
   void setMotionEditorScreen(bool arg);
+  void displayStepInfo();
 
 private slots:
   void on_loadMoves_button_released();

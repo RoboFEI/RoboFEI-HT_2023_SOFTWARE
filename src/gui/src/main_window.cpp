@@ -48,12 +48,12 @@ MainWindow::MainWindow(
   allPosLabel << ui_->label_1  << ui_->label_2  << ui_->label_3  << ui_->label_4  << ui_->label_5 ;
   allPosLabel << ui_->label_6  << ui_->label_7  << ui_->label_8  << ui_->label_9  << ui_->label_10;
   allPosLabel << ui_->label_11 << ui_->label_12 << ui_->label_13 << ui_->label_14 << ui_->label_15;
-  allPosLabel << ui_->label_16 << ui_->label_17 << ui_->label_18 << ui_->label_19 << ui_->label_20;
+  allPosLabel << ui_->label_16 << ui_->label_17 << ui_->label_18;
 
   allPosLineEdit << ui_->pos_id_1  << ui_->pos_id_2  << ui_->pos_id_3  << ui_->pos_id_4  << ui_->pos_id_5;
   allPosLineEdit << ui_->pos_id_6  << ui_->pos_id_7  << ui_->pos_id_8  << ui_->pos_id_9  << ui_->pos_id_10;
   allPosLineEdit << ui_->pos_id_11 << ui_->pos_id_12 << ui_->pos_id_13 << ui_->pos_id_14 << ui_->pos_id_15;
-  allPosLineEdit << ui_->pos_id_16 << ui_->pos_id_17 << ui_->pos_id_18 << ui_->pos_id_19 << ui_->pos_id_20;
+  allPosLineEdit << ui_->pos_id_16 << ui_->pos_id_17 << ui_->pos_id_18;
 
   gameStateButtons << ui_->initial_button << ui_->playing_button << ui_->ready_button << ui_->penalized_button;
 
@@ -157,7 +157,7 @@ void MainWindow::printPos()
 {  
   QString saida = "[";
  
-  for(int i=0; i<20; i++)
+  for(int i=0; i<18; i++)
   {
     saida.append(allPosLineEdit[i]->text());
     saida.append(",");
@@ -172,7 +172,7 @@ void MainWindow::printPos()
 
 void MainWindow::getAllPositions()
 {
-  for(int i=0; i<20; i++)
+  for(int i=0; i<18; i++)
   {
     allPosLineEdit[i]->setText(allPosLabel[i]->text());
   }
@@ -181,7 +181,7 @@ void MainWindow::getAllPositions()
 
 void MainWindow::jointPositionCallback(const JointStateMsg::SharedPtr all_joints_position)
 {
-  for(int i=0; i<20; i++)
+  for(int i=0; i<18; i++)
   { 
     allPosLabel[i]->setText(QString("%1").arg(all_joints_position->info[i+1]));
   }
@@ -231,7 +231,7 @@ void MainWindow::on_pos_button_clicked()
     ui_->vel_button->setChecked(false);
     mode = 0;
 
-    for(int i=0; i<20; i++)
+    for(int i=0; i<18; i++)
     { 
       allPosLabel[i]->setText(QString("%1").arg(lastPositions[i]));
     }
@@ -245,7 +245,7 @@ void MainWindow::on_vel_button_clicked()
   {
     ui_->pos_button->setChecked(false);
     mode = 1;
-    for(int i=0; i<20; i++)
+    for(int i=0; i<18; i++)
     { 
       allPosLabel[i]->setText(QString("%1").arg(lastVelocitys[i]));
     }
@@ -273,6 +273,7 @@ void MainWindow::setMotionEditorScreen(bool arg)
     atualStep = 1;
     ui_->motion_frame->setEnabled(true);
     ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
+    displayStepInfo();
   }
   else
   {
@@ -280,7 +281,13 @@ void MainWindow::setMotionEditorScreen(bool arg)
     ui_->motion_frame->setEnabled(false);
     ui_->statusbar->clearMessage();
   }
-  
-
 }
 
+void MainWindow::displayStepInfo()
+{
+  lastPositions = atualMovesList[atualStep-1][0];
+  lastVelocitys = atualMovesList[atualStep-1][1];
+
+  if(mode == 0) on_pos_button_clicked();
+  else on_vel_button_clicked();  
+}

@@ -55,6 +55,8 @@ std::vector<std::vector<std::vector<int>>> Json::getMove(std::string move_name)
 
         std::string address_json = "address" + std::to_string(i);
 
+        std::cout << "Debug 1\n";
+
         while(j[move_name][address_json] != 116) // to get the velocity
         {
             std::string id_json = "id" + std::to_string(i);
@@ -67,36 +69,39 @@ std::vector<std::vector<std::vector<int>>> Json::getMove(std::string move_name)
             address_json = "address" + std::to_string(i);
         }
 
+        std::cout << "Debug 2\n";
+
         //to get position
         std::string position_json =  "position" + std::to_string(i);
         position = std::vector<int>(j[move_name][position_json]);
 
+        std::cout << "Debug 3\n";
 
 
         std::string sleep_json = "sleep" + std::to_string(i);
         float aux = j[move_name][sleep_json];
         sleep[0] = (int)(aux*1000);
         
-        // //Debug
-        // for(auto pos : position)
-        // {
-        //     std::cout << pos << " ";
-        // }
-        // std::cout << "\n";
+        //Debug
+        for(auto pos : position)
+        {
+            std::cout << pos << " ";
+        }
+        std::cout << "\n";
 
-        // for(auto vel : velocity)
-        // {
-        //     std::cout << vel << " ";
-        // }
-        // std::cout << "\n";
+        for(auto vel : velocity)
+        {
+            std::cout << vel << " ";
+        }
+        std::cout << "\n";
 
-        // for(auto delay : sleep)
-        // {
-        //     std::cout << delay << " ";
-        // }
-        // std::cout << "\n";
-        // std::cout << "\n";
-        // std::cout << "\n";
+        for(auto delay : sleep)
+        {
+            std::cout << delay << " ";
+        }
+        std::cout << "\n";
+        std::cout << "\n";
+        std::cout << "\n";
 
         moves[move][0] = position;
         moves[move][1] = velocity;
