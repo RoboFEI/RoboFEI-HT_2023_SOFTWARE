@@ -320,7 +320,7 @@ void MainWindow::sendJointVel(std::vector<int> jointsVel)
 {
   auto jointVel = JointStateMsg();
 
-  if(count(jointsVel.begin(), jointsVel.end(), jointsVel[0]) == jointsVel)
+  if(count(jointsVel.begin(), jointsVel.end(), jointsVel[0]) == jointsVel.size())
   {
     jointVel.id.push_back(254);
     jointVel.info.push_back(jointsVel[0]);

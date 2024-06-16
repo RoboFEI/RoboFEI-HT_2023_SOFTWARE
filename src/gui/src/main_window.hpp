@@ -74,6 +74,8 @@ private:
   void torque_checkbox_changed();
   void gameStateVal();
   void send_torque_info(int id, int torque);
+  void sendJointPos(std::vector<int> jointsPos);
+  void sendJointVel(std::vector<int> jointsVel);
   void sendGameControllerInfo();
   void publishJointStates();
   void getAllPositions();
