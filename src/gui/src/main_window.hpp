@@ -86,6 +86,7 @@ private slots:
   void on_movesList_currentTextChanged(const QString &arg1);
   void on_pos_button_clicked();
   void on_vel_button_clicked();
-
+  void on_nextStep_button_clicked();
+  void on_prevStep_button_clicked();
 
 };

@@ -291,3 +291,23 @@ void MainWindow::displayStepInfo()
   if(mode == 0) on_pos_button_clicked();
   else on_vel_button_clicked();  
 }
+
+void MainWindow::on_nextStep_button_clicked()
+{
+  if(atualStep < atualMovesList.size())
+  {
+    atualStep++;
+    displayStepInfo();
+    ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
+  }
+}
+
+void MainWindow::on_prevStep_button_clicked()
+{
+  if(atualStep > 1)
+  {
+    atualStep--;
+    displayStepInfo();
+    ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
+  }
+}

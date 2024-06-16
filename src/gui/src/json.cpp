@@ -55,8 +55,6 @@ std::vector<std::vector<std::vector<int>>> Json::getMove(std::string move_name)
 
         std::string address_json = "address" + std::to_string(i);
 
-        std::cout << "Debug 1\n";
-
         while(j[move_name][address_json] != 116) // to get the velocity
         {
             std::string id_json = "id" + std::to_string(i);
@@ -69,14 +67,9 @@ std::vector<std::vector<std::vector<int>>> Json::getMove(std::string move_name)
             address_json = "address" + std::to_string(i);
         }
 
-        std::cout << "Debug 2\n";
-
         //to get position
         std::string position_json =  "position" + std::to_string(i);
         position = std::vector<int>(j[move_name][position_json]);
-
-        std::cout << "Debug 3\n";
-
 
         std::string sleep_json = "sleep" + std::to_string(i);
         float aux = j[move_name][sleep_json];
