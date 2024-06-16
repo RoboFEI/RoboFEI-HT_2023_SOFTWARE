@@ -1178,16 +1178,16 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_23">
           <item>
-           <widget class="QPushButton" name="nextStep_button">
+           <widget class="QPushButton" name="prevStep_button">
             <property name="text">
-             <string>Next Step</string>
+             <string>Prev Step</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="prevStep_button">
+           <widget class="QPushButton" name="nextStep_button">
             <property name="text">
-             <string>Prev Step</string>
+             <string>Next Step</string>
             </property>
            </widget>
           </item>

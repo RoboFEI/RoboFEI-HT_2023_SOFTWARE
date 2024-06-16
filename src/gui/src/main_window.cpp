@@ -181,10 +181,11 @@ void MainWindow::getAllPositions()
 
 void MainWindow::jointPositionCallback(const JointStateMsg::SharedPtr all_joints_position)
 {
-  for(int i=0; i<18; i++)
-  { 
-    allPosLabel[i]->setText(QString("%1").arg(all_joints_position->info[i+1]));
-  }
+    for(int i=0; i<18; i++)
+    {
+      if(mode == 0) allPosLabel[i]->setText(QString("%1").arg(all_joints_position->info[i+1]));
+      lastPositions[i] = all_joints_position->info[i+1];
+    }
 }
 
 void MainWindow::torque_checkbox_changed()
@@ -283,7 +284,7 @@ void MainWindow::setMotionEditorScreen(bool arg)
   }
 }
 
-void MainWindow::displayStepInfo()
+void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosições 
 {
   lastPositions = atualMovesList[atualStep-1][0];
   lastVelocitys = atualMovesList[atualStep-1][1];
