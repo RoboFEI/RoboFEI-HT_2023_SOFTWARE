@@ -288,6 +288,9 @@ void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosiçõ
 {
   lastPositions = atualMovesList[atualStep-1][0];
   lastVelocitys = atualMovesList[atualStep-1][1];
+  
+  sendJointVel(lastVelocitys);
+  sendJointPos(lastPositions);
 
   if(mode == 0) on_pos_button_clicked();
   else on_vel_button_clicked();  
@@ -311,4 +314,40 @@ void MainWindow::on_prevStep_button_clicked()
     displayStepInfo();
     ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
   }
+}
+
+void MainWindow::sendJointVel(std::vector<int> jointsVel)
+{
+  auto jointVel = JointStateMsg();
+
+  if(count(jointsVel.begin(), jointsVel.end(), jointsVel[0]) == jointsVel)
+  {
+    jointVel.id.push_back(254);
+    jointVel.info.push_back(jointsVel[0]);
+    jointVel.type.push_back(JointStateMsg::VELOCITY);
+    joint_state_publisher_ ->publish(jointVel);
+  }
+  else
+  {
+    for(int i=0; i<18; i++)
+    {
+      jointVel.id.push_back(i+1);
+      jointVel.info.push_back(jointsVel[i]);
+      jointVel.type.push_back(JointStateMsg::VELOCITY);
+    }
+    joint_state_publisher_ ->publish(jointVel); 
+  }
+}
+
+void MainWindow::sendJointPos(std::vector<int> jointsPos)
+{
+  auto jointPos = JointStateMsg();
+
+  for(int i=0; i<18; i++)
+  {
+    jointPos.id.push_back(i+1);
+    jointPos.info.push_back(jointsPos[i]);
+    jointPos.type.push_back(JointStateMsg::POSITION);
+  }
+  joint_state_publisher_ ->publish(jointPos);
 }

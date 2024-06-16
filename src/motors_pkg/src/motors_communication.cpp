@@ -269,6 +269,7 @@ void MotorsCommunication::setJointVel(int id, int goalVel)
     } else if (dxl_error != 0) {
         RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
     }
+    usleep(1e3); //sleep
 }
 
 bool openSerialPort()

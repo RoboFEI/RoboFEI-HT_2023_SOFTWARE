@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <numeric>
+#include <unistd.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"

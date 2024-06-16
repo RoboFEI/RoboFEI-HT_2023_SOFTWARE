@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <string>
 #include <filesystem>
+#include <bits/stdc++.h>
 
 #include "json.hpp"
 
