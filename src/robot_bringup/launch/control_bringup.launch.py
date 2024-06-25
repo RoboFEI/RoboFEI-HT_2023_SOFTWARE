@@ -4,14 +4,18 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
+import sys
+sys.path.append("src/robot_bringup/launch")
+from robot_num import robot_number
 
 def generate_launch_description():
     ld = LaunchDescription()
 
+    config_file = 'robot_config'+str(robot_number)+'.yaml'
     control_config = os.path.join(
         get_package_share_directory('robot_bringup'),
         'config',
-        'robot_config.yaml'
+        config_file
     )
 
     control = Node(

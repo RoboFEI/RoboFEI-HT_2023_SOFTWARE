@@ -7,9 +7,16 @@
 #include <QLabel>
 #include <QShortcut>
 #include <QPushButton>
+#include <QTimer>
+// #include <QtConcurrent>
+
+#include <QCoreApplication>
+#include <QtConcurrent/QtConcurrent>
+
 #include <string>
 #include <filesystem>
 #include <bits/stdc++.h>
+#include <unistd.h> 
 
 #include "json.hpp"
 
@@ -51,6 +58,8 @@ public:
 private:
   Ui::MainWindow * ui_;
 
+  QTimer *checkUnsavedTimer;
+
   int mode = 0; //0 = Position mode    1 = Velocity mode
   int atualStep = 0;
 
@@ -78,11 +87,13 @@ private:
   void sendJointVel(std::vector<int> jointsVel);
   void sendGameControllerInfo();
   void publishJointStates();
-  void getAllPositions();
+  std::vector<int>  getAllPositions();
   void sendSingleInfo();
   void printPos();
   void setMotionEditorScreen(bool arg);
   void displayStepInfo();
+  void checkUnsaved();
+  void runMove(bool all);
 
 private slots:
   void on_loadMoves_button_released();
@@ -91,5 +102,7 @@ private slots:
   void on_vel_button_clicked();
   void on_nextStep_button_clicked();
   void on_prevStep_button_clicked();
-
+  void on_saveStep_button_clicked();
+  void on_playMove_button_clicked();
+  void on_playUntilMove_button_clicked();
 };

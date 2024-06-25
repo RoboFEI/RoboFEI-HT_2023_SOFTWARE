@@ -11,7 +11,7 @@ def generate_launch_description():
     control_config = os.path.join(
         get_package_share_directory('robot_bringup'),
         'config',
-        'robot_config.yaml'
+        'robot_config2.yaml'
     )
 
     decision = Node(

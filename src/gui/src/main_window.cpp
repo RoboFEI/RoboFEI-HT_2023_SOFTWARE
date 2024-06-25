@@ -72,6 +72,9 @@ MainWindow::MainWindow(
   QShortcut *sC2 = new QShortcut(QKeySequence("Ctrl+Return"), this);
   this->connect(sC2, &QShortcut::activated, this, &MainWindow::printPos);
 
+  QShortcut *sC3 = new QShortcut(QKeySequence("Ctrl+S"), this);
+  this->connect(sC3, &QShortcut::activated, this, &MainWindow::on_saveStep_button_clicked);
+
   for(auto PosLineEdit : allPosLineEdit)
   {
     this->connect(PosLineEdit, &QLineEdit::returnPressed, this, &MainWindow::sendSingleInfo);
@@ -84,6 +87,9 @@ MainWindow::MainWindow(
       this, &MainWindow::torque_checkbox_changed);
   }
 
+  checkUnsavedTimer = new QTimer(this);
+  this->connect(checkUnsavedTimer, &QTimer::timeout, this, &MainWindow::checkUnsaved);
+  checkUnsavedTimer->start(10);
 }
 
 MainWindow::~MainWindow()
@@ -155,6 +161,10 @@ void MainWindow::sendSingleInfo()
 
 void MainWindow::printPos()
 {  
+  if(mode == 1) return;
+
+  sendJointPos(getAllPositions());
+
   QString saida = "[";
  
   for(int i=0; i<18; i++)
@@ -166,17 +176,18 @@ void MainWindow::printPos()
   saida.append("],");
 
   RCLCPP_INFO(this->get_logger(), saida.toUtf8().constData());
-
-  // ui_->label_saida->setText(saida);
 }
 
-void MainWindow::getAllPositions()
+std::vector<int> MainWindow::getAllPositions()
 {
+  std::vector<int> allPos;
   for(int i=0; i<18; i++)
   {
     allPosLineEdit[i]->setText(allPosLabel[i]->text());
+    allPos.push_back(allPosLabel[i]->text().toInt());
   }
-  RCLCPP_INFO(this->get_logger(), "Teste");
+
+  return allPos;
 }
 
 void MainWindow::jointPositionCallback(const JointStateMsg::SharedPtr all_joints_position)
@@ -351,3 +362,66 @@ void MainWindow::sendJointPos(std::vector<int> jointsPos)
   }
   joint_state_publisher_ ->publish(jointPos);
 }
+
+void MainWindow::on_saveStep_button_clicked()
+{
+  if(atualStep == 0) return;
+  
+  atualMovesList[atualStep-1][0] = lastPositions;
+  atualMovesList[atualStep-1][1] = lastVelocitys;
+}
+
+void MainWindow::checkUnsaved()
+{
+  if(atualStep == 0)
+  {
+    for (auto label : allPosLabel)
+    {
+      label->setStyleSheet("QLabel {background-color: none; color : black; }");
+    }
+    
+    return;
+  }
+
+  for(int i=0; i<18; i++)
+  {
+    auto infoForVerify = lastPositions;
+    int idx = 0;
+    if(mode == 1)
+    {
+      infoForVerify = lastVelocitys;
+      idx = 1;  
+    }
+
+
+    if(atualMovesList[atualStep-1][idx][i] != infoForVerify[i] )
+    {
+      allPosLabel[i]->setStyleSheet("QLabel {background-color: yellow; color : none; }");
+    }
+    else allPosLabel[i]->setStyleSheet("QLabel {background-color: none; color : black; }");
+  
+  }
+}
+
+void MainWindow::on_playMove_button_clicked()
+{
+  QFuture<void> future = QtConcurrent::run(this, &MainWindow::runMove, true);
+}
+
+void MainWindow::on_playUntilMove_button_clicked()
+{
+  QFuture<void> future = QtConcurrent::run(this, &MainWindow::runMove, false);
+}
+
+void MainWindow::runMove(bool all)
+{
+  int limiter = atualMovesList.size();
+  if(!all) limiter = atualStep;
+
+  for(int i=0; i<limiter; i++)
+  {
+    sendJointVel(atualMovesList[i][1]);
+    sendJointPos(atualMovesList[i][0]);
+    usleep(atualMovesList[i][2][0]*1e3);
+  }
+} 

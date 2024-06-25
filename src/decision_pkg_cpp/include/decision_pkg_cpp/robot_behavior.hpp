@@ -23,7 +23,9 @@ class RobotBehavior : public DecisionNode
         bool ball_in_left_limit();
         bool ball_in_right_limit();
         bool ball_in_close_limit();
+        bool ball_in_right_foot();
         bool robot_align_with_the_ball();
+        bool robot_align_for_kick();
         bool centered_neck();
         bool full_centered_neck();
         void detect_ball_position();

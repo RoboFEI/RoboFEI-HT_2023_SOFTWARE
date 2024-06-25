@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 class Json
 {
     public:
-        int openJson(std::string json_path);
+        void openJson(std::string json_path);
         std::vector<std::string> getKeys();
         std::vector<std::vector<std::vector<int>>> getMove(std::string move_name);
         void printJson();

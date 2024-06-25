@@ -32,6 +32,7 @@ set(msg_files
   "msg/Walk.msg"
   "msg/NeckPosition.msg"
   "msg/JointState.msg"
+  "msg/RobotState.msg"
 )
 
 set(srv_files

@@ -12,11 +12,11 @@ std::string folder_path2 = fs::current_path();
 // {
 // }
 
-int Json::openJson(std::string json_path)
+void Json::openJson(std::string json_path)
 {
     std::ifstream fJson(json_path);
     j = json::parse(fJson);
-
+    
 }
 
 std::vector<std::string> Json::getKeys()

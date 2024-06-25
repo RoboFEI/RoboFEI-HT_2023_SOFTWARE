@@ -52,6 +52,8 @@ namespace Robot
 		bool m_IsLogging;
 		float IMU_GYRO_X;
 		float IMU_GYRO_Y;
+		int robot_number_;
+
 		rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr subscription_imu;
 		rclcpp::Subscription<custom_interfaces::msg::Walk>::SharedPtr subscription_walk;
 		// rclcpp::Subscription<custom_interfaces::msg::SetPosition>::SharedPtr subscription_positions;

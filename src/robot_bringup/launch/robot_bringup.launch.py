@@ -9,12 +9,20 @@ def generate_launch_description():
     control_config = os.path.join(
         get_package_share_directory('robot_bringup'),
         'config',
+        'robot_config2.yaml'
+    )
+
+    control_config = os.path.join(
+        get_package_share_directory('robot_bringup'),
+        'config',
         'robot_config.yaml'
     )
     
     control = Node(
         package="control",
         executable="control",
+        output = 'screen',
+        parameters = [control_config]
         output = 'screen',
         parameters = [control_config]
     )
@@ -26,6 +34,8 @@ def generate_launch_description():
     neck_control = Node(
         package="control",
         executable="neck_control",
+        output = 'screen',
+        parameters = [control_config]
         output = 'screen',
         parameters = [control_config]
     )

@@ -2,8 +2,11 @@
 
 #include "decision_pkg_cpp/robot_behavior.hpp"
 #include "decision_node.cpp"
+#include<unistd.h> // apenas para delay, apagar
 
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
+
+int gambiarra = 0;
 
 RobotBehavior::RobotBehavior()
 {
@@ -37,7 +40,7 @@ void RobotBehavior::players_behavior()
 
 void RobotBehavior::normal_game()
 {
-    RCLCPP_INFO(this->get_logger(), "Normal Game: %d", gc_info.game_state);
+    // RCLCPP_INFO(this->get_logger(), "Normal Game: %d", gc_info.game_state);
     switch (gc_info.game_state)
     {
     case GameControllerMsg::GAMESTATE_INITAL: // conferido
@@ -67,44 +70,94 @@ void RobotBehavior::normal_game()
 void RobotBehavior::player_normal_game() // fazer
 {
     RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-    RCLCPP_INFO(this->get_logger(), "ball side %d", robot.ball_position);
 
-    
     switch (robot.state)
     {
     case searching_ball:
-        RCLCPP_INFO(this->get_logger(), "Searching ball");
+        //RCLCPP_INFO(this->get_logger(), "Searching ball");
         if(ball_is_locked())
         {
-            robot.state = aligning_with_the_ball;
-            send_goal(gait); //gait
+            if(robot.ball_position == center) robot.state = ball_approach;
+            else robot.state = aligning_with_the_ball;
         }
         else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) turn_to_ball();
         else send_goal(gait); // gait
         break;
     
     case aligning_with_the_ball:
-        RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
+        //RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
         if(robot_align_with_the_ball()) robot.state = ball_approach;
         else if(ball_is_locked()) turn_to_ball();
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        else send_goal(gait);
         break;
 
     case ball_approach:
-        if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = kick_ball;
+        RCLCPP_INFO(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
+        if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = ball_close;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
         else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
         else send_goal(walk);
         break;
 
-    case kick_ball:
-        if((robot.neck_pos.position19 - 2048) > 0) send_goal(left_kick);
-        else send_goal(right_kick);
-        robot.state = ball_approach;
+    case ball_close:
+        if(robot_align_for_kick()) robot.state = kick_ball;
+        else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        //else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        else send_goal(gait);
         break;
+
+    case kick_ball:
+	if(robot.movement != 3){
+
+		if(gambiarra < 400) send_goal(stand_still);
+		else send_goal(right_kick);
+	}
+	   
+	  if(robot.finished_move)
+	  {
+           	robot.state = ball_approach;
+	   	gambiarra = 0;
+	   }
+        RCLCPP_INFO(this->get_logger(), "debug 1: gambiarra %d", gambiarra);
+	gambiarra++;
+	usleep(1000);
+
+
+	break;
+	
     default:
+	for(int i=0; i<100; i++)
+	{
+		send_goal(stand_still);
+		usleep(10000);
+	}
+        
+	for(int i=0; i<100; i++)
+	{
+		send_goal(right_kick);
+	}	
+	//usleep(10e6);
+        //send_goal(stand_still);
+        //usleep(1e6);
+    	//send_goal(right_kick);
+        robot.state = ball_approach;
+    
         break;
     }
+}
+
+bool RobotBehavior::robot_align_for_kick()
+{
+    if(ball_in_right_foot()) return true;
+    else send_goal(walk_left); 
+    return false;
+}
+
+bool RobotBehavior::ball_in_right_foot()
+{
+    if(ball_is_locked() && robot.neck_pos.position19 < 1890) return true;
+    return false;
 }
 
 bool RobotBehavior::robot_align_with_the_ball()
@@ -182,6 +235,7 @@ bool RobotBehavior::neck_to_right() // testar
 
 bool RobotBehavior::neck_to_left() // testar
 {
+    RCLCPP_INFO(this->get_logger(), "Neck left th: %d\nrobot neck pos: %d", NECK_LEFT_TH, robot.neck_pos.position19); 
     return NECK_LEFT_TH < robot.neck_pos.position19;
 }
 
