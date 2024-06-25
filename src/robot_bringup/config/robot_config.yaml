@@ -15,7 +15,7 @@
 /control:
   ros__parameters:
     body_activate : true
-    robot_number  :  2
+    robot_number  :  1
 
 /decision_node:
   ros__parameters:
