@@ -60,8 +60,9 @@ std::vector<std::vector<std::vector<int>>> Json::getMove(std::string move_name)
             std::string id_json = "id" + std::to_string(i);
             std::string velocity_json = "velocity" + std::to_string(i);
             
+            int id = int(j[move_name][id_json]) - 1;
             if(j[move_name][id_json] == 254) velocity = std::vector<int>(20, j[move_name][velocity_json]);
-            else velocity[j[move_name][id_json]] = j[move_name][velocity_json];
+            else velocity[id] = j[move_name][velocity_json];
 
             i++;
             address_json = "address" + std::to_string(i);
