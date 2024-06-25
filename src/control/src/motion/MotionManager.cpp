@@ -30,6 +30,7 @@
 #include <time.h>
 #include <cstdlib>
 #include "minIni.h"
+#include <filesystem>
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
@@ -42,6 +43,7 @@
 
 #define INI_FILE_PATH       "src/control/Data/config_draco.ini"
 
+namespace fs = std::filesystem;
 using namespace Robot;
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -50,6 +52,8 @@ using std::placeholders::_1;
 const int TORQUE_ADAPTION_CYCLES = 1000 / MotionModule::TIME_UNIT;
 const int DEST_TORQUE = 1023;
 int position[20];
+
+std::string folder_path = fs::current_path();
 
 #define BROADCAST_ID        0xFE    // 254
 
@@ -91,7 +95,11 @@ MotionManager::MotionManager(const rclcpp::NodeOptions & options) :
         m_Offset[i] = 0;
 	// update_thread_ = std::thread(std::bind(&MotionManager::update_loop, this));
 	printf("CONSTRUTOR\n");
-	ini = new minIni((char *)INI_FILE_PATH);
+
+	robot_number_ = this->declare_parameter("robot_number", 2);
+	
+	std::string iniPath = "src/control/Data/config" + std::to_string(robot_number_) + ".ini";
+	ini = new minIni(iniPath);
 	
 }
 

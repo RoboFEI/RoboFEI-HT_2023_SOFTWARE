@@ -8,7 +8,7 @@
 #ifndef _MX_28_H_
 #define _MX_28_H_
 
-//#define MX28_1024
+//#define RX
 
 namespace Robot
 {
@@ -16,7 +16,7 @@ namespace Robot
 	{
 	public:
 		static const int MIN_VALUE = 0;
-#ifdef MX28_1024
+#ifdef RX
         static const int CENTER_VALUE = 512;
         static const int MAX_VALUE = 1023;
         static constexpr double MIN_ANGLE = -150.0; // degree

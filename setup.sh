@@ -63,6 +63,9 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     #instalação da yolov8
     pip install ultralytics
 
+    #Instalação da biblioteca para Json
+    sudo apt install nlohmann-json3-dev
+
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
     sudo touch /etc/udev/rules.d/robot-usb-ports.rules && sudo chmod 777 /etc/udev/rules.d/robot-usb-ports.rules
