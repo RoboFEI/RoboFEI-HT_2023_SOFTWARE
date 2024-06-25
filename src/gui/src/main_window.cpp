@@ -438,3 +438,14 @@ void MainWindow::on_stop_button_clicked()
   if(!moveIsRunning) return;
   stoppingMove = true;
 }
+
+void MainWindow::on_deletStep_button_clicked()
+{
+  // RCLCPP_INFO(this->get_logger(), "teste");
+  // if(atualStep == 0 || atualMovesList.size() == 1) return;
+  // RCLCPP_INFO(this->get_logger(), "deletando");
+  // atualMovesList.erase(atualMovesList.begin()+atualStep-1);
+  // atualStep = atualStep - 2;
+  // if(atualStep == -1) atualStep = 0;
+  // on_nextStep_button_clicked();
+}
