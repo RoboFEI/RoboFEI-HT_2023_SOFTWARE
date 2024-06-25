@@ -1203,13 +1203,6 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_26">
           <item>
-           <widget class="QPushButton" name="playStep_button">
-            <property name="text">
-             <string>Play Step</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="playMove_button">
             <property name="text">
              <string>Play Move</string>
@@ -1220,6 +1213,13 @@
            <widget class="QPushButton" name="playUntilMove_button">
             <property name="text">
              <string>Play Until This Move</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stop_button">
+            <property name="text">
+             <string>Stop</string>
             </property>
            </widget>
           </item>

@@ -415,6 +415,8 @@ void MainWindow::on_playUntilMove_button_clicked()
 
 void MainWindow::runMove(bool all)
 {
+  moveIsRunning = true;
+
   int limiter = atualMovesList.size();
   if(!all) limiter = atualStep;
 
@@ -423,5 +425,16 @@ void MainWindow::runMove(bool all)
     sendJointVel(atualMovesList[i][1]);
     sendJointPos(atualMovesList[i][0]);
     usleep(atualMovesList[i][2][0]*1e3);
+
+    if(stoppingMove) break;
   }
+
+  moveIsRunning = false;
+  stoppingMove = false;
 } 
+
+void MainWindow::on_stop_button_clicked()
+{
+  if(!moveIsRunning) return;
+  stoppingMove = true;
+}

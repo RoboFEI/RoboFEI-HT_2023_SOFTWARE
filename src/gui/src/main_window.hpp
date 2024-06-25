@@ -69,6 +69,9 @@ private:
   std::vector<int> lastVelocitys = std::vector<int>(18, 32);
   std::vector<int> lastPositions = std::vector<int>(18, 2048);
   std::vector<std::vector<std::vector<int>>> atualMovesList;
+  bool moveIsRunning = false;
+  bool stoppingMove = false;
+
 
   
   
@@ -105,4 +108,6 @@ private slots:
   void on_saveStep_button_clicked();
   void on_playMove_button_clicked();
   void on_playUntilMove_button_clicked();
+  void on_stop_button_clicked();
+
 };
