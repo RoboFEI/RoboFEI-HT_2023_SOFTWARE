@@ -66,6 +66,8 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     #Instalação da biblioteca para Json
     sudo apt install nlohmann-json3-dev
 
+    echo "robot_number=2" | sudo tee /home/robot_num.py
+
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
     sudo touch /etc/udev/rules.d/robot-usb-ports.rules && sudo chmod 777 /etc/udev/rules.d/robot-usb-ports.rules
