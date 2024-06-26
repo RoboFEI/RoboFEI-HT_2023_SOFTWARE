@@ -110,5 +110,6 @@ private slots:
   void on_playUntilMove_button_clicked();
   void on_stop_button_clicked();
   void on_deletStep_button_clicked();
-
+  void on_newStep_button_clicked();
+  
 };

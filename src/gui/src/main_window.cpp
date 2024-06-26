@@ -304,7 +304,9 @@ void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosiçõ
   sendJointPos(lastPositions);
 
   if(mode == 0) on_pos_button_clicked();
-  else on_vel_button_clicked();  
+  else on_vel_button_clicked(); 
+
+  ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size())); 
 }
 
 void MainWindow::on_nextStep_button_clicked()
@@ -313,7 +315,6 @@ void MainWindow::on_nextStep_button_clicked()
   {
     atualStep++;
     displayStepInfo();
-    ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
   }
 }
 
@@ -323,7 +324,6 @@ void MainWindow::on_prevStep_button_clicked()
   {
     atualStep--;
     displayStepInfo();
-    ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
   }
 }
 
@@ -441,11 +441,19 @@ void MainWindow::on_stop_button_clicked()
 
 void MainWindow::on_deletStep_button_clicked()
 {
-  // RCLCPP_INFO(this->get_logger(), "teste");
-  // if(atualStep == 0 || atualMovesList.size() == 1) return;
-  // RCLCPP_INFO(this->get_logger(), "deletando");
-  // atualMovesList.erase(atualMovesList.begin()+atualStep-1);
-  // atualStep = atualStep - 2;
-  // if(atualStep == -1) atualStep = 0;
-  // on_nextStep_button_clicked();
+  if(atualStep == 0 || atualMovesList.size() == 1) return;
+  atualMovesList.erase(atualMovesList.begin()+atualStep-1);
+  atualStep = atualStep - 2;
+  if(atualStep == -1) atualStep = 0;
+  on_nextStep_button_clicked();
 }
+
+void MainWindow::on_newStep_button_clicked()
+{
+  if(atualStep == 0) return;
+  std::vector<std::vector<int>> newMove = atualMovesList[atualStep-1];
+  atualMovesList.emplace(atualMovesList.begin()+atualStep-1, newMove);
+  atualStep += 1;
+  displayStepInfo();
+}
+
