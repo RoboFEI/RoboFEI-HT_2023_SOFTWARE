@@ -4,6 +4,7 @@
     neck_down_limit : 1350
     neck_left_limit : 2650
     neck_right_limit: 1350
+    robot_number    : 3
 
 /neck_node:
   ros__parameters:
@@ -15,7 +16,6 @@
 /control:
   ros__parameters:
     body_activate : true
-    robot_number  :  3
 
 /decision_node:
   ros__parameters:

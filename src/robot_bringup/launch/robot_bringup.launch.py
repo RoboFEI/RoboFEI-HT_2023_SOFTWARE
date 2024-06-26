@@ -26,7 +26,8 @@ def generate_launch_description():
     gait = Node(
         package="control",
         executable="gait_publisher",
-        output = 'screen'
+        output = 'screen',
+        parameters = [control_config]
     )
     neck_control = Node(
         package="control",
