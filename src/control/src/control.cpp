@@ -73,6 +73,8 @@ std::string position_name = "position";
 std::string sleep_name = "sleep";
 std::string section = "Stand Still";
 
+int cWalk = 1;
+
 class Control : public rclcpp::Node
 {
 public:
@@ -340,7 +342,7 @@ private:
           if (do_gait){
             movement = 15;
             contador++;
-            if (contador >= 3){
+            if (contador >= cWalk){
               do_gait = false;
               contador = 0;
             }
