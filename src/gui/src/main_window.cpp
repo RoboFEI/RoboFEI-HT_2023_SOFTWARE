@@ -28,7 +28,6 @@ MainWindow::MainWindow(
   prefix_(this->declare_parameter("prefix", ""))
 {
   robot_number_ = this->declare_parameter("robot_number", 2);
-  motions.openJson(folder_path + "/src/control/Data/motion" + std::to_string(robot_number_) + ".json");
 
   using namespace std::chrono_literals;
  
@@ -90,6 +89,8 @@ MainWindow::MainWindow(
   checkUnsavedTimer = new QTimer(this);
   this->connect(checkUnsavedTimer, &QTimer::timeout, this, &MainWindow::checkUnsaved);
   checkUnsavedTimer->start(10);
+
+  on_loadMoves_button_released();
 }
 
 MainWindow::~MainWindow()
@@ -226,6 +227,8 @@ void MainWindow::send_torque_info(int id, int torque)
 
 void MainWindow::on_loadMoves_button_released()
 {
+  motions.openJson(folder_path + "/src/control/Data/motion" + std::to_string(robot_number_) + ".json");
+
   ui_->movesList->clear();  
   ui_->movesList->addItem("No Move");
 
