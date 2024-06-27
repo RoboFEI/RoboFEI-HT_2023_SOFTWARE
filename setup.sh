@@ -96,40 +96,40 @@ echo -e "${blue} commands setup${NC}"
     #Comand for compile 
     sudo rm /usr/local/bin/compile
     sudo cp robot_commands/compile /usr/local/bin && sudo chmod 777 /usr/local/bin/compile
-    sudo cp robot_commands/compile /usr/local/bin && sudo chmod 777 /usr/local/bin/compile
 
     #Comand for run IMU
     sudo rm /usr/local/bin/imu
-    sudo cp robot_commands/imu /usr/local/bin && sudo chmod 777 /usr/local/bin/imu
     sudo cp robot_commands/imu /usr/local/bin && sudo chmod 777 /usr/local/bin/imu
 
     #Comand for run control
     sudo rm /usr/local/bin/control
     sudo cp robot_commands/control /usr/local/bin && sudo chmod 777 /usr/local/bin/control
-    sudo cp robot_commands/control /usr/local/bin && sudo chmod 777 /usr/local/bin/control
 
     #Comand for run vision
     sudo rm /usr/local/bin/vision
-    sudo cp robot_commands/vision /usr/local/bin && sudo chmod 777 /usr/local/bin/vision
     sudo cp robot_commands/vision /usr/local/bin && sudo chmod 777 /usr/local/bin/vision
 
     #Comand for run decision
     sudo rm /usr/local/bin/decision
     sudo cp robot_commands/decision /usr/local/bin && sudo chmod 777 /usr/local/bin/decision
-    sudo cp robot_commands/decision /usr/local/bin && sudo chmod 777 /usr/local/bin/decision
 
     #Comand for run Gamecontroller
     sudo rm /usr/local/bin/gamecontroller
-    sudo cp robot_commands/gamecontroller /usr/local/bin && sudo chmod 777 /usr/local/bin/gamecontroller
     sudo cp robot_commands/gamecontroller /usr/local/bin && sudo chmod 777 /usr/local/bin/gamecontroller
 
     #Comand for run motors
     sudo rm /usr/local/bin/motors
     sudo cp robot_commands/motors /usr/local/bin && sudo chmod 777 /usr/local/bin/motors
-    sudo cp robot_commands/motors /usr/local/bin && sudo chmod 777 /usr/local/bin/motors
 
-    sudo chown root: /usr/local/bin/pos /usr/local/bin/connect /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors 
-    sudo chown root: /usr/local/bin/pos /usr/local/bin/connect /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors 
+    #Comand for open robot configs
+    sudo rm /usr/local/bin/config
+    sudo cp robot_commands/config /usr/local/bin && sudo chmod 777 /usr/local/bin/config
+
+    #Comand for open robot gui
+    sudo rm /usr/local/bin/gui
+    sudo cp robot_commands/gui /usr/local/bin && sudo chmod 777 /usr/local/bin/gui
+
+    sudo chown root: /usr/local/bin/gui /usr/local/bin/config /usr/local/bin/pos /usr/local/bin/connect /usr/local/bin/compile /usr/local/bin/imu /usr/local/bin/control /usr/local/bin/vision /usr/local/bin/decision /usr/local/bin/gamecontroller /usr/local/bin/motors 
 
 echo -e "${blue} Instaling Softwares${NC}"
     sudo apt update && sudo apt upgrade && sudo apt install snapd -y
