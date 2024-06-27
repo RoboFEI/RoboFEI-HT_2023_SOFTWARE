@@ -163,17 +163,24 @@ void DecisionNode::send_goal(const Move &order)
 
   RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
+  // ver se funciona e melhorar lógica depois
   if(order != this->robot.movement)
   {
     if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
     {
       if(goal_handle_ != nullptr && !robot.finished_move)
       {
-        auto goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle_);
-        goal_handle_future_.wait_for(1500ms);
+        if(robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side)
+        {
+          auto goal_handle_future_ = this->action_client_->async_cancel_goal(goal_handle_);
+          goal_handle_future_.wait_for(1500ms);
+        }
       }
-      action_client_->async_send_goal(goal_msg, send_goal_options);
-      robot.movement = order;
+      if(robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side)
+      {
+        action_client_->async_send_goal(goal_msg, send_goal_options);
+        robot.movement = order;
+      }
     }
     else if(robot.finished_move)
     {
