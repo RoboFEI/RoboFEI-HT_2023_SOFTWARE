@@ -1,0 +1,28 @@
+#!/bin/bash
+
+cd ~/RoboFEI-HT_2023_SOFTWARE/src
+
+if [ $1 = 'c' ]; then
+  cd robot_bringup/config
+  if [ -z $2 ]; then
+    echo "ERRO: Not have Robot Number"
+  else 
+    vim robot_config$2.yaml
+  fi
+fi
+if [ $1 = 'm' ]; then
+  cd control/Data
+  if [ -z $2 ]; then
+    echo "ERRO: Not have Robot Number"
+  else 
+    vim motion$2.json
+  fi
+fi
+if [ $1 = 'i' ]; then
+  cd control/Data
+  if [ -z $2 ]; then
+    echo "ERRO: Not have Robot Number"
+  else 
+    vim config$2.ini
+  fi
+fi
