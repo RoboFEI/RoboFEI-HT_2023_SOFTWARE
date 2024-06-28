@@ -333,7 +333,7 @@ private:
           setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
           pubisher_body_joints_->publish(setJointInfoMsg);
 
-          if (movement != last_movement && (movement == 5 || movement == 6 || movement == 14)) {
+          if (movement != last_movement && (movement == 5 || movement == 6 || movement == 14 || movement == 20 || movement == 21)) {
             do_gait = true;
           }
 
