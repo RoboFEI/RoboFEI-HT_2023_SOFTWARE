@@ -72,7 +72,15 @@ if [ -z $1 ]; then
 		echo ''
 	fi
 	if [ $n = 17 ]; then
-		echo '16- Stand Up Front'
+		echo '17- Stand Up Front'
+		echo ''
+	fi
+	if [ $n = 20 ]; then
+		echo '20- Walk Left'
+		echo ''
+	fi
+	if [ $n = 21 ]; then
+		echo '21- Walk Right'
 		echo ''
 	fi
 else
