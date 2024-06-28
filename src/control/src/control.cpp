@@ -73,14 +73,13 @@ std::string position_name = "position";
 std::string sleep_name = "sleep";
 std::string section = "Stand Still";
 
-int cWalk = 1;
-
 class Control : public rclcpp::Node
 {
 public:
   using JointStateMsg = custom_interfaces::msg::JointState;
   
   int robot_number_;
+  int cWalk;
 
   bool body_activate_;
 
@@ -107,6 +106,7 @@ public:
 
     body_activate_ = this->declare_parameter("body_activate", true);
     robot_number_ = this->declare_parameter("robot_number", 2);
+    cWalk = this->declare_parameter("walk_counter", 1);
 
     RCLCPP_INFO(this->get_logger(), "body activate: %d", body_activate_);
     RCLCPP_INFO(this->get_logger(), "robot number: %d", robot_number_);
@@ -333,7 +333,7 @@ private:
           setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
           pubisher_body_joints_->publish(setJointInfoMsg);
 
-          if (movement != last_movement && (movement == 5 || movement == 6 || movement == 14)) {
+          if (movement != last_movement && (movement == 5 || movement == 6 || movement == 14 || movement == 20 || movement == 21)) {
             do_gait = true;
           }
 
