@@ -108,42 +108,9 @@ void RobotBehavior::player_normal_game() // fazer
         break;
 
     case kick_ball:
-	if(robot.movement != 3){
-
-		if(gambiarra < 400) send_goal(stand_still);
-		else send_goal(right_kick);
-	}
-	   
-	  if(robot.finished_move)
-	  {
-           	robot.state = ball_approach;
-	   	gambiarra = 0;
-	   }
-        RCLCPP_INFO(this->get_logger(), "debug 1: gambiarra %d", gambiarra);
-	gambiarra++;
-	usleep(1000);
-
-
-	break;
-	
-    default:
-	for(int i=0; i<100; i++)
-	{
-		send_goal(stand_still);
-		usleep(10000);
-	}
-        
-	for(int i=0; i<100; i++)
-	{
-		send_goal(right_kick);
-	}	
-	//usleep(10e6);
-        //send_goal(stand_still);
-        //usleep(1e6);
-    	//send_goal(right_kick);
-        robot.state = ball_approach;
-    
-        break;
+        if(robot.movement != 3) send_goal(right_kick);
+        else if(robot.finished_move) robot.state = ball_approach;
+	    break;
     }
 }
 
