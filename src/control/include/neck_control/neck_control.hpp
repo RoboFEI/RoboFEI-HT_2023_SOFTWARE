@@ -76,6 +76,7 @@ class NeckNode : public rclcpp::Node
     int cont_lost_ball = 0;
     int search_ball_pos[9][2] = {{2270,1300}, {2048, 1300}, {1826, 1300}, {1528, 1550}, {2048, 1550}, {2568, 1550}, {2866, 1800}, {2048, 1800},{1230, 1800}};
     int search_ball_state = 0;
+    int robotNumber;
 
     AssyncTimer lost_ball_timer;
     AssyncTimer search_ball_timer;
