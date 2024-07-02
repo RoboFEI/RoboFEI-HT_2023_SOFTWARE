@@ -20,12 +20,12 @@ class GameStateReceiver(Node):
     After this we send a package back to the GC """
 
     def __init__(self):
-        super().__init__('game_controller', automatically_declare_parameters_from_overrides=True)
+        super().__init__('game_controller')
 
         self.declare_parameter('TEAM_ROBOFEI', 7)
-        self.declare_parameter('ROBOT_NUMBER', 2)
+        self.declare_parameter('robot_number', 2)
         self.team = self.get_parameter('TEAM_ROBOFEI').get_parameter_value().integer_value
-        self.player_number = self.get_parameter('ROBOT_NUMBER').get_parameter_value().integer_value
+        self.player_number = self.get_parameter('robot_number').get_parameter_value().integer_value
         logger.info('We are playing as player {} in team {}'.format(self.player_number, self.team))
 
         self.state_publisher = self.create_publisher(GameStateMsg, 'gamestate', 1)
