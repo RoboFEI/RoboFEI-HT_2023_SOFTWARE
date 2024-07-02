@@ -56,7 +56,10 @@ void RobotBehavior::normal_game()
     //     break;
     
     case GameControllerMsg::GAMESTATE_PLAYING: // fazer
-        player_normal_game();
+        if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
+        {
+            player_normal_game();
+        }
         // if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game(); // fazer
         // // else player_normal_game();
         break;
