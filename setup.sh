@@ -168,3 +168,8 @@ echo -e "${blue} Instaling Softwares${NC}"
 
     #install byobu
     sudo apt install byobu -y
+
+    #install ssh-server
+    sudo apt-get update
+    sudo apt-get install openssh-server
+    sudo ufw allow 22
