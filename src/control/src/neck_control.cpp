@@ -133,7 +133,7 @@ void NeckNode::search_ball()
 
     this->search_ball_state += 1;
 
-    if(this->search_ball_state >= 8) this->search_ball_state = 0;
+    if(this->search_ball_state >= 9) this->search_ball_state = 0;
   }
 }
 
