@@ -78,6 +78,11 @@ echo -e "${blue} setup new rules for usb names${NC}"
     sudo udevadm trigger
     # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}
 
+    #Full permitions for camera, motors and imu
+    echo "sudo chmod 777 /dev/imu" >> ~/.bashrc
+    echo "sudo chmod 777 /dev/motors" >> ~/.bashrc
+    echo "sudo chmod 777 /dev/camera" >> ~/.bashrc
+
 #Bind Comand
 echo -e "${blue} commands setup${NC}"
 
@@ -154,11 +159,12 @@ echo -e "${blue} Instaling Softwares${NC}"
     #Filezila
     sudo apt install filezilla -y
 
-    #Fortclient
-    wget -O ~/Downloads/forticlient.deb https://filestore.fortinet.com/forticlient/forticlient_vpn_7.0.7.0246_amd64.deb
-    sudo dpkg -i ~/Downloads/forticlient.deb
-    sudo apt install -f -y
-
     #Dependence for GameController
     sudo apt  install ant -y
-    sudo apt install openjdk-19-jdk -y
+    sudo apt install openjdk-11-jdk -y
+
+    #install vim
+    sudo apt install vim
+
+    #install byobu
+    sudo apt install byobu
