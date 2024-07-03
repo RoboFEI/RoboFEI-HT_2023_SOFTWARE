@@ -43,11 +43,11 @@ echo -e "${blue} Instalação do ROS2...${NC}"
     sudo apt-get install ros-humble-vision-msgs -y
 
     #Install rqt and plugins 
-    sudo apt update
-    sudo apt install ros-humble-rqt*
+    sudo apt update 
+    sudo apt install ros-humble-rqt* -y
 
     #install ros2 dynamixel
-    sudo apt-get install ros-humble-dynamixel-sdk
+    sudo apt-get install ros-humble-dynamixel-sdk -y
 
     # Setup colcon and colcon_cd
     echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
@@ -64,7 +64,7 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     pip install ultralytics
 
     #Instalação da biblioteca para Json
-    sudo apt install nlohmann-json3-dev
+    sudo apt install nlohmann-json3-dev -y
 
     echo "robot_number=2" | sudo tee /home/robot_num.py
 
@@ -164,7 +164,7 @@ echo -e "${blue} Instaling Softwares${NC}"
     sudo apt install openjdk-11-jdk -y
 
     #install vim
-    sudo apt install vim
+    sudo apt install vim -y
 
     #install byobu
-    sudo apt install byobu
+    sudo apt install byobu -y
