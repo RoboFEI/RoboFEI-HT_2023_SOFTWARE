@@ -19,12 +19,16 @@ class Json
         std::vector<std::vector<std::vector<int>>> getMove(std::string move_name);
         void printJson();
         void teste();
+        void moveToJson();
+        void saveJson(std::vector<std::vector<std::vector<int>>> move, std::string moveName);
 
         // Json();
         // virtual ~Json();
     
     private:
         json j;
+        int getMode(std::vector<int> valueList);
+        
 };
 
 #endif
