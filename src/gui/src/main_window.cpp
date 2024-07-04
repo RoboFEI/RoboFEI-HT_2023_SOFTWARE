@@ -80,7 +80,13 @@ MainWindow::MainWindow(
   QShortcut *sC5 = new QShortcut(QKeySequence("Ctrl+Left"), this);
   this->connect(sC5, &QShortcut::activated, this, &MainWindow::on_prevStep_button_clicked);
 
+  // //Espelhar valores dos motores
+  // QShortcut *sC6 = new QShortcut(QKeySequence(""), this);
+  // this->connect(sC6, &QShortcut::activated, this, &MainWindow::);
 
+  //mandar o parado
+  QShortcut *sC7 = new QShortcut(QKeySequence("Ctrl+P"), this);
+  this->connect(sC7, &QShortcut::activated, this, &MainWindow::sendStandStill);
 
   for(auto PosLineEdit : allPosLineEdit)
   {
@@ -487,4 +493,12 @@ void MainWindow::on_sleep_returnPressed()
 
   lastSleep[0] = int(sleepFloat*1000);
   ui_->label_sleep->setText(QString("%1").arg(lastSleep[0]/1000));
+}
+
+void MainWindow::sendStandStill()
+{
+  std::vector<std::vector<std::vector<int>>> standStill = motions.getMove("Stand Still");
+  sendJointVel(standStill[0][1]);
+  sendJointPos(standStill[0][0]);
+  usleep(standStill[0][2][0]*1e3);
 }

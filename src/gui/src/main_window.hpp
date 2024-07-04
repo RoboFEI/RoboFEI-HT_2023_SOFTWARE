@@ -98,6 +98,7 @@ private:
   void displayStepInfo();
   void checkUnsaved();
   void runMove(bool all);
+  void sendStandStill();
 
 private slots:
   void on_loadMoves_button_released();
