@@ -74,6 +74,14 @@ MainWindow::MainWindow(
   QShortcut *sC3 = new QShortcut(QKeySequence("Ctrl+S"), this);
   this->connect(sC3, &QShortcut::activated, this, &MainWindow::on_saveStep_button_clicked);
 
+  QShortcut *sC4 = new QShortcut(QKeySequence("Ctrl+Right"), this);
+  this->connect(sC4, &QShortcut::activated, this, &MainWindow::on_nextStep_button_clicked);
+
+  QShortcut *sC5 = new QShortcut(QKeySequence("Ctrl+Left"), this);
+  this->connect(sC5, &QShortcut::activated, this, &MainWindow::on_prevStep_button_clicked);
+
+
+
   for(auto PosLineEdit : allPosLineEdit)
   {
     this->connect(PosLineEdit, &QLineEdit::returnPressed, this, &MainWindow::sendSingleInfo);
@@ -302,9 +310,12 @@ void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosiçõ
 {
   lastPositions = atualMovesList[atualStep-1][0];
   lastVelocitys = atualMovesList[atualStep-1][1];
+  lastSleep     = atualMovesList[atualStep-1][2];
   
   sendJointVel(lastVelocitys);
   sendJointPos(lastPositions);
+
+  ui_->label_sleep->setText(QString("%1").arg(lastSleep[0]/1000.0));
 
   if(mode == 0) on_pos_button_clicked();
   else on_vel_button_clicked(); 
@@ -314,7 +325,7 @@ void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosiçõ
 
 void MainWindow::on_nextStep_button_clicked()
 {
-  if(atualStep < atualMovesList.size())
+  if(atualStep < atualMovesList.size() && atualStep != 0)
   {
     atualStep++;
     displayStepInfo();
@@ -372,6 +383,7 @@ void MainWindow::on_saveStep_button_clicked()
   
   atualMovesList[atualStep-1][0] = lastPositions;
   atualMovesList[atualStep-1][1] = lastVelocitys;
+  atualMovesList[atualStep-1][2] = lastSleep;
 }
 
 void MainWindow::checkUnsaved()
@@ -401,8 +413,16 @@ void MainWindow::checkUnsaved()
     {
       allPosLabel[i]->setStyleSheet("QLabel {background-color: yellow; color : none; }");
     }
-    else allPosLabel[i]->setStyleSheet("QLabel {background-color: none; color : black; }");
-  
+    else allPosLabel[i]->setStyleSheet("QLabel {background-color: none; color : black; }");  
+  }
+
+  if(atualMovesList[atualStep-1][2][0] != lastSleep[0])
+  {
+    ui_->label_sleep->setStyleSheet("QLabel {background-color: yellow; color : none; }");
+  }
+  else
+  {
+    ui_->label_sleep->setStyleSheet("QLabel {background-color: none; color : black; }");  
   }
 }
 
@@ -460,3 +480,11 @@ void MainWindow::on_newStep_button_clicked()
   displayStepInfo();
 }
 
+void MainWindow::on_sleep_returnPressed()
+{
+  int sleepFloat = ui_->sleep->text().toFloat();
+  if(sleepFloat < 0) return;
+
+  lastSleep[0] = int(sleepFloat*1000);
+  ui_->label_sleep->setText(QString("%1").arg(lastSleep[0]/1000));
+}

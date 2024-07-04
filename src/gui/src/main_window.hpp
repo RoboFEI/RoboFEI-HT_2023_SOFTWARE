@@ -68,6 +68,7 @@ private:
   QVector<QPushButton*> gameStateButtons;
   std::vector<int> lastVelocitys = std::vector<int>(18, 32);
   std::vector<int> lastPositions = std::vector<int>(18, 2048);
+  std::vector<int> lastSleep = std::vector<int>(1, 0);
   std::vector<std::vector<std::vector<int>>> atualMovesList;
   bool moveIsRunning = false;
   bool stoppingMove = false;
@@ -111,5 +112,5 @@ private slots:
   void on_stop_button_clicked();
   void on_deletStep_button_clicked();
   void on_newStep_button_clicked();
-  
+  void on_sleep_returnPressed();
 };
