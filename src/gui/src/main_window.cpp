@@ -472,14 +472,14 @@ void MainWindow::on_deletStep_button_clicked()
 {
   if(atualStep == 0 || atualMovesList.size() == 1) return;
   atualMovesList.erase(atualMovesList.begin()+atualStep-1);
-  atualStep = atualStep - 2;
-  if(atualStep == -1) atualStep = 0;
-  on_nextStep_button_clicked();
+  // atualStep = atualStep - 1;
+  // if(atualStep == -1) atualStep = 0;
+  on_prevStep_button_clicked();
 }
 
 void MainWindow::on_newStep_button_clicked()
 {
-  if(atualStep == 0) return;
+  if(atualStep == 0 || ui_->movesList->currentText() == QString("Stand Still")) return;
   std::vector<std::vector<int>> newMove = atualMovesList[atualStep-1];
   atualMovesList.emplace(atualMovesList.begin()+atualStep-1, newMove);
   atualStep += 1;

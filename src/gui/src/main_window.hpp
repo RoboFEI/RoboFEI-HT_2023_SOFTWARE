@@ -70,6 +70,7 @@ private:
   std::vector<int> lastPositions = std::vector<int>(18, 2048);
   std::vector<int> lastSleep = std::vector<int>(1, 0);
   std::vector<std::vector<std::vector<int>>> atualMovesList;
+  std::string moveName;
   bool moveIsRunning = false;
   bool stoppingMove = false;
 
