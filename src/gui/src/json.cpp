@@ -14,6 +14,7 @@ std::string folder_path2 = fs::current_path();
 
 void Json::openJson(std::string json_path)
 {
+    jsonPath = json_path;
     std::ifstream fJson(json_path);
     j = json::parse(fJson);
     
@@ -203,7 +204,7 @@ void Json::saveJson(std::vector<std::vector<std::vector<int>>> move, std::string
     // // j["Stand Still"];
 
     // fTeste >> saida;    
-    std::ofstream file("motion_teste.json");
+    std::ofstream file(jsonPath);
 
     file << std::setw(4) << j;
 

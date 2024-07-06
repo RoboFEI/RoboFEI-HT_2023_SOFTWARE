@@ -502,3 +502,9 @@ void MainWindow::sendStandStill()
   sendJointPos(standStill[0][0]);
   usleep(standStill[0][2][0]*1e3);
 }
+
+void MainWindow::on_saveMove_button_clicked()
+{
+  on_saveStep_button_clicked();
+  motions.saveJson(atualMovesList, ui_->movesList->currentText().toUtf8().constData());
+}

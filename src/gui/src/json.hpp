@@ -26,6 +26,7 @@ class Json
         // virtual ~Json();
     
     private:
+        std::string jsonPath;
         json j;
         int getMode(std::vector<int> valueList);
         
