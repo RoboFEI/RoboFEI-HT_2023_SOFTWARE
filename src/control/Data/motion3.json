@@ -156,7 +156,38 @@
         "sleep9" : 1
     },
 
-    
+    "Goodbye":{
+        "number of movements" : 1,
+
+        "address1" : 116,
+        "position1" : [416,512,513,496,564,344,530,520,525,482,466,576,580,460,580,465,496,499,512,512],
+        "sleep1" : 0.5
+    },
+
+    "Goalkeeper Fall Left":{
+        "number of movements" : 1,
+
+        "address1" : 116,
+        "position1" : [416,512,513,496,564,344,530,520,525,482,466,576,580,460,580,465,496,499,512,512],
+        "sleep1" : 0.5
+    },
+
+    "Goalkeeper Fall Right":{
+        "number of movements" : 1,
+
+        "address1" : 116,
+        "position1" : [416,512,513,496,564,344,530,520,525,482,466,576,580,460,580,465,496,499,512,512],
+        "sleep1" : 0.5
+    },
+
+    "Goalkeeper Middle":{
+        "number of movements" : 1,
+
+        "address1" : 116,
+        "position1" : [416,512,513,496,564,344,530,520,525,482,466,576,580,460,580,465,496,499,512,512],
+        "sleep1" : 0.5
+    },
+
     "Stand Up Back":{
         "number of movements" : 25, 
 
