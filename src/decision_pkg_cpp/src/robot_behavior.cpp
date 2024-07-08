@@ -63,7 +63,7 @@ void RobotBehavior::normal_game()
         // if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game(); // fazer
         // // else player_normal_game();
         break;
-    
+   
     case GameControllerMsg::GAMESTATE_FINISHED: // feito
         send_goal(stand_still);
         break;
@@ -73,12 +73,14 @@ void RobotBehavior::normal_game()
 void RobotBehavior::player_normal_game() // fazer
 {
     RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-
+    
     switch (robot.state)
     {
     case searching_ball:
         //RCLCPP_INFO(this->get_logger(), "Searching ball");
-        if(ball_is_locked())
+        RCLCPP_INFO(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
+
+	if(ball_is_locked())
         {
             if(robot.ball_position == center) robot.state = ball_approach;
             else robot.state = aligning_with_the_ball;
@@ -112,8 +114,12 @@ void RobotBehavior::player_normal_game() // fazer
 
     case kick_ball:
         if(robot.movement != 3) send_goal(right_kick);
-        else if(robot.finished_move) robot.state = ball_approach;
-	    break;
+        else if(robot.finished_move)
+	{
+		robot.state = ball_approach;
+		lost_ball_timer.reset();
+	}   
+	break;
     }
 }
 

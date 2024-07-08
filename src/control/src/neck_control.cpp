@@ -148,13 +148,13 @@ void NeckNode::main_callback()
     break;
   }
 
-  if(lost_ball_timer.delayNR(2000) && this->robot_state == State::follow_ball)
+  if(lost_ball_timer.delayNR(500) && this->robot_state == State::follow_ball)
   {
     this->robot_state = State::search_ball;
     search_ball_timer.reset();
     this->search_ball_state = 0;
   }
-  else if (!lost_ball_timer.delayNR(2000))
+  else if (!lost_ball_timer.delayNR(500))
   {
     this->robot_state = State::follow_ball;
   }
