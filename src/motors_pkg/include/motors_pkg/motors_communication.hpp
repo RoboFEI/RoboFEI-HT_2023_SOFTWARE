@@ -7,6 +7,8 @@
 #include <numeric>
 #include <unistd.h>
 
+#include <motors_pkg/motorsAttributes.hpp>
+
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"
 #include "dynamixel_sdk/dynamixel_sdk.h"
@@ -38,6 +40,8 @@ public:
   
   Joints joints;
   std::vector<int> allIds = std::vector<int>(20);
+  int robotNumber;
+  motorsAttributes *mtrs_att;
 
   int dxl_comm_result = COMM_TX_FAIL;
 
