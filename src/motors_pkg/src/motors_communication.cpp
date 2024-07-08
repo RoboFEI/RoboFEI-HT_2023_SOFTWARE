@@ -27,6 +27,7 @@ MotorsCommunication::MotorsCommunication()
     robotNumber = this->declare_parameter("robot_number", 2);
 
     mtrs_att = new motorsAttributes(robotNumber);   
+    RCLCPP_INFO(this->get_logger(), "robotNumber: %d", robotNumber); 
 
     packetHandler = PacketHandler::getPacketHandler(mtrs_att->PROTOCOL_VERSION);
     groupSyncWritePos = new dynamixel::GroupSyncWrite(portHandler, packetHandler, mtrs_att->ADDR_GOAL_POSITION, mtrs_att->LEN_GOAL_POSITION);
