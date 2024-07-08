@@ -301,6 +301,11 @@ private:
           parameters = false;
           section = "Left Kick Variant L";
           break;
+        case 35: 
+          RCLCPP_INFO(this->get_logger(), "Left Kick Penalti");
+          parameters = false;
+          section = "Left Kick Penalti";
+          break;
 
       }
     }
