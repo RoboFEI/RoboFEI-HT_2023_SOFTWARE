@@ -3,13 +3,13 @@
 
 #include "motors_pkg/motors_communication.hpp"
 
-#define PROTOCOL_VERSION 2   
+// #define PROTOCOL_VERSION 2   
 
-#if PROTOCOL_VERSION == 2
-    #include "motors_pkg/protocol2.h"
-#else
-    #include "motors_pkg/protocol1.h"
-#endif
+// #if PROTOCOL_VERSION == 2
+//     #include "motors_pkg/protocol2.h"
+// #else
+//     #include "motors_pkg/protocol1.h"
+// #endif
 
 // Default setting
 #define BAUDRATE 1000000  // Default Baudrate of DYNAMIXEL X series
@@ -24,9 +24,14 @@ MotorsCommunication::MotorsCommunication()
 {
     std::iota (std::begin(allIds), std::end(allIds), 1);
 
-    packetHandler = PacketHandler::getPacketHandler(PROTOCOL_VERSION);
-    groupSyncWritePos = new dynamixel::GroupSyncWrite(portHandler, packetHandler, ADDR_GOAL_POSITION, LEN_GOAL_POSITION);
-    groupSyncReadPos  = new dynamixel::GroupSyncRead(portHandler, packetHandler, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION);
+    robotNumber = this->declare_parameter("robot_number", 2);
+
+    mtrs_att = new motorsAttributes(robotNumber);   
+    RCLCPP_INFO(this->get_logger(), "robotNumber: %d", robotNumber); 
+
+    packetHandler = PacketHandler::getPacketHandler(mtrs_att->PROTOCOL_VERSION);
+    groupSyncWritePos = new dynamixel::GroupSyncWrite(portHandler, packetHandler, mtrs_att->ADDR_GOAL_POSITION, mtrs_att->LEN_GOAL_POSITION);
+    groupSyncReadPos  = new dynamixel::GroupSyncRead(portHandler, packetHandler, mtrs_att->ADDR_PRESENT_POSITION, mtrs_att->LEN_PRESENT_POSITION);
     
     initialMotorsSetup(BROADCAST_ID);
 
@@ -56,7 +61,7 @@ MotorsCommunication::~MotorsCommunication()
 
 void MotorsCommunication::initialMotorsSetup(int id)
 {
-    if(PROTOCOL_VERSION == 2)
+    if(mtrs_att->PROTOCOL_VERSION == 2)
     {
         uint8_t dxl_error = 0;
         
@@ -146,7 +151,7 @@ void MotorsCommunication::getNoTorquePos()
 
     for(auto id : idPositionReaded)
     {
-        joints.position[id] = groupSyncReadPos->getData(id, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION);
+        joints.position[id] = groupSyncReadPos->getData(id, mtrs_att->ADDR_PRESENT_POSITION, mtrs_att->LEN_PRESENT_POSITION);
     }
 
     groupSyncReadPos->clearParam();
@@ -215,7 +220,7 @@ void MotorsCommunication::setJointTorque(int id, int goalTorque)
     dxl_comm_result = packetHandler->write1ByteTxRx(
     portHandler,
     (uint8_t) id,
-    ADDR_TORQUE_ENABLE,
+    mtrs_att->ADDR_TORQUE_ENABLE,
     (uint8_t) goalTorque,
     &dxl_error
     );
@@ -234,9 +239,9 @@ void MotorsCommunication::setJointTorque(int id, int goalTorque)
 
 uint8_t *MotorsCommunication::convertInfo(int jointInfo)
 {
-    uint8_t *info = new uint8_t[LEN_GOAL_POSITION];
+    uint8_t *info = new uint8_t[mtrs_att->LEN_GOAL_POSITION];
 
-    if(LEN_GOAL_POSITION == 4)
+    if(mtrs_att->LEN_GOAL_POSITION == 4)
     {
         info[0] = DXL_LOBYTE(DXL_LOWORD(jointInfo));
         info[1] = DXL_HIBYTE(DXL_LOWORD(jointInfo));
@@ -255,11 +260,11 @@ void MotorsCommunication::setJointVel(int id, int goalVel)
 {
     uint8_t dxl_error = 0;
 
-    if(LEN_PROFILE_VELOCITY == 4)
-        dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, (uint8_t) id, ADDR_PROFILE_VELOCITY, (uint32_t) goalVel, &dxl_error);
+    if(mtrs_att->LEN_PROFILE_VELOCITY == 4)
+        dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, (uint8_t) id, mtrs_att->ADDR_PROFILE_VELOCITY, (uint32_t) goalVel, &dxl_error);
     
     else
-        dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, (uint8_t) id, ADDR_PROFILE_VELOCITY, (uint32_t) goalVel, &dxl_error);
+        dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, (uint8_t) id, mtrs_att->ADDR_PROFILE_VELOCITY, (uint32_t) goalVel, &dxl_error);
 
 
     if (dxl_comm_result != COMM_SUCCESS) {

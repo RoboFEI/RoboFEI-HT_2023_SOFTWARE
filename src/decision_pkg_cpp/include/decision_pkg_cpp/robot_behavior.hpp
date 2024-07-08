@@ -33,6 +33,9 @@ class RobotBehavior : public DecisionNode
         bool neck_to_right();
         void turn_to_ball();
 
+        void penalty();
+        void player_penalty();
+
         RobotBehavior();
         virtual ~RobotBehavior();
 
