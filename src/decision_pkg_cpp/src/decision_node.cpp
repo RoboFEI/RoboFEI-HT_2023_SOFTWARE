@@ -44,6 +44,12 @@ DecisionNode::DecisionNode() : Node("decision_node")
       std::bind(&DecisionNode::listener_callback_vision, this, std::placeholders::_1)
     );
 
+    running_move_subscriber_ = this->create_subscription<intMsg>(
+        "move_running",
+        rclcpp::QoS(10),
+        std::bind(&DecisionNode::listener_calback_running_move, this, _1)
+    );
+
     this->action_client_ = rclcpp_action::create_client<ControlActionMsg>(
       this,
       "control_action"
@@ -150,6 +156,11 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
   // RCLCPP_INFO(this->get_logger(), "Recive Vision Info");
 }
 
+void DecisionNode::listener_calback_running_move(const intMsg::SharedPtr atualMove)
+{
+  this->robot.movement = static_cast<Move>(atualMove->data);
+}    
+
 void DecisionNode::send_goal(const Move &order)
 {
   auto goal_msg = ControlActionMsg::Goal();
@@ -179,13 +190,13 @@ void DecisionNode::send_goal(const Move &order)
       if((robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side) || robot.finished_move)
       {
         action_client_->async_send_goal(goal_msg, send_goal_options);
-        robot.movement = order;
+        // robot.movement = order;
       }
     }
     else if(robot.finished_move)
     {
       action_client_->async_send_goal(goal_msg, send_goal_options);
-      robot.movement = order;
+      // robot.movement = order;
     }
 
     robot.finished_move = false;
@@ -193,7 +204,7 @@ void DecisionNode::send_goal(const Move &order)
   else if(robot.finished_move)
   {
     action_client_->async_send_goal(goal_msg, send_goal_options); 
-    robot.movement = order;
+    // robot.movement = order;
     robot.finished_move = false;
   }
 
