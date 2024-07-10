@@ -85,8 +85,8 @@ class BallDetection(Node):
             self.ball_detection()
             
             
-            cv2.imshow('Ball', self.img) # Show image
-            cv2.waitKey(1)
+            #cv2.imshow('Ball', self.img) # Show image
+            #cv2.waitKey(1)
     
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False, imgsz=img.shape[:2])

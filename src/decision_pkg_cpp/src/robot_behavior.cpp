@@ -25,21 +25,24 @@ void RobotBehavior::players_behavior()
     else
     {
         if(robot_fallen(robot)) get_up();
-
-        switch (gc_info.secondary_state)
+	    else
         {
-        case GameControllerMsg::STATE_NORMAL:
-            normal_game();
-            break;
-        
-        case GameControllerMsg::STATE_PENALTYSHOOT:
-            penalty();
-            break;
+            switch (gc_info.secondary_state)
+            {
+            case GameControllerMsg::STATE_NORMAL:
+                normal_game();
+                break;
+            
+            case GameControllerMsg::STATE_PENALTYSHOOT:
+                penalty();
+                break;
 
-        default:
-            break;
+            default:
+                break;
+            }
         }
     }
+
 }
 
 void RobotBehavior::penalty()

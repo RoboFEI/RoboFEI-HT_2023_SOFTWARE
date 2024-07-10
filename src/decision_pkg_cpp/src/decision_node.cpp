@@ -176,7 +176,7 @@ void DecisionNode::send_goal(const Move &order)
           goal_handle_future_.wait_for(1500ms);
         }
       }
-      if(robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side)
+      if((robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side) || robot.finished_move)
       {
         action_client_->async_send_goal(goal_msg, send_goal_options);
         robot.movement = order;
