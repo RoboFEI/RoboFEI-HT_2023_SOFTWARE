@@ -31,6 +31,7 @@
 #include "sensor_msgs/msg/imu.hpp"
 // #include "custom_interfaces/msg/neck_position.hpp"
 #include "std_msgs/msg/bool.hpp"
+#include "std_msgs/msg/int32.hpp"
 #include "GaitMove.hpp"
 // #include "custom_interfaces/msg/set_position_original.hpp"
 #include "custom_interfaces/srv/reset.hpp"
@@ -77,6 +78,7 @@ class Control : public rclcpp::Node
 {
 public:
   using JointStateMsg = custom_interfaces::msg::JointState;
+  using intMsg = std_msgs::msg::Int32;
   
   int robot_number_;
   int cWalk;
@@ -96,7 +98,8 @@ public:
     // publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
     // publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
     pubisher_body_joints_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
-    publisher_walk = this->create_publisher<custom_interfaces::msg::Walk>("walking", 10); 
+    publisher_walk = this->create_publisher<custom_interfaces::msg::Walk>("walking", 10);
+    publisher_atual_move = this->create_publisher<intMsg>("move_running", 10);
 
     using namespace std::placeholders;
 
@@ -309,8 +312,10 @@ private:
           parameters = false;
           section = "Left Kick Penalti";
           break;
-
       }
+      auto atualMove = intMsg();
+      atualMove.data = movement;
+      publisher_atual_move->publish(atualMove);
     }
 
     bool isParamMove(int move)
@@ -464,6 +469,7 @@ private:
     // rclcpp::Publisher<custom_interfaces::msg::SetPositionOriginal>::SharedPtr publisher_single; 
     rclcpp::Publisher<JointStateMsg>::SharedPtr pubisher_body_joints_;
     rclcpp::Publisher<custom_interfaces::msg::Walk>::SharedPtr publisher_walk; 
+    rclcpp::Publisher<intMsg>::SharedPtr publisher_atual_move; 
     rclcpp::Client<custom_interfaces::srv::Reset>::SharedPtr client;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp_action::Server<Control_action>::SharedPtr action_server_;
