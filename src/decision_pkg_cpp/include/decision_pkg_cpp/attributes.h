@@ -68,28 +68,4 @@ struct Robot
 
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif // ATTRIBUTES_H
