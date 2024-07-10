@@ -81,6 +81,9 @@ public:
   int robot_number_;
   int cWalk;
 
+  std::vector<int> stepMoves = {1, 2, 3, 4, 7, 30, 31, 32, 33, 34, 35};
+  std::vector<int> paramMoves = {5, 6, 9, 10, 14, 20, 21};
+
   bool body_activate_;
 
   json j;
@@ -310,6 +313,16 @@ private:
       }
     }
 
+    bool isParamMove(int move)
+    {
+      return count(paramMoves.begin(), paramMoves.end(), move) > 0;
+    }
+
+    bool isStepMove(int move)
+    {
+      return count(stepMoves.begin(), stepMoves.end(), move) > 0;
+    }
+
     void execute(const std::shared_ptr<GoalHandleAction> goal_handle)
     {   
         auto message_walk = custom_interfaces::msg::Walk();  
@@ -338,7 +351,7 @@ private:
           setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
           pubisher_body_joints_->publish(setJointInfoMsg);
 
-          if (movement != last_movement && (movement == 5 || movement == 6 || movement == 14 || movement == 20 || movement == 21)) {
+          if (movement != last_movement && (isParamMove(movement) || (isStepMove(movement) && isParamMove(last_movement)))) {
             do_gait = true;
           }
 
