@@ -215,7 +215,7 @@ void RobotBehavior::player_penalty()
 
     case kick_ball:
         if(side_penalty == 0){
-            if(robot.movement != right_kick) send_goal(right_kick);
+            if(robot.movement != right_kick_to_left) send_goal(right_kick_to_left);
             else if(robot.finished_move)
             {
                 robot.state = ball_approach;
@@ -224,7 +224,7 @@ void RobotBehavior::player_penalty()
         }
         else if (side_penalty == 1)
         {
-            if(robot.movement != left_kick) send_goal(left_kick);
+            if(robot.movement != lefk_kick_to_right) send_goal(lefk_kick_to_right);
             else if(robot.finished_move)
             {
                 robot.state = ball_approach;
