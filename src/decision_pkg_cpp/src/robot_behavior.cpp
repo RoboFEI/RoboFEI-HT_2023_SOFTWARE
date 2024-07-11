@@ -159,7 +159,8 @@ void RobotBehavior::player_normal_game() // fazer
 void RobotBehavior::player_penalty()
 {
     RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-    
+    RCLCPP_INFO(this->get_logger(), "side Penalty: %d", side_penalty);
+
     switch (robot.state)
     {
     case searching_ball:
@@ -214,7 +215,7 @@ void RobotBehavior::player_penalty()
 
     case kick_ball:
         if(side_penalty == 0){
-            if(robot.movement != 3) send_goal(right_kick);
+            if(robot.movement != right_kick) send_goal(right_kick);
             else if(robot.finished_move)
             {
                 robot.state = ball_approach;
@@ -223,7 +224,7 @@ void RobotBehavior::player_penalty()
         }
         else if (side_penalty == 1)
         {
-            if(robot.movement != 3) send_goal(right_kick);
+            if(robot.movement != left_kick) send_goal(left_kick);
             else if(robot.finished_move)
             {
                 robot.state = ball_approach;
