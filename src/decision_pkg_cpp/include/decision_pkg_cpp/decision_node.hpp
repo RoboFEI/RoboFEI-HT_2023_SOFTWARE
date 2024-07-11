@@ -48,6 +48,7 @@ class DecisionNode : public rclcpp::Node
         Robot               robot;
 
         int falses_fallen_counter = 0;
+        int side_penalty = 0;
 
         void listener_callback_GC(const GameControllerMsg::SharedPtr gc_info);
         void listener_callback_neck_pos(const JointStateMsg::SharedPtr neck_pos);

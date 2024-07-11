@@ -80,6 +80,13 @@ DecisionNode::~DecisionNode()
 
 void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_info)
 {
+    if (this->gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && this->gc_info->game_state == GameControllerMsg::GAMESTATE_SET)
+    {
+      if(gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && gc_info->game_state == GameControllerMsg::GAMESTATE_PLAYING)
+      {
+        int side_penalty = rand()%3;
+      }
+    }
     this->gc_info = *gc_info;
     // RCLCPP_INFO(this->get_logger(), "Recive GC Info");
     // RCLCPP_INFO(this->get_logger(), "Game State: %d", this->gc_info.game_state);
@@ -190,7 +197,7 @@ void DecisionNode::send_goal(const Move &order)
       if((robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side) || robot.finished_move)
       {
         action_client_->async_send_goal(goal_msg, send_goal_options);
-        robot.movement = order;
+        // robot.movement = order;
       }
     }
     else if(robot.finished_move)
