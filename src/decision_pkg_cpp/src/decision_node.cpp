@@ -84,7 +84,7 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
     {
       if(gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && gc_info->game_state == GameControllerMsg::GAMESTATE_PLAYING)
       {
-        int side_penalty = rand()%3;
+        int side_penalty = rand()%2;
       }
     }
     this->gc_info = *gc_info;

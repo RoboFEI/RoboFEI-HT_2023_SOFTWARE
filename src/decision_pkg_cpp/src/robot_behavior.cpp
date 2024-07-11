@@ -192,7 +192,7 @@ void RobotBehavior::player_penalty()
         break;
 
     case ball_close:
-        // 0 - Esqeurda | 1 - Centro | 2 - Direita
+        // 0 - Esqeurda | 1 - Direita 
         if(side_penalty == 0)
         {
             if(robot_align_for_kick_right()) robot.state = kick_ball;
@@ -200,7 +200,7 @@ void RobotBehavior::player_penalty()
             //else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
             else send_goal(gait);
         }
-        else if(side_penalty == 2)
+        else if(side_penalty == 1)
         {
             if(robot_align_for_kick_left()) robot.state = kick_ball;
             else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
@@ -221,7 +221,7 @@ void RobotBehavior::player_penalty()
                 lost_ball_timer.reset();
             }   
         }
-        else if (side_penalty == 2)
+        else if (side_penalty == 1)
         {
             if(robot.movement != 3) send_goal(right_kick);
             else if(robot.finished_move)
