@@ -80,11 +80,11 @@ DecisionNode::~DecisionNode()
 
 void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_info)
 {
-    if (this->gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && this->gc_info->game_state == GameControllerMsg::GAMESTATE_SET)
+    if (this->gc_info.secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && this->gc_info.game_state == GameControllerMsg::GAMESTATE_SET)
     {
       if(gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && gc_info->game_state == GameControllerMsg::GAMESTATE_PLAYING)
       {
-        int side_penalty = rand()%2;
+        side_penalty = rand()%2;
       }
     }
     this->gc_info = *gc_info;
