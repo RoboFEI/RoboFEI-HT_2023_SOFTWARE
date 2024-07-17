@@ -48,7 +48,12 @@ NeckNode::NeckNode()
   neck_left_limit = this->declare_parameter("neck_left_limit", 2650);
   neck_right_limit = this->declare_parameter("neck_right_limit", 1350);
   robotNumber = this->declare_parameter("robot_number", 2);
-  if(robotNumber > 2) search_ball_pos = {{2270/4,1300/4}, {2048/4, 1300/4}, {1826/4, 1300/4}, {1528/4, 1550/4}, {2048/4, 1550/4}, {2568/4, 1550/4}, {2866/4, 1800/4}, {2048/4, 1800/4},{1230/4, 1800/4}};
+  if(robotNumber > 2)
+  {
+    search_ball_pos = {{2270/4,1300/4}, {2048/4, 1300/4}, {1826/4, 1300/4}, {1528/4, 1550/4}, {2048/4, 1550/4}, {2568/4, 1550/4}, {2866/4, 1800/4}, {2048/4, 1800/4},{1230/4, 1800/4}};
+    neck.pan  = 512;
+    neck.tilt = 512;  
+  }
 }
 
 NeckNode::~NeckNode()

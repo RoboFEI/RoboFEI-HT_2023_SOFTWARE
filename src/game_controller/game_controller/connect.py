@@ -22,9 +22,9 @@ class GameStateReceiver(Node):
     def __init__(self):
         super().__init__('game_controller')
 
-        self.declare_parameter('TEAM_ROBOFEI', 7)
+        self.declare_parameter('team_number', 7)
         self.declare_parameter('robot_number', 2)
-        self.team = self.get_parameter('TEAM_ROBOFEI').get_parameter_value().integer_value
+        self.team = self.get_parameter('team_number').get_parameter_value().integer_value
         self.player_number = self.get_parameter('robot_number').get_parameter_value().integer_value
         logger.info('We are playing as player {} in team {}'.format(self.player_number, self.team))
 

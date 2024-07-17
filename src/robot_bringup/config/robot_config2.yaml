@@ -22,3 +22,8 @@
   ros__parameters:
     FALL_ACCEL_TH: 8.5
     FALSES_FALLEN_TH: 30
+
+/image_node:
+  ros__parameters:
+    get_image: true
+    img_qlty: 70
