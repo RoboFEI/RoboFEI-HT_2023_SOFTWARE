@@ -7,6 +7,7 @@
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
 
 int gambiarra = 0;
+bool IS_GOALKEEPER = true; // True = Goalkeeper // False = Player
 
 RobotBehavior::RobotBehavior()
 {
@@ -91,9 +92,11 @@ void RobotBehavior::normal_game()
     case GameControllerMsg::GAMESTATE_PLAYING: // fazer
         if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
         {
-            player_normal_game();
+            if (!IS_GOALKEEPER) player_normal_game();
+            else goalkeeper_normal_game();
+            
         }
-        // if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game(); // fazer
+        //if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game(); // fazer
         // // else player_normal_game();
         break;
    
@@ -153,6 +156,60 @@ void RobotBehavior::player_normal_game() // fazer
 		lost_ball_timer.reset();
 	    }   
 	    break;
+    }
+}
+
+void RobotBehavior::goalkeeper_normal_game() // fazer
+{
+    //RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
+    RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
+
+    switch (robot.state)
+    {
+    case searching_ball:
+        //RCLCPP_INFO(this->get_logger(), "Searching ball");
+        RCLCPP_INFO(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
+
+	if(ball_is_locked())
+        {
+            if(robot.ball_position == center) robot.state = ball_approach;
+            else robot.state = aligning_with_the_ball;
+        }
+        else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) turn_to_ball();
+        else send_goal(gait); // gait
+        break;
+    
+    case aligning_with_the_ball:
+        //RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
+        if(robot_align_with_the_ball()) robot.state = ball_approach;
+        else if(ball_is_locked()) turn_to_ball();
+        else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        else send_goal(gait);
+        break;
+
+    case ball_approach:
+        RCLCPP_INFO(this->get_logger(), "neck limit %d,neck pos %d, ball locked %d, ball close %d", ball_in_close_limit(),robot.neck_pos, ball_is_locked(), robot.camera_ball_position.close);
+        //if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) //robot.state = ball_close;
+        if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
+        else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        else {if (robot.neck_pos.position20 < 2048) send_goal(walk); else send_goal(gait);}
+        break;
+
+    /*case ball_close:
+        if(robot_align_for_kick_right()) robot.state = kick_ball;
+        else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        //else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        else send_goal(gait);
+        break;
+
+    case kick_ball:
+        if(robot.movement != 3) send_goal(right_kick);
+        else if(robot.finished_move)
+	    {
+		robot.state = ball_approach;
+		lost_ball_timer.reset();
+	    }   
+	    break;*/
     }
 }
 
