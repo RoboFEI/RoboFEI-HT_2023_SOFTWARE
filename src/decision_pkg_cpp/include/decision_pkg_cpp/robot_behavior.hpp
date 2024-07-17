@@ -15,6 +15,7 @@ class RobotBehavior : public DecisionNode
     public:
         void players_behavior();
         void normal_game();
+        void normal_game_prepair();
         void player_normal_game();
         bool ball_is_locked();
         bool vision_stable();

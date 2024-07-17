@@ -80,13 +80,13 @@ void RobotBehavior::normal_game()
         send_goal(stand_still);
         break;
     
-    // case GameControllerMsg::GAMESTATE_READY: // fazer
-    //     // normal_game_prepair();
-    //     break;
+    case GameControllerMsg::GAMESTATE_READY: // fazer
+        normal_game_prepair();
+        break;
     
-    // case GameControllerMsg::GAMESTATE_SET: // feito
-    //     send_goal(stand_still);
-    //     break;
+    case GameControllerMsg::GAMESTATE_SET: // feito
+        send_goal(stand_still);
+        break;
     
     case GameControllerMsg::GAMESTATE_PLAYING: // fazer
         if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
@@ -101,6 +101,13 @@ void RobotBehavior::normal_game()
         send_goal(stand_still);
         break;
     }
+}
+
+void RobotBehavior::normal_game_prepair()
+{
+    if(gc_info.secondary_seconds_remaining>35) send_goal(walk);
+    else if(gc_info.secondary_seconds_remaining>25) send_goal(turn_right);
+    else send_goal(stand_still);
 }
 
 void RobotBehavior::player_normal_game() // fazer
