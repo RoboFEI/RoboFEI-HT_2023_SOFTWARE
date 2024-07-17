@@ -4,6 +4,9 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import TextSubstitution
+from launch.substitutions import LaunchConfiguration
 
 import sys
 sys.path.append("/home")
@@ -19,12 +22,18 @@ def generate_launch_description():
         config_file
     )
 
-    decision = Node(
+    team_number_launch_arg = DeclareLaunchArgument(
+        "team_number", default_value=TextSubstitution(text="7")
+    )
+
+    gc_node = Node(
         package="game_controller",
         executable="connect",
         output = 'screen',
-        parameters = [control_config]
+        parameters = [control_config, {"team_number": LaunchConfiguration('team_number')}]
     )
 
-    ld.add_action(decision)
-    return ld
+    return LaunchDescription([
+        team_number_launch_arg,
+        gc_node
+    ])
