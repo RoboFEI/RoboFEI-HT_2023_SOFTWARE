@@ -7,7 +7,6 @@
 #define MAX_LOST_BALL_TIME 10000 //10 seconds
 
 int gambiarra = 0;
-bool IS_GOALKEEPER = true; // True = Goalkeeper // False = Player
 
 RobotBehavior::RobotBehavior()
 {
@@ -92,7 +91,8 @@ void RobotBehavior::normal_game()
     case GameControllerMsg::GAMESTATE_PLAYING: // fazer
         if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
         {
-            if (!IS_GOALKEEPER) player_normal_game();
+            RCLCPP_INFO(this->get_logger(), "is goalkeeper %d", is_goalkeeper(robot_number));
+            if (!is_goalkeeper(robot_number)) player_normal_game();
             else goalkeeper_normal_game();
             
         }
