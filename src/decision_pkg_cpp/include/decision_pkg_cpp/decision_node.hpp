@@ -22,7 +22,7 @@
 #include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/action/control.hpp"
 
-
+#include "std_msgs/msg/int32.hpp"
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 
@@ -37,6 +37,7 @@ class DecisionNode : public rclcpp::Node
         using ImuGyroMsg = geometry_msgs::msg::Vector3Stamped;
         using ImuAccelMsg = sensor_msgs::msg::Imu;
         using VisionMsg = custom_interfaces::msg::Vision;
+        using intMsg = std_msgs::msg::Int32;
 
         using ControlActionMsg = custom_interfaces::action::Control;
         using GoalHandleControl = rclcpp_action::ClientGoalHandle<ControlActionMsg>;
@@ -47,6 +48,7 @@ class DecisionNode : public rclcpp::Node
         Robot               robot;
 
         int falses_fallen_counter = 0;
+        int side_penalty = 0;
 
         void listener_callback_GC(const GameControllerMsg::SharedPtr gc_info);
         void listener_callback_neck_pos(const JointStateMsg::SharedPtr neck_pos);
@@ -55,7 +57,8 @@ class DecisionNode : public rclcpp::Node
         void robot_detect_fallen(const float &robot_accel_x,
                                  const float &robot_accel_y,
                                  const float &robot_accel_z); 
-        void listener_callback_vision(const VisionMsg::SharedPtr vision_info);       
+        void listener_callback_vision(const VisionMsg::SharedPtr vision_info); 
+        void listener_calback_running_move(const intMsg::SharedPtr atualMove);      
         
         void send_goal(const Move &move);
 
@@ -68,6 +71,8 @@ class DecisionNode : public rclcpp::Node
         int NECK_LEFT_LIMIT;
         int NECK_RIGHT_LIMIT;
         int NECK_CLOSE_LIMIT;
+
+        int robot_number;
         
         DecisionNode();
         virtual ~DecisionNode();
@@ -78,6 +83,7 @@ class DecisionNode : public rclcpp::Node
         rclcpp::Subscription<ImuGyroMsg>::SharedPtr imu_gyro_subscriber_;
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
         rclcpp::Subscription<VisionMsg>::SharedPtr vision_subscriber_;
+        rclcpp::Subscription<intMsg>::SharedPtr running_move_subscriber_;
 
         rclcpp_action::Client<ControlActionMsg>::SharedPtr action_client_;
         rclcpp_action::Client<ControlActionMsg>::SendGoalOptions send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();

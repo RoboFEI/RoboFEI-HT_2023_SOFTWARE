@@ -44,6 +44,12 @@ DecisionNode::DecisionNode() : Node("decision_node")
       std::bind(&DecisionNode::listener_callback_vision, this, std::placeholders::_1)
     );
 
+    running_move_subscriber_ = this->create_subscription<intMsg>(
+        "move_running",
+        rclcpp::QoS(10),
+        std::bind(&DecisionNode::listener_calback_running_move, this, _1)
+    );
+
     this->action_client_ = rclcpp_action::create_client<ControlActionMsg>(
       this,
       "control_action"
@@ -66,6 +72,7 @@ DecisionNode::DecisionNode() : Node("decision_node")
     NECK_LEFT_LIMIT = this->declare_parameter("neck_left_limit", 2650);
     NECK_RIGHT_LIMIT = this->declare_parameter("neck_right_limit", 1350);
     NECK_CLOSE_LIMIT = this->declare_parameter("neck_down_limit", 1350);
+    robot_number = this->declare_parameter("robot_number", 2);
 }
 
 DecisionNode::~DecisionNode()
@@ -74,6 +81,13 @@ DecisionNode::~DecisionNode()
 
 void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_info)
 {
+    if (this->gc_info.secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && this->gc_info.game_state == GameControllerMsg::GAMESTATE_SET)
+    {
+      if(gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && gc_info->game_state == GameControllerMsg::GAMESTATE_PLAYING)
+      {
+        side_penalty = rand()%2;
+      }
+    }
     this->gc_info = *gc_info;
     // RCLCPP_INFO(this->get_logger(), "Recive GC Info");
     // RCLCPP_INFO(this->get_logger(), "Game State: %d", this->gc_info.game_state);
@@ -150,6 +164,11 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
   // RCLCPP_INFO(this->get_logger(), "Recive Vision Info");
 }
 
+void DecisionNode::listener_calback_running_move(const intMsg::SharedPtr atualMove)
+{
+  this->robot.movement = static_cast<Move>(atualMove->data);
+}    
+
 void DecisionNode::send_goal(const Move &order)
 {
   auto goal_msg = ControlActionMsg::Goal();
@@ -176,7 +195,7 @@ void DecisionNode::send_goal(const Move &order)
           goal_handle_future_.wait_for(1500ms);
         }
       }
-      if(robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side)
+      if((robot.movement != stand_up_back && robot.movement != stand_up_front && robot.movement != stand_up_side) || robot.finished_move)
       {
         action_client_->async_send_goal(goal_msg, send_goal_options);
         robot.movement = order;
@@ -185,7 +204,7 @@ void DecisionNode::send_goal(const Move &order)
     else if(robot.finished_move)
     {
       action_client_->async_send_goal(goal_msg, send_goal_options);
-      robot.movement = order;
+      // robot.movement = order;
     }
 
     robot.finished_move = false;
@@ -193,7 +212,7 @@ void DecisionNode::send_goal(const Move &order)
   else if(robot.finished_move)
   {
     action_client_->async_send_goal(goal_msg, send_goal_options); 
-    robot.movement = order;
+    // robot.movement = order;
     robot.finished_move = false;
   }
 

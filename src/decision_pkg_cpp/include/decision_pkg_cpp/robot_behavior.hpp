@@ -6,8 +6,6 @@
 #include "decision_pkg_cpp/utils.h"
 #include "decision_pkg_cpp/AssyncTimer.hpp"
 
-#define ROBOT_NUMBER 2
-
 using namespace std::chrono_literals;
 
 class RobotBehavior : public DecisionNode
@@ -15,7 +13,9 @@ class RobotBehavior : public DecisionNode
     public:
         void players_behavior();
         void normal_game();
+        void normal_game_prepair();
         void player_normal_game();
+        void goalkeeper_normal_game();
         bool ball_is_locked();
         bool vision_stable();
         bool ball_in_camera_center();
@@ -24,8 +24,10 @@ class RobotBehavior : public DecisionNode
         bool ball_in_right_limit();
         bool ball_in_close_limit();
         bool ball_in_right_foot();
+        bool ball_in_left_foot();
         bool robot_align_with_the_ball();
-        bool robot_align_for_kick();
+        bool robot_align_for_kick_right();
+        bool robot_align_for_kick_left();
         bool centered_neck();
         bool full_centered_neck();
         void detect_ball_position();

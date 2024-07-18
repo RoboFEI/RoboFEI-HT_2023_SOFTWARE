@@ -10,15 +10,20 @@
   ros__parameters:
     neck_activate: true
 
-    x_p_gain: 0.3
-    y_p_gain: 0.35
+    x_p_gain: 0.4
+    y_p_gain: 0.4
 
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 10 
+    walk_counter  : 150 
 
 /decision_node:
   ros__parameters:
     FALL_ACCEL_TH: 7.0
     FALSES_FALLEN_TH: 30
+
+/image_node:
+  ros__parameters:
+    get_image: true
+    img_qlty: 70

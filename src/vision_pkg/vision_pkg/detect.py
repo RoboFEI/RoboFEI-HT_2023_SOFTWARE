@@ -6,6 +6,7 @@ from ultralytics import YOLO
 import os
 import numpy as np
 from math import hypot
+import time
     
 from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
@@ -13,17 +14,34 @@ from vision_msgs.msg import Point2D
 from .submodules.utils import draw_lines, position, recise_image
 from .submodules.ClassConfig import *
 
-REDUCE_IMG_QLTY = 70 #[%]
+# REDUCE_IMG_QLTY = 70 #[%]
 
 class BallDetection(Node):
     def __init__(self):
 
-        super().__init__("image_topic")
+        super().__init__("image_node")
+
+        #params
+        self.declare_parameter("device", "cpu")
+        self.device = self.get_parameter("device").get_parameter_value().string_value
+
+        self.declare_parameter("show_divisions", True) # Show division lines and center of ball in output image
+        self.show_divisions = self.get_parameter("show_divisions").get_parameter_value().bool_value
+
+        self.declare_parameter("get_image", True) #
+        self.get_image = self.get_parameter("get_image").get_parameter_value().bool_value
+
+        self.declare_parameter("img_qlty", 70) # 
+        self.img_qlty = self.get_parameter("img_qlty").get_parameter_value().integer_value
+
+        self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best.pt")
+        self.model = YOLO(self.get_parameter("model").get_parameter_value().string_value) #Load Model
         
         self.original_dim = np.array([640, 480])
-        self.redued_dim = self.original_dim * REDUCE_IMG_QLTY / 100
-        
-        self.cap = cv2.VideoCapture("/dev/camera")
+        self.redued_dim = self.original_dim * self.img_qlty / 100
+        self.value_classes = self.get_classes()
+
+        self.cap = cv2.VideoCapture("/dev/video0")
         self.cap.set(3, self.original_dim[0])
         self.cap.set(4, self.original_dim[1])
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -41,17 +59,6 @@ class BallDetection(Node):
 
         #recive data from config.ini using the ClassConfig submodule
         self.config = classConfig()
-        
-        #params
-        self.declare_parameter("device", "cpu")
-        self.device = self.get_parameter("device").get_parameter_value().string_value
-
-        self.declare_parameter("show_divisions", True) # Show division lines and center of ball in output image
-        self.show_divisions = self.get_parameter("show_divisions").get_parameter_value().bool_value
-
-        self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best.pt")
-        self.model = YOLO(self.get_parameter("model").get_parameter_value().string_value) #Load Model
-        self.value_classes = self.get_classes()
 
         self.results = None
         self.img = None
@@ -62,6 +69,9 @@ class BallDetection(Node):
         self.ball_pos_area = Vision()
         
         self.cont_real_detections = 0
+
+        self.old_time = time.time()
+        self.foto_count = 0
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
@@ -76,8 +86,13 @@ class BallDetection(Node):
 
 
         if(ret):
-            
-            self.results = self.predict_image(recise_image(self.img, REDUCE_IMG_QLTY)) # predict image 
+            if(self.get_image and (time.time() - self.old_time > 0.5)):
+                self.get_logger().info("entrou")
+                self.old_time = time.time()
+                cv2.imwrite(f"/home/robo/Desktop/novo_dataset/new_ball{self.foto_count:04d}.jpg", self.img)
+                self.foto_count += 1
+
+            self.results = self.predict_image(recise_image(self.img, self.img_qlty)) # predict image 
 
             if self.show_divisions:
                 self.img = draw_lines(self.img, self.config)  #Draw camera divisions
@@ -85,8 +100,8 @@ class BallDetection(Node):
             self.ball_detection()
             
             
-            cv2.imshow('Ball', self.img) # Show image
-            cv2.waitKey(1)
+            #cv2.imshow('Ball', self.img) # Show image
+            #cv2.waitKey(1)
     
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False, imgsz=img.shape[:2])

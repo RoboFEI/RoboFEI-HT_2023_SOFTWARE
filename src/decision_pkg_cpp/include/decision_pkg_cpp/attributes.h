@@ -25,20 +25,24 @@ enum FallStatus
 
 enum Move
 {
-    stand_still     = 1,
-    greeting        = 2,
-    right_kick      = 3,
-    left_kick       = 4,
-    turn_right      = 5,
-    turn_left       = 6,
-    goodbye         = 7,
-    walk            = 14,
-    gait            = 15,
-    stand_up_back   = 16,
-    stand_up_front  = 17,
-    stand_up_side   = 8,
-    walk_left       = 20,
-    walk_right      = 21
+    stand_still         = 1,
+    greeting            = 2,
+    right_kick          = 3,
+    left_kick           = 4,
+    right_kick_to_right = 31,
+    right_kick_to_left  = 32,
+    left_kick_to_left   = 34, 
+    lefk_kick_to_right  = 33,
+    turn_right          = 5,
+    turn_left           = 6,
+    goodbye             = 7,
+    walk                = 14,
+    gait                = 15,
+    stand_up_back       = 16,
+    stand_up_front      = 17,
+    stand_up_side       = 8,
+    walk_left           = 20,
+    walk_right          = 21
 };
 
 enum RobotBallPosition
@@ -67,29 +71,5 @@ struct Robot
     RobotBallPosition ball_position = center;
 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif // ATTRIBUTES_H
