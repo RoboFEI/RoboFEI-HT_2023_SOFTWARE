@@ -36,7 +36,7 @@ class BallDetection(Node):
         self.declare_parameter("server_ip", "192.168.7.10")
         self.server_ip = self.get_parameter("server_ip").get_parameter_value().string_value
 
-        self.declare_parameter("server_port", 5050)
+        self.declare_parameter("server_port", 12345)
         self.server_port = self.get_parameter("server_port").get_parameter_value().integer_value
 
         self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best.pt")

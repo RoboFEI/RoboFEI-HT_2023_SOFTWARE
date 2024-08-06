@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 class Client():
-    def __init__(self, ip = '127.0.0.1', port = 12345, buffer_size = 65536):
+    def __init__(self, ip = '127.0.0.1', port = 12345, buffer_size = 40960):
         self.ip = ip
         self.port = port
         self.addr = (self.ip, self.port)
