@@ -1,40 +1,10 @@
-# import socket
-
-# class ServerUDP():
-#     def __init__(self):
-#         self.ip = '0.0.0.0'
-#         self.port = 5000
-#         self.addr = (self.ip, self.port)
-#         self._open_socket()
-
-#     def _open_socket(self):
-#         self.udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#         self.udp.bind(self.addr)
-
-#     def recive_once(self):
-#         mensage, end_client = self.udp.recvfrom(1024)
-#         print("Recebi = ", mensage, " , Do cliente", end_client)
-    
-#     def close_socket(self):
-#         self.udp.close()
-    
-# server_udp = ServerUDP()
-# server_udp.recive_once()
-# server_udp.close_socket()
-
-
-
-
-
-
-
 import socket
 import numpy as np
 import cv2
 
 # Configurações do servidor UDP
-SERVER_IP = '192.168.7.10'
-SERVER_PORT = 12345
+SERVER_IP = "192.168.7.10"
+SERVER_PORT = 5050
 BUFFER_SIZE = 40960
 
 # Configura o socket UDP
@@ -47,6 +17,9 @@ while True:
     # Recebe o tamanho da imagem
     size_data, addr = sock.recvfrom(4)
     size = int.from_bytes(size_data, byteorder='big')
+
+    if size > 90000:
+        continue
 
     # Recebe a imagem em partes
     img_data = b''
