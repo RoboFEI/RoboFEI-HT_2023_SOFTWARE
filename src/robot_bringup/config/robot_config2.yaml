@@ -16,7 +16,7 @@
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 80   #20
+    walk_counter  : 1   #20
 
 /decision_node:
   ros__parameters:
@@ -26,4 +26,4 @@
 /image_node:
   ros__parameters:
     get_image: false
-    img_qlty: 100
+    img_qlty: 70

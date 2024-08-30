@@ -6,8 +6,6 @@
 #include "decision_pkg_cpp/utils.h"
 #include "decision_pkg_cpp/AssyncTimer.hpp"
 
-#define ROBOT_NUMBER 2
-
 using namespace std::chrono_literals;
 
 class RobotBehavior : public DecisionNode

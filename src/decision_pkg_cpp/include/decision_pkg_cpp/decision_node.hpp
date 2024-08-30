@@ -71,6 +71,8 @@ class DecisionNode : public rclcpp::Node
         int NECK_LEFT_LIMIT;
         int NECK_RIGHT_LIMIT;
         int NECK_CLOSE_LIMIT;
+
+        int robot_number;
         
         DecisionNode();
         virtual ~DecisionNode();

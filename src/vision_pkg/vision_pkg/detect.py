@@ -11,10 +11,9 @@ import time
 from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
 
-from .submodules.utils import draw_lines, position, recise_image
-from .submodules.ClassConfig import *
-
-# REDUCE_IMG_QLTY = 70 #[%]
+from .submodules.utils          import draw_lines, position, recise_image
+from .submodules.ClassConfig    import *
+from .submodules.Client         import Client
 
 class BallDetection(Node):
     def __init__(self):
@@ -33,6 +32,12 @@ class BallDetection(Node):
 
         self.declare_parameter("img_qlty", 70) # 
         self.img_qlty = self.get_parameter("img_qlty").get_parameter_value().integer_value
+
+        self.declare_parameter("server_ip", "192.168.7.10")
+        self.server_ip = self.get_parameter("server_ip").get_parameter_value().string_value
+
+        self.declare_parameter("server_port", 12345)
+        self.server_port = self.get_parameter("server_port").get_parameter_value().integer_value
 
         self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best.pt")
         self.model = YOLO(self.get_parameter("model").get_parameter_value().string_value) #Load Model
@@ -73,6 +78,11 @@ class BallDetection(Node):
         self.old_time = time.time()
         self.foto_count = 0
 
+        self.client = Client(self.server_ip, self.server_port)
+
+    def __del__(self):
+        self.client.close_socket()
+
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         fake_image = np.zeros((640,480,3), dtype=np.uint8)
         result = self.model(fake_image, device=self.device, verbose=False, imgsz=list(self.redued_dim))
@@ -99,7 +109,7 @@ class BallDetection(Node):
 
             self.ball_detection()
             
-            
+            self.client.send_image(self.img)
             #cv2.imshow('Ball', self.img) # Show image
             #cv2.waitKey(1)
     
