@@ -46,6 +46,7 @@ class RobotBehavior : public DecisionNode
     private:
 
         AssyncTimer lost_ball_timer;
+        AssyncTimer timer_gamb;
         bool is_penalized();
         void get_up();
 

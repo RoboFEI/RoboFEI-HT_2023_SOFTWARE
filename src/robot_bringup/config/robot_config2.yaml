@@ -25,5 +25,5 @@
 
 /image_node:
   ros__parameters:
-    get_image: true
-    img_qlty: 70
+    get_image: false
+    img_qlty: 100
