@@ -11,7 +11,7 @@ import time
 from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
 
-from .submodules.utils          import draw_lines, position, recise_image
+from .submodules.utils          import draw_lines, position, resize_image
 from .submodules.ClassConfig    import *
 from .submodules.Client         import Client
 
@@ -50,10 +50,8 @@ class BallDetection(Node):
         self.cap.set(3, self.original_dim[0])
         self.cap.set(4, self.original_dim[1])
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-        self.cap.set(cv2.CAP_PROP_EXPOSURE, -4) 
+        self.cap.set(cv2.CAP_PROP_EXPOSURE, 0) 
         
-
         self.timer = self.create_timer(0.008, self.main_callbalck)
 
         self.ball_position_publisher_ = self.create_publisher(Vision, '/ball_position', 2)
@@ -97,12 +95,11 @@ class BallDetection(Node):
 
         if(ret):
             if(self.get_image and (time.time() - self.old_time > 0.5)):
-                self.get_logger().info("entrou")
                 self.old_time = time.time()
                 cv2.imwrite(f"/home/robo/Desktop/novo_dataset/new_ball{self.foto_count:04d}.jpg", self.img)
                 self.foto_count += 1
 
-            self.results = self.predict_image(recise_image(self.img, self.img_qlty)) # predict image 
+            self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
 
             if self.show_divisions:
                 self.img = draw_lines(self.img, self.config)  #Draw camera divisions
@@ -110,8 +107,8 @@ class BallDetection(Node):
             self.ball_detection()
             
             self.client.send_image(self.img)
-            #cv2.imshow('Ball', self.img) # Show image
-            #cv2.waitKey(1)
+            cv2.imshow('Ball', self.img) # Show image
+            cv2.waitKey(1)
     
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False, imgsz=img.shape[:2])

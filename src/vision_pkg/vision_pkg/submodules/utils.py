@@ -14,7 +14,7 @@ def draw_lines(img, config):
 
     return img
 
-def recise_image(img, scale_percent=100):
+def resize_image(img, scale_percent=100):
 
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
