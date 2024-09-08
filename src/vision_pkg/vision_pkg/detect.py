@@ -7,6 +7,7 @@ import os
 import numpy as np
 from math import hypot
 import time
+import datetime
     
 from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
@@ -78,6 +79,11 @@ class BallDetection(Node):
 
         self.client = Client(self.server_ip, self.server_port)
 
+        if self.get_image:
+            today = datetime.datetime.now()
+            self.vision_log_path = f'vision_log/{today.day}_{today.month}_{today.year}-{today.hour}_{today.minute}'
+            os.makedirs(self.vision_log_path, exist_ok=True)
+
     def __del__(self):
         self.client.close_socket()
 
@@ -96,7 +102,8 @@ class BallDetection(Node):
         if(ret):
             if(self.get_image and (time.time() - self.old_time > 0.5)):
                 self.old_time = time.time()
-                cv2.imwrite(f"/home/robo/Desktop/novo_dataset/new_ball{self.foto_count:04d}.jpg", self.img)
+                file_name = f"/ball_photo{self.foto_count:04d}.jpg"
+                cv2.imwrite(self.vision_log_path+file_name, self.img)
                 self.foto_count += 1
 
             self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 

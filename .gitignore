@@ -2,6 +2,7 @@
 **/install
 **/log
 **/runs
+**/vision_log
 .vscode
 **/__pycache__
 
