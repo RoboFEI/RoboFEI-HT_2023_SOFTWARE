@@ -172,4 +172,7 @@ echo -e "${blue} Instaling Softwares${NC}"
     #install ssh-server
     sudo apt-get update
     sudo apt-get install openssh-server
+    sudo ufw enable
     sudo ufw allow 22
+    sudo ufw allow 5050
+    echo "sudo ufw enable" >> ~/.bashrc
