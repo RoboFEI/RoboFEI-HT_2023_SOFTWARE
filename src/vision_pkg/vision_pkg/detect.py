@@ -57,6 +57,9 @@ class BallDetection(Node):
         #  ___) |  __/ |   \ V /  __/ |    
         # |____/ \___|_|    \_/ \___|_|   
 
+        self.declare_parameter("enable_udp", True)
+        self.enable_udp = self.get_parameter("enable_udp").get_parameter_value().bool_value
+
         self.declare_parameter("server_ip", "192.168.7.10")
         self.server_ip = self.get_parameter("server_ip").get_parameter_value().string_value
 
@@ -110,7 +113,8 @@ class BallDetection(Node):
         self.old_time = time.time()
         self.foto_count = 0
 
-        self.client = Client(self.server_ip, self.server_port)
+        if self.enable_udp:
+            self.client = Client(self.server_ip, self.server_port)
 
         if self.get_image: 
             today = datetime.datetime.now()
@@ -139,8 +143,10 @@ class BallDetection(Node):
             self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
         self.ball_detection()
-        
-        self.client.send_image(self.img)
+
+        if self.enable_udp:
+            self.client.send_image(self.img)
+             
         cv2.imshow('Ball', self.img) # Show image
         cv2.waitKey(1)
 

@@ -28,3 +28,4 @@
     img_qlty: 100 
     get_image: false
     fps_save: 2
+    enable_udp: True
