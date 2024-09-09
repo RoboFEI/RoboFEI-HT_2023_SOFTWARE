@@ -74,7 +74,11 @@ class BallDetection(Node):
 
         self.declare_parameter("get_image", False) #
         self.get_image = self.get_parameter("get_image").get_parameter_value().bool_value
+        
+        self.declare_parameter("fps_save", 2) 
+        self.fps_save = self.get_parameter("fps_save").get_parameter_value().integer_value
         #===============================================================================================================
+        
 
         self.original_dim = np.array([self.img_width, self.img_height])
         self.redued_dim = self.original_dim * self.img_qlty / 100
@@ -108,7 +112,7 @@ class BallDetection(Node):
 
         self.client = Client(self.server_ip, self.server_port)
 
-        if self.get_image:
+        if self.get_image: 
             today = datetime.datetime.now()
             self.vision_log_path = f'vision_log/{today.day}_{today.month}_{today.year}-{today.hour}_{today.minute}'
             os.makedirs(self.vision_log_path, exist_ok=True)
@@ -125,6 +129,9 @@ class BallDetection(Node):
     
     def image_callback(self, msg):
         self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+
+        if self.get_image:
+            self.save_image(self.img)
 
         self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
 
@@ -205,33 +212,33 @@ class BallDetection(Node):
         # identify the ball position in Y axis
         if (ball_px_pos.x <= self.config.x_left):     #ball to the left
             ball_pos.left = True
-            self.get_logger().info("Bola à Esquerda")
+            self.get_logger().debug("Bola à Esquerda")
 
         elif (ball_px_pos.x < self.config.x_center):  #ball to the center left
             ball_pos.center_left = True
-            self.get_logger().info("Bola Centralizada a Esquerda")
+            self.get_logger().debug("Bola Centralizada a Esquerda")
 
         elif (ball_px_pos.x < self.config.x_right):   #ball to the center right
             ball_pos.center_right = True
-            self.get_logger().info("Bola Centralizada a Direita")
+            self.get_logger().debug("Bola Centralizada a Direita")
 
         else:                                            #ball to the right
             ball_pos.right = True
-            self.get_logger().info("Bola à Direita")
+            self.get_logger().debug("Bola à Direita")
         
 
         # identify the ball position in Y axis
         if (ball_px_pos.y > self.config.y_chute):     #ball near
             ball_pos.close = True
-            self.get_logger().info("Bola Perto")
+            self.get_logger().debug("Bola Perto")
         
         elif (ball_px_pos.y <= self.config.y_longe):  #ball far
             ball_pos.far = True
-            self.get_logger().info("Bola Longe")
+            self.get_logger().debug("Bola Longe")
 
         else:                                           #Bola middle
             ball_pos.med = True
-            self.get_logger().info("Bola ao Centro")
+            self.get_logger().debug("Bola ao Centro")
 
         return ball_pos
         
@@ -241,6 +248,13 @@ class BallDetection(Node):
         dp.y = abs(new_position.y - self.ball_pos.y)
 
         return hypot(dp.x, dp.y) < threshold
+
+    def save_image(self, img):
+        if time.time() - self.old_time > 1.0/self.fps_save:
+            self.old_time = time.time()
+            file_name = f"/ball_photo{self.foto_count:04d}.jpg"
+            cv2.imwrite(self.vision_log_path+file_name, img)
+            self.foto_count += 1
             
 def main(args=None):
     rclpy.init(args=args)
