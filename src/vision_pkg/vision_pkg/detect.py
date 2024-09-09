@@ -80,8 +80,6 @@ class BallDetection(Node):
         self.redued_dim = self.original_dim * self.img_qlty / 100
         self.value_classes = self.get_classes()
         
-        # self.timer = self.create_timer(0.008, self.main_callbalck)
-
         self.bridge = CvBridge()
         self.raw_image_sub_ = self.create_subscription(Image, "/image_raw", self.image_callback, 1)
         self.raw_image_sub_
@@ -139,29 +137,6 @@ class BallDetection(Node):
         cv2.imshow('Ball', self.img) # Show image
         cv2.waitKey(1)
 
-
-    # def main_callbalck(self):
-
-    #     ret, self.img = self.cap.read()
-
-
-    #     if(ret):
-    #         if(self.get_image and (time.time() - self.old_time > 0.5)):
-    #             self.old_time = time.time()
-    #             file_name = f"/ball_photo{self.foto_count:04d}.jpg"
-    #             cv2.imwrite(self.vision_log_path+file_name, self.img)
-    #             self.foto_count += 1
-
-    #         self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
-
-    #         if self.show_divisions:
-    #             self.img = draw_lines(self.img, self.config)  #Draw camera divisions
-
-    #         self.ball_detection()
-            
-    #         self.client.send_image(self.img)
-    #         cv2.imshow('Ball', self.img) # Show image
-    #         cv2.waitKey(1)
     
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.7, max_det=3, verbose=False, imgsz=img.shape[:2])
