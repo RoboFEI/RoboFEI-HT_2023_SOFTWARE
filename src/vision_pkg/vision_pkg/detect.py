@@ -33,7 +33,7 @@ class BallDetection(Node):
         self.declare_parameter("device", "cpu")
         self.device = self.get_parameter("device").get_parameter_value().string_value
         
-        self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best.pt")
+        self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best_openvino_model/")
         self.model = YOLO(self.get_parameter("model").get_parameter_value().string_value) #Load Model
 
         #   ____                               
@@ -152,7 +152,7 @@ class BallDetection(Node):
 
     
     def predict_image(self, img):
-        results = self.model(img, device=self.device, conf=0.5, max_det=3, verbose=False, imgsz=img.shape[:2])
+        results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)
         return results[0]
 
     def ball_detection(self):
