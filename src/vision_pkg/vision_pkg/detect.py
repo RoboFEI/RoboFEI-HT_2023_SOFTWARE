@@ -151,7 +151,7 @@ class BallDetection(Node):
 
     
     def predict_image(self, img):
-        results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=True)        
+        results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)        
         return results[0]
 
     def ball_detection(self):

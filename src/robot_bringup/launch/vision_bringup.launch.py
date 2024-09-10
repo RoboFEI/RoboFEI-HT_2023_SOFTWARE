@@ -75,7 +75,8 @@ def generate_launch_description():
         parameters = [vision_config, camera_config],
         arguments=['--ros-args', '--log-level', log_level,
                    '--log-level',  'rcl:=info',
-                   '--log-level',  'rmw_fastrtps_cpp:=info']
+                   '--log-level',  'rmw_fastrtps_cpp:=info'],
+        emulate_tty=True
     )
 
     ld.add_action(camera)
