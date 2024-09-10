@@ -9,6 +9,7 @@ from math import hypot
 import time
 import datetime
 from cv_bridge import CvBridge
+import torch
 
 from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
@@ -125,9 +126,7 @@ class BallDetection(Node):
         self.client.close_socket()
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
-        fake_image = np.zeros((640,480,3), dtype=np.uint8)
-        result = self.model(fake_image, device=self.device, verbose=False, imgsz=list(self.redued_dim))
-        classes = result[0].names
+        classes = self.model.names
         value_classes = {value: key for key, value in classes.items()}
         return value_classes   
     
@@ -152,7 +151,7 @@ class BallDetection(Node):
 
     
     def predict_image(self, img):
-        results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)
+        results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=True)        
         return results[0]
 
     def ball_detection(self):
