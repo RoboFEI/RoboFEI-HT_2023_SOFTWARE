@@ -26,11 +26,13 @@ class BallDetection(Node):
         super().__init__("image_node")
 
         #PARAMS
-        #===============================================================================================================
+        #==============================================================================================================#
+        # __   _____  _     ___  
         # \ \ / / _ \| |   / _ \ 
         #  \ V / | | | |  | | | |
         #   | || |_| | |__| |_| |
         #   |_| \___/|_____\___/ 
+
 
         self.declare_parameter("device", "cpu")
         self.device = self.get_parameter("device").get_parameter_value().string_value
@@ -82,7 +84,7 @@ class BallDetection(Node):
         
         self.declare_parameter("fps_save", 2) 
         fps_save = self.get_parameter("fps_save").get_parameter_value().integer_value
-        #===============================================================================================================
+        #==============================================================================================================#
         
 
         self.original_dim = np.array([self.img_width, self.img_height])
@@ -118,14 +120,17 @@ class BallDetection(Node):
         if self.get_image: 
             self.imageGetter = ImageGetter('vision_log', fps_save)
 
+
     def __del__(self):
         self.client.close_socket()
+
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         classes = self.model.names
         value_classes = {value: key for key, value in classes.items()}
         return value_classes   
     
+
     def image_callback(self, msg):
         self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
 
@@ -145,10 +150,11 @@ class BallDetection(Node):
         cv2.imshow('Ball', self.img) # Show image
         cv2.waitKey(1)
 
-    
+
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)        
         return results[0]
+
 
     def ball_detection(self, img, results):
         img_cp = img.copy()
@@ -162,13 +168,11 @@ class BallDetection(Node):
             ball_px_pos_msg.x = ball_px_pos[0]
             ball_px_pos_msg.y = ball_px_pos[1]
             self.ball_px_position_publisher_.publish(ball_px_pos_msg)
-
-        # FAZER ESSA PARTE DO GET_BALL_POS_AREA
-        #     # ball_px_pos = self.ball_px_position_filter(ball_px_pos, 0)
-        #     # new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
+            new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
+        
+        self.ball_pos_area_filter(new_ball_pos_area, 1)
         return img_cp
 
-        self.ball_pos_area_filter(new_ball_pos_area, 1)
 
     def ball_px_position_filter(self, not_filtered_ball_pos, opt):
         
@@ -179,6 +183,7 @@ class BallDetection(Node):
         
         self.ball_px_position_publisher_.publish(ball_px_pos)
         return ball_px_pos
+
 
     def ball_pos_area_filter(self, not_filtered_ball_pos, opt):
         if opt == 0:
@@ -195,20 +200,21 @@ class BallDetection(Node):
             if self.cont_real_detections > 2:
                 self.ball_position_publisher_.publish(self.ball_pos_area)
 
+
     def get_ball_pos_area(self, ball_px_pos):
         ball_pos = Vision()
         ball_pos.detected = True
 
         # identify the ball position in Y axis
-        if (ball_px_pos.x <= self.config.x_left):     #ball to the left
+        if (ball_px_pos[0] <= self.config.x_left):     #ball to the left
             ball_pos.left = True
             self.get_logger().debug("Bola à Esquerda")
 
-        elif (ball_px_pos.x < self.config.x_center):  #ball to the center left
+        elif (ball_px_pos[0] < self.config.x_center):  #ball to the center left
             ball_pos.center_left = True
             self.get_logger().debug("Bola Centralizada a Esquerda")
 
-        elif (ball_px_pos.x < self.config.x_right):   #ball to the center right
+        elif (ball_px_pos[0] < self.config.x_right):   #ball to the center right
             ball_pos.center_right = True
             self.get_logger().debug("Bola Centralizada a Direita")
 
@@ -218,11 +224,11 @@ class BallDetection(Node):
         
 
         # identify the ball position in Y axis
-        if (ball_px_pos.y > self.config.y_chute):     #ball near
+        if (ball_px_pos[1] > self.config.y_chute):     #ball near
             ball_pos.close = True
             self.get_logger().debug("Bola Perto")
         
-        elif (ball_px_pos.y <= self.config.y_longe):  #ball far
+        elif (ball_px_pos[1] <= self.config.y_longe):  #ball far
             ball_pos.far = True
             self.get_logger().debug("Bola Longe")
 
@@ -232,6 +238,7 @@ class BallDetection(Node):
 
         return ball_pos
         
+
     def ball_delta_position_threshold(self, new_position, threshold):
         dp = position()
         dp.x = abs(new_position.x - self.ball_pos.x)
@@ -239,6 +246,7 @@ class BallDetection(Node):
 
         return hypot(dp.x, dp.y) < threshold
             
+
 def main(args=None):
     rclpy.init(args=args)
 
