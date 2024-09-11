@@ -18,6 +18,7 @@ from sensor_msgs.msg import Image
 from .submodules.utils          import draw_lines, position, resize_image, findBall
 from .submodules.ClassConfig    import *
 from .submodules.Client         import Client
+from .submodules.ImageGetter    import ImageGetter
 
 class BallDetection(Node):
     def __init__(self):
@@ -80,7 +81,7 @@ class BallDetection(Node):
         self.get_image = self.get_parameter("get_image").get_parameter_value().bool_value
         
         self.declare_parameter("fps_save", 2) 
-        self.fps_save = self.get_parameter("fps_save").get_parameter_value().integer_value
+        fps_save = self.get_parameter("fps_save").get_parameter_value().integer_value
         #===============================================================================================================
         
 
@@ -111,16 +112,11 @@ class BallDetection(Node):
         
         self.cont_real_detections = 0
 
-        self.old_time = time.time()
-        self.foto_count = 0
-
         if self.enable_udp:
             self.client = Client(self.server_ip, self.server_port)
 
         if self.get_image: 
-            today = datetime.datetime.now()
-            self.vision_log_path = f'vision_log/{today.day}_{today.month}_{today.year}-{today.hour}_{today.minute}'
-            os.makedirs(self.vision_log_path, exist_ok=True)
+            self.imageGetter = ImageGetter('vision_log', fps_save)
 
     def __del__(self):
         self.client.close_socket()
@@ -134,7 +130,7 @@ class BallDetection(Node):
         self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
 
         if self.get_image:
-            self.save_image(self.img)
+            self.imageGetter.save(self.img)
 
         self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
 
@@ -167,6 +163,7 @@ class BallDetection(Node):
             ball_px_pos_msg.y = ball_px_pos[1]
             self.ball_px_position_publisher_.publish(ball_px_pos_msg)
 
+        # FAZER ESSA PARTE DO GET_BALL_POS_AREA
         #     # ball_px_pos = self.ball_px_position_filter(ball_px_pos, 0)
         #     # new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
         return img_cp
@@ -241,13 +238,6 @@ class BallDetection(Node):
         dp.y = abs(new_position.y - self.ball_pos.y)
 
         return hypot(dp.x, dp.y) < threshold
-
-    def save_image(self, img):
-        if time.time() - self.old_time > 1.0/self.fps_save:
-            self.old_time = time.time()
-            file_name = f"/ball_photo{self.foto_count:04d}.jpg"
-            cv2.imwrite(self.vision_log_path+file_name, img)
-            self.foto_count += 1
             
 def main(args=None):
     rclpy.init(args=args)
