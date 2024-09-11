@@ -15,7 +15,7 @@ from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
 from sensor_msgs.msg import Image
 
-from .submodules.utils          import draw_lines, position, resize_image
+from .submodules.utils          import draw_lines, position, resize_image, findBall
 from .submodules.ClassConfig    import *
 from .submodules.Client         import Client
 
@@ -141,7 +141,7 @@ class BallDetection(Node):
         if self.show_divisions:
             self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
-        self.ball_detection()
+        self.img = self.ball_detection(self.img, self.results)
 
         if self.enable_udp:
             self.client.send_image(self.img)
@@ -154,36 +154,24 @@ class BallDetection(Node):
         results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)        
         return results[0]
 
-    def ball_detection(self):
-        ball_px_pos = self.find_ball() # recive x and y position (Point2D)
+    def ball_detection(self, img, results):
+        img_cp = img.copy()
+
+        img_cp, ball_px_pos = findBall(img_cp, results, self.value_classes) #image, [x, y]
 
         new_ball_pos_area = Vision()
+        ball_px_pos_msg = Point2D()
 
-        if ball_px_pos != -1: #if ball was finded
-            ball_px_pos = self.ball_px_position_filter(ball_px_pos, 0)
-            new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
+        if ball_px_pos.size != 0: #if ball was finded
+            ball_px_pos_msg.x = ball_px_pos[0]
+            ball_px_pos_msg.y = ball_px_pos[1]
+            self.ball_px_position_publisher_.publish(ball_px_pos_msg)
+
+        #     # ball_px_pos = self.ball_px_position_filter(ball_px_pos, 0)
+        #     # new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
+        return img_cp
 
         self.ball_pos_area_filter(new_ball_pos_area, 1)
-
-    def find_ball(self):
-        ball_detection = (self.results.boxes.cls == self.value_classes['ball']).nonzero(as_tuple=True)[0].numpy()
-        
-        if ball_detection.size > 0:
-            ball_pos = Point2D()
-
-            ball_box_xywh = self.results.boxes[ball_detection[0]].xywhn.numpy() #get the most conf ball detect box in xyxy format
-            array_box_xywh = np.reshape(ball_box_xywh, -1)  #convert matriz to array
-
-            ball_pos.x = float(array_box_xywh[0] * self.img.shape[1])
-            ball_pos.y = float(array_box_xywh[1] * self.img.shape[0])
-            
-            raio_ball       = int((array_box_xywh[2] * self.img.shape[1] +array_box_xywh[3] * self.img.shape[0]) / 4)
-
-            cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), abs(raio_ball), (255, 0, 0), 2)
-            cv2.circle(self.img, (int(ball_pos.x), int(ball_pos.y)), 5, (255, 0, 0), -1)
-            return ball_pos
-
-        return -1
 
     def ball_px_position_filter(self, not_filtered_ball_pos, opt):
         
@@ -276,37 +264,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
-
-# #!/usr/bin/python3
-# import rclpy
-# from rclpy.node import Node
-# import cv2
-# from sensor_msgs.msg import Image
-# from cv_bridge import CvBridge
-
-# class ImageSubscriber(Node):
-#     def __init__(self):
-#         super().__init__("image_subscriber")
-#         self.bridge = CvBridge()
-
-#         self.sub = self.create_subscription(Image, "/image_raw", self.image_callback, 1)
-#         self.sub
-
-#     def image_callback(self, msg):
-#         cv2.imshow('Imagem', self.bridge.imgmsg_to_cv2(msg, "bgr8"))
-#         cv2.waitKey(1)
-
-# def main(args=None):
-#     rclpy.init(args=args)
-
-#     image_subscriber = ImageSubscriber()
-#     rclpy.spin(image_subscriber)
-
-#     image_subscriber.destroy_node()
-#     rclpy.shutdown()
-
-#     cv2.destroyAllWindows()
-
-# if __name__ == '__main__':
-#     main()
