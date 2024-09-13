@@ -4,7 +4,7 @@ import cv2
 
 # Configurações do servidor UDP
 SERVER_IP = ""
-SERVER_PORT = 12345
+SERVER_PORT = 5050
 BUFFER_SIZE = 40960
 
 # Configura o socket UDP
