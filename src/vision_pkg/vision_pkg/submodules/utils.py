@@ -1,5 +1,8 @@
 import cv2
 from dataclasses import dataclass
+import numpy as np
+
+from .image import drawBallBox
 
 def draw_lines(img, config):
 
@@ -24,6 +27,19 @@ def resize_image(img, scale_percent=100):
     
     return resized
 
+def findBall(img, results, classesValues):
+    img_cp = img.copy()
+    
+    # Return the most confidence ball index, if ball not found index equal -1
+    try:
+        ball_index = np.where(results.boxes.cls == classesValues['ball'])[0][0]
+    except: 
+        ball_index = -1
+    
+    img_cp, ballPositionPx = drawBallBox(img_cp, results, ball_index)
+        
+    return img_cp, ballPositionPx
+        
 @dataclass
 class position:
     x: int = 0

@@ -25,7 +25,7 @@
 
 /image_node:
   ros__parameters:
-    img_qlty: 100 
+    img_qlty: 70 
     get_image: false
     fps_save: 2
     enable_udp: True

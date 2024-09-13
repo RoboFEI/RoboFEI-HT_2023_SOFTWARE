@@ -65,17 +65,22 @@ def generate_launch_description():
         package="usb_cam",
         executable="usb_cam_node_exe",
         output = 'screen',
-        parameters = [camera_config]
+        parameters = [camera_config],
+        arguments=['--ros-args', '--log-level', 'warn'],
+        respawn=True,
+        respawn_delay=0.5,
+        emulate_tty=True
     )
 
     image_viwer = Node(
         package="vision_pkg",
         executable="detect",
         output = 'screen',
-        parameters = [vision_config],
+        parameters = [vision_config, camera_config],
         arguments=['--ros-args', '--log-level', log_level,
                    '--log-level',  'rcl:=info',
-                   '--log-level',  'rmw_fastrtps_cpp:=info']
+                   '--log-level',  'rmw_fastrtps_cpp:=info'],
+        emulate_tty=True
     )
 
     ld.add_action(camera)
