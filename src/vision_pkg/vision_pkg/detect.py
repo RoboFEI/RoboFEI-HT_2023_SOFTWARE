@@ -15,10 +15,11 @@ from custom_interfaces.msg import Vision
 from vision_msgs.msg import Point2D
 from sensor_msgs.msg import Image
 
-from .submodules.utils          import draw_lines, position, resize_image, findBall
+from .submodules.utils          import draw_lines, position
 from .submodules.ClassConfig    import *
 from .submodules.Client         import Client
 from .submodules.ImageGetter    import ImageGetter
+from .submodules.image          import findBall, resize_image 
 
 class BallDetection(Node):
     def __init__(self):

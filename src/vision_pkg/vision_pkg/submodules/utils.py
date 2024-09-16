@@ -16,30 +16,7 @@ def draw_lines(img, config):
     cv2.line(img, (0, config.y_longe), (img.shape[1], config.y_longe), (0, 0, 255), 1)
 
     return img
-
-def resize_image(img, scale_percent=100):
-
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-
-    resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-    
-    return resized
-
-def findBall(img, results, classesValues):
-    img_cp = img.copy()
-    
-    # Return the most confidence ball index, if ball not found index equal -1
-    try:
-        ball_index = np.where(results.boxes.cls == classesValues['ball'])[0][0]
-    except: 
-        ball_index = -1
-    
-    img_cp, ballPositionPx = drawBallBox(img_cp, results, ball_index)
-        
-    return img_cp, ballPositionPx
-        
+       
 @dataclass
 class position:
     x: int = 0
