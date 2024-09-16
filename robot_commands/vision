@@ -2,4 +2,14 @@
 
 cd ~/RoboFEI-HT_2023_SOFTWARE 
 source install/setup.bash 
+
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -d|--debug)
+      ros2 launch robot_bringup vision_bringup.launch.py log_level:='debug'
+      exit 1
+      ;;
+  esac
+done
 ros2 launch robot_bringup vision_bringup.launch.py

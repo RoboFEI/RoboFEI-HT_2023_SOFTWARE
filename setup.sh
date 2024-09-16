@@ -41,7 +41,8 @@ echo -e "${blue} Instalação do ROS2...${NC}"
     echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
     sudo apt install python3-colcon-common-extensions -y
     sudo apt-get install ros-humble-vision-msgs -y
-
+    sudo apt install ros-humble-usb-cam
+    
     #Install rqt and plugins 
     sudo apt update 
     sudo apt install ros-humble-rqt* -y
