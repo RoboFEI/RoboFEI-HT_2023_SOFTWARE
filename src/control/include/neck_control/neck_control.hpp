@@ -74,7 +74,12 @@ class NeckNode : public rclcpp::Node
     State robot_state = State::follow_ball;
     BallPositionPx ball_pos_px;
     int cont_lost_ball = 0;
-    std::vector<std::vector<int>> search_ball_pos = {{2270,1300}, {2048, 1300}, {1826, 1300}, {1528, 1550}, {2048, 1550}, {2568, 1550}, {2866, 2000}, {2048, 2000},{1230, 2000}};
+
+    int search_ball_delay = 10;
+    std::vector<int> search_ball_limits = {2348,2498,2648}; //Não usar valores < 2048
+    std::vector<int> search_ball_samples = {75,100,125};
+    std::vector<int> search_ball_pos = {2048,2048};
+
     int search_ball_state = 0;
     int robotNumber;
 

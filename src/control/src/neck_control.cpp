@@ -44,13 +44,12 @@ NeckNode::NeckNode()
   RCLCPP_INFO(this->get_logger(), "neck activate %d", neck_activate_);
 
   neck_up_limit = this->declare_parameter("neck_up_limit", 2048);
-  neck_down_limit = this->declare_parameter("neck_down_limit", 1350);
-  neck_left_limit = this->declare_parameter("neck_left_limit", 2650);
+  neck_down_limit = this->declare_parameter("neck_down_limit", 1050);
+  neck_left_limit = this->declare_parameter("neck_left_limit", 3050);
   neck_right_limit = this->declare_parameter("neck_right_limit", 1350);
   robotNumber = this->declare_parameter("robot_number", 2);
   if(robotNumber > 2)
   {
-    search_ball_pos = {{2270/4,1300/4}, {2048/4, 1300/4}, {1826/4, 1300/4}, {1528/4, 1550/4}, {2048/4, 1550/4}, {2568/4, 1550/4}, {2866/4, 1800/4}, {2048/4, 1800/4},{1230/4, 1800/4}};
     neck.pan  = 512;
     neck.tilt = 512;  
   }
@@ -119,15 +118,35 @@ void NeckNode::listener_callback_neck(const JointStateMsg::SharedPtr msg)
 void NeckNode::search_ball()
 {
   
-  if(search_ball_timer.delay(1000 + (325 * (search_ball_state/3))))
+  if(search_ball_timer.delay(search_ball_delay))
   {
     auto new_neck_position = JointStateMsg();
 
+    if(this->search_ball_state < search_ball_samples[0])
+      {
+        search_ball_pos = {search_ball_limits[0],1300};
+        if(this->search_ball_state > 0) this->search_ball_pos[0] -= (((search_ball_limits[0]*2)-4096)/(search_ball_samples[0]))*search_ball_state;
+      }
+    if(this->search_ball_state >= search_ball_samples[0] && this->search_ball_state <= (search_ball_samples[0]+search_ball_samples[1]))
+      {
+        search_ball_pos = {(4096-search_ball_limits[1]),1550};
+        if(this->search_ball_state > (search_ball_samples[0])) this->search_ball_pos[0] += (((search_ball_limits[1]*2)-4096)/(search_ball_samples[1]))*(search_ball_state-search_ball_samples[0]);
+      }
+    if(this->search_ball_state >= (search_ball_samples[0]+search_ball_samples[1]))
+      {
+        search_ball_pos = {search_ball_limits[2],1800};
+        if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1])) this->search_ball_pos[0] -= (((search_ball_limits[2]*2)-4096)/(search_ball_samples[2]))*(search_ball_state-(search_ball_samples[0]+search_ball_samples[1]));
+      }
+    if(robotNumber > 2) 
+      {
+        this->search_ball_pos[0] = (search_ball_pos[0])*(0.25);
+        this->search_ball_pos[1] = (search_ball_pos[1])*(0.25);
+      }
     new_neck_position.id.push_back(19);
     new_neck_position.id.push_back(20);
   
-    new_neck_position.info.push_back(this->search_ball_pos[search_ball_state][0]);
-    new_neck_position.info.push_back(this->search_ball_pos[search_ball_state][1]);
+    new_neck_position.info.push_back(this->search_ball_pos[0]);
+    new_neck_position.info.push_back(this->search_ball_pos[1]);
 
     new_neck_position.type.push_back(JointStateMsg::POSITION);
     new_neck_position.type.push_back(JointStateMsg::POSITION);
@@ -138,7 +157,7 @@ void NeckNode::search_ball()
 
     this->search_ball_state += 1;
 
-    if(this->search_ball_state >= 9) this->search_ball_state = 0;
+    if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1]+search_ball_samples[2])) this->search_ball_state = 0;
   }
 }
 
