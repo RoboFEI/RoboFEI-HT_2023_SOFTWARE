@@ -19,8 +19,9 @@ class Client():
         data = img_encoded.tobytes()
 
         # Envia o tamanho da imagem primeiro
-        size = len(data)
-        self.udp.sendto(size.to_bytes(4, byteorder='big'), self.addr)
+        # Envia como string para difernciar dos dados da camera
+        flag = f'{len(data)}'
+        self.udp.sendto(flag.encode(), self.addr)
 
         # Envia a imagem em partes
         for i in range(0, len(data), self.buffer_size):

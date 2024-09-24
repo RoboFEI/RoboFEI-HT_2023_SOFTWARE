@@ -41,7 +41,8 @@ echo -e "${blue} Instalação do ROS2...${NC}"
     echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
     sudo apt install python3-colcon-common-extensions -y
     sudo apt-get install ros-humble-vision-msgs -y
-
+    sudo apt install ros-humble-usb-cam
+    
     #Install rqt and plugins 
     sudo apt update 
     sudo apt install ros-humble-rqt* -y
@@ -70,18 +71,10 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
 
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
-    sudo touch /etc/udev/rules.d/robot-usb-ports.rules && sudo chmod 777 /etc/udev/rules.d/robot-usb-ports.rules
-    echo -e "KERNEL==\"ttyUSB*\", ATTRS{product}==\"USB-Serial Controller\", SYMLINK+=\"imu\"\n" >> /etc/udev/rules.d/robot-usb-ports.rules 
-    echo -e "KERNEL==\"ttyUSB*\", ATTRS{serial}==\"A50285BI\", SYMLINK+=\"motors\"\n" >> /etc/udev/rules.d/robot-usb-ports.rules 
-    echo -e "KERNEL==\"video*\", ATTRS{product}==\"HD Pro Webcam C920\",ATTR{index}==\"0\", SYMLINK+=\"camera\"" >> /etc/udev/rules.d/robot-usb-ports.rules
+    sudo cp robot_commands/robot-usb-ports.rules /etc/udev/rules.d/
     sudo udevadm control --reload-rules
     sudo udevadm trigger
     # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}
-
-    #Full permitions for camera, motors and imu
-    echo "sudo chmod 777 /dev/imu" >> ~/.bashrc
-    echo "sudo chmod 777 /dev/motors" >> ~/.bashrc
-    echo "sudo chmod 777 /dev/camera" >> ~/.bashrc
 
 #Bind Comand
 echo -e "${blue} commands setup${NC}"
