@@ -66,7 +66,7 @@ def generate_launch_description():
         executable="usb_cam_node_exe",
         output = 'screen',
         parameters = [camera_config],
-        arguments=['--ros-args', '--log-level', 'warn'],
+        arguments=['--ros-args', '--log-level', 'info'],
         respawn=True,
         respawn_delay=0.5,
         emulate_tty=True

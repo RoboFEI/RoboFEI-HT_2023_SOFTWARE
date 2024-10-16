@@ -34,9 +34,9 @@ class classConfig():
 		self.kernel_muito_longe2 = None
 
 		self.x_left = None
-		self.x_center_left = None
+		#self.x_center_left = None
 		self.x_center = None
-		self.x_center_right = None
+		#self.x_center_right = None
 		self.x_right = None
 
 		self.y_chute = None
@@ -51,7 +51,7 @@ class classConfig():
 		if self.Config.read(f'{os.path.dirname(os.path.realpath(__file__))}/config.ini') != []:
 			print('Leitura do config.ini')
 			self.CENTER_SERVO_PAN = 	self.Config.getint('Basic Settings', 'center_servo_pan')
-			self.POSITION_SERVO_TILT  = 	self.Config.getint('Basic Settings', 'position_servo_tilt')
+			self.POSITION_SERVO_TILT  = self.Config.getint('Basic Settings', 'position_servo_tilt')
 
 			self.SERVO_PAN_LEFT = 		self.Config.getint('Basic Settings', 'servo_pan_left')
 			self.SERVO_PAN_RIGHT  = 	self.Config.getint('Basic Settings', 'servo_pan_right')
@@ -59,21 +59,21 @@ class classConfig():
 			self.SERVO_PAN_ID    = 		self.Config.getint('Basic Settings', 'PAN_ID')
 			self.SERVO_TILT_ID   = 		self.Config.getint('Basic Settings', 'TILT_ID')
 
-			self.DNN_folder = 		self.Config.get('Basic Settings', 'dnn_folder')
+			self.DNN_folder = 			self.Config.get('Basic Settings', 'dnn_folder')
 
 
-			self.max_count_lost_frame =   self.Config.getint('Basic Settings', 'max_count_lost_frame')
-			self.max_count_lost_frame_far_ball =   self.Config.getint('Basic Settings', 'max_count_lost_frame_far_ball')
-			self.head_up = self.Config.getint('Basic Settings', 'head_up')
-			self.cut_edge_image = self.Config.getint('Basic Settings', 'cut_edge_image')
+			self.max_count_lost_frame =   				self.Config.getint('Basic Settings', 'max_count_lost_frame')
+			self.max_count_lost_frame_far_ball =  		self.Config.getint('Basic Settings', 'max_count_lost_frame_far_ball')
+			self.head_up = 								self.Config.getint('Basic Settings', 'head_up')
+			self.cut_edge_image = 						self.Config.getint('Basic Settings', 'cut_edge_image')
 
 			self.x_left = 			self.Config.getint('Distance Limits (Pixels)', 'Left_Region_Division')
 			self.x_center = 		self.Config.getint('Distance Limits (Pixels)', 'Center_Region_Division')
 			self.x_right = 			self.Config.getint('Distance Limits (Pixels)', 'Right_Region_Division')
 			self.y_chute = 			self.Config.getint('Distance Limits (Pixels)', 'Down_Region_Division')
 			self.y_longe = 			self.Config.getint('Distance Limits (Pixels)', 'Up_Region_Division')
-			self.when_ball_up = self.Config.getint('Distance Limits (Pixels)', 'when_ball_up')
-			self.when_ball_down = self.Config.getint('Distance Limits (Pixels)', 'when_ball_down')			
+			self.when_ball_up = 	self.Config.getint('Distance Limits (Pixels)', 'when_ball_up')
+			self.when_ball_down = 	self.Config.getint('Distance Limits (Pixels)', 'when_ball_down')			
 			#break
 
 		else:
