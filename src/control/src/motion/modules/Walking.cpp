@@ -101,7 +101,8 @@ void Walking::LoadINISettings(minIni* ini)
 void Walking::LoadINISettings(minIni* ini, const std::string &section)
 {
     double value = INVALID_VALUE;
-    printf("LOAD \n");
+    //      feedback no terminal d gait_publisher 3
+    //printf("LOAD \n");
 
     if((value = ini->getd(section, "x_offset", INVALID_VALUE)) != INVALID_VALUE)                X_OFFSET_START = X_OFFSET = value;
     if((value = ini->getd(section, "y_offset", INVALID_VALUE)) != INVALID_VALUE)                Y_OFFSET = value;
@@ -132,7 +133,8 @@ void Walking::LoadINISettings(minIni* ini, const std::string &section)
     if((value = ini->getd(section, "walk_foward", INVALID_VALUE)) != INVALID_VALUE) X_MOVE_AMPLITUDE = value;
     if((value = ini->getd(section, "sidle", INVALID_VALUE)) != INVALID_VALUE) Y_MOVE_AMPLITUDE = value;
 
-    printf("X OFFSET %f", X_OFFSET_START);
+    //      feedback no terminal do gait_publisher 2
+    //printf("X OFFSET %f", X_OFFSET_START);
     int ivalue = INVALID_VALUE;
 
     if((ivalue = ini->geti(section, "p_gain", INVALID_VALUE)) != INVALID_VALUE)                 P_GAIN = ivalue;
@@ -371,8 +373,9 @@ void Walking::Start()
 {
 	m_Ctrl_Running = true;
     m_Real_Running = true;
-    printf("WALKING START \n");
-    printf("WALKING START SET VALUE %f\n", A_MOVE_AMPLITUDE);
+    //      feedback no terminal do gait_publisher 1
+    //printf("WALKING START \n");
+    //printf("WALKING START SET VALUE %f\n", A_MOVE_AMPLITUDE);
 }
 
 void Walking::Stop()
@@ -703,7 +706,7 @@ double Walking::splineBalance(double angle, double vel, double gain)
     double offset = 1000.0 * gain * (cmd.x - angle);
 
 #if LOG_BALANCE
-    fprintf(m_balanceLog, "%5.3f %5.3f %5.3f %5.3f\n", angle, vel, offset, cmd.t);
+    //fprintf(m_balanceLog, "%5.3f %5.3f %5.3f %5.3f\n", angle, vel, offset, cmd.t);
 #endif
 
     return offset;

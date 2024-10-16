@@ -1,5 +1,31 @@
 #!/bin/bash
 
-cd ~/RoboFEI-HT_2023_SOFTWARE
-source install/setup.bash
-ros2 launch robot_bringup robot_bringup.launch.py
+cd ~/RoboFEI-HT_2023_SOFTWARE 
+source install/setup.bash 
+
+
+if [ $# -gt 0 ] 
+    then
+        case "$1" in
+            -d)
+            ros2 launch robot_bringup robot_bringup.launch.py log_level:='debug'
+            ;;
+            -i)
+            ros2 launch robot_bringup robot_bringup.launch.py log_level:='info'
+            ;;
+            -w)
+            ros2 launch robot_bringup robot_bringup.launch.py log_level:='warn'
+            ;;
+            -e)
+            ros2 launch robot_bringup robot_bringup.launch.py log_level:='error'
+            ;;
+            -f)
+            ros2 launch robot_bringup robot_bringup.launch.py log_level:='fatal'
+            exit 1
+            ;;
+        esac
+fi
+if [ $1 -z ]
+  then
+    ros2 launch robot_bringup robot_bringup.launch.py log_level:='info'
+fi

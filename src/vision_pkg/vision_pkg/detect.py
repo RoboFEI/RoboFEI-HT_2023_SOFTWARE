@@ -209,33 +209,33 @@ class BallDetection(Node):
         # identify the ball position in Y axis
         if (ball_px_pos[0] <= self.config.x_left):     #ball to the left
             ball_pos.left = True
-            self.get_logger().debug("Bola à Esquerda")
+            self.get_logger().info("Bola à Esquerda")
 
         elif (ball_px_pos[0] < self.config.x_center):  #ball to the center left
-            ball_pos.center_left = True
-            self.get_logger().debug("Bola Centralizada a Esquerda")
+            ball_pos.center = True
+            self.get_logger().info("Bola Centralizada")
 
-        elif (ball_px_pos[0] < self.config.x_right):   #ball to the center right
-            ball_pos.center_right = True
-            self.get_logger().debug("Bola Centralizada a Direita")
+        # elif (ball_px_pos[0] < self.config.x_right):   #ball to the center right
+        #     ball_pos.center_right = True
+        #     self.get_logger().info("Bola Centralizada a Direita")
 
         else:                                            #ball to the right
             ball_pos.right = True
-            self.get_logger().debug("Bola à Direita")
+            self.get_logger().info("Bola à Direita")
         
 
         # identify the ball position in Y axis
         if (ball_px_pos[1] > self.config.y_chute):     #ball near
             ball_pos.close = True
-            self.get_logger().debug("Bola Perto")
+            self.get_logger().info("Bola Perto")
         
         elif (ball_px_pos[1] <= self.config.y_longe):  #ball far
             ball_pos.far = True
-            self.get_logger().debug("Bola Longe")
+            self.get_logger().info("Bola Longe")
 
         else:                                           #Bola middle
             ball_pos.med = True
-            self.get_logger().debug("Bola ao Centro")
+            self.get_logger().info("Bola ao Centro")
 
         return ball_pos
         

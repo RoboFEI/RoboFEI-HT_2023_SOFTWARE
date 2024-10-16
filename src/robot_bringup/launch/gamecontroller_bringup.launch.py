@@ -15,11 +15,11 @@ from robot_num import robot_number
 def generate_launch_description():
     ld = LaunchDescription()
 
-    config_file = 'robot_config'+str(robot_number)+'.yaml'
+    robot_config_file = 'robot_config'+str(robot_number)+'.yaml'
     control_config = os.path.join(
         get_package_share_directory('robot_bringup'),
         'config',
-        config_file
+        robot_config_file
     )
 
     team_number_launch_arg = DeclareLaunchArgument(

@@ -2,7 +2,7 @@
 
 using namespace std::chrono_literals;
 
-// #define NECK_TILT_CENTER 2048
+// #define NECK_TILT_CENTER 512
 // #define NECK_CENTER_TH 185
 // #define NECK_LEFT_LIMIT 2650
 // #define NECK_LEFT_TH (NECK_LEFT_LIMIT-(NECK_TILT_CENTER+NECK_CENTER_TH))
@@ -150,7 +150,8 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
   this->robot.camera_ball_position = *vision_info;
   if(robot.neck_pos.position20 < 1750)
   {
-    NECK_CENTER_TH = get_center_th(robot.neck_pos.position20);
+    //NECK_CENTER_TH = get_center_th(robot.neck_pos.position20);
+    NECK_CENTER_TH = 100;
     NECK_LEFT_TH = NECK_TILT_CENTER + NECK_CENTER_TH;
     NECK_RIGHT_TH = NECK_TILT_CENTER - NECK_CENTER_TH;
   }
