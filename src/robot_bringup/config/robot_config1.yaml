@@ -16,7 +16,7 @@
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 1  #150 
+    walk_counter  : 150 
 
 /decision_node:
   ros__parameters:
@@ -28,4 +28,4 @@
     img_qlty: 100 
     get_image: false
     fps_save: 2
-    enable_udp: false
+    enable_udp: True

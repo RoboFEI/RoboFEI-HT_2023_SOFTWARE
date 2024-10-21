@@ -2,30 +2,4 @@
 
 cd ~/RoboFEI-HT_2023_SOFTWARE 
 source install/setup.bash 
-
-
-if [ $# -gt 0 ] 
-    then
-        case "$1" in
-            -d)
-            ros2 launch robot_bringup decision_bringup.launch.py log_level:='debug'
-            ;;
-            -i)
-            ros2 launch robot_bringup decision_bringup.launch.py log_level:='info'
-            ;;
-            -w)
-            ros2 launch robot_bringup decision_bringup.launch.py log_level:='warn'
-            ;;
-            -e)
-            ros2 launch robot_bringup decision_bringup.launch.py log_level:='error'
-            ;;
-            -f)
-            ros2 launch robot_bringup decision_bringup.launch.py log_level:='fatal'
-            exit 1
-            ;;
-        esac
-fi
-if [ $1 -z ]
-  then
-    ros2 launch robot_bringup decision_bringup.launch.py log_level:='info'
-fi
+ros2 launch robot_bringup decision_bringup.launch.py

@@ -137,7 +137,7 @@ private:
     rclcpp_action::GoalResponse handle_goal(
         const rclcpp_action::GoalUUID & uuid,
         std::shared_ptr<const Control_action::Goal> goal)
-    {       // feedback no terminal do controle numero 1
+    {
         RCLCPP_INFO(this->get_logger(), "Received action %d", goal->action_number);
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
@@ -336,16 +336,15 @@ private:
         
         const auto goal = goal_handle->get_goal();
         movement = goal->action_number;
-        //      feedback no terminal do controle numero 2
-        //RCLCPP_INFO(this->get_logger(), "Decision: %d", movement);
+        RCLCPP_INFO(this->get_logger(), "Decision: %d", movement);
         auto feedback = std::make_shared<Control_action::Feedback>();
         auto & movements_remaining = feedback->movements_remaining;
         auto result = std::make_shared<Control_action::Result>();
 
         if(body_activate_ || movement == 1) // when body deactivate only recive move 1
         {
-          //      feedback no terminal do controle numero 3
-          //RCLCPP_INFO(this->get_logger(), "Executing goal");
+
+          RCLCPP_INFO(this->get_logger(), "Executing goal");
 
           // message_single.id = 254;
           // message_single.address = 112;
@@ -357,113 +356,112 @@ private:
           setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
           pubisher_body_joints_->publish(setJointInfoMsg);
 
-          int esse = 0;
-          if (movement == 14 || movement == 5 || movement == 6 || movement == 9 || movement == 10 || movement == 20 || movement == 21){
-            esse = movement;
-            if (contador < cWalk){
-              movement = 15;   
-            }
+          if (movement != last_movement && (isParamMove(movement) || (isStepMove(movement) && isParamMove(last_movement)))) {
+            do_gait = true;
+          }
+
+          last_movement = movement;
+
+          if (do_gait){
+            movement = 15;
             contador++;
             if (contador >= cWalk){
-              movement = esse;
+              do_gait = false;
               contador = 0;
-              RCLCPP_INFO(this->get_logger(), "Gait trocando movimentacao %d", contador);
             }
+            RCLCPP_INFO(this->get_logger(), "Gait trocando movimentacao %d", contador);
           }
-            choose_movement(movement);          
 
-            if (parameters){
-              if (goal_handle->is_canceling()) {
-                  result->finished = false;
-                  goal_handle->canceled(result);
-                  RCLCPP_INFO(this->get_logger(), "Goal canceled");
-                  return;
-              }
-              message_walk.walk_number = parameter_number;  
-              publisher_walk->publish(message_walk);
+          choose_movement(movement);          
+
+          if (parameters){
+            if (goal_handle->is_canceling()) {
+                result->finished = false;
+                goal_handle->canceled(result);
+                RCLCPP_INFO(this->get_logger(), "Goal canceled");
+                return;
             }
+            message_walk.walk_number = parameter_number;  
+            publisher_walk->publish(message_walk);
+          }
           
-            else{
-              if (fase_zero) {
+          else{
+            if (fase_zero) {
+              message_walk.walk_number = 0; 
+              publisher_walk->publish(message_walk);
+              // message.id = motors;
+
+              number_of_mov = j[section]["number of movements"];
+              
+              for (int i = 1; i <= number_of_mov; i++){
+                
                 message_walk.walk_number = 0; 
                 publisher_walk->publish(message_walk);
-                // message.id = motors;
-
-                number_of_mov = j[section]["number of movements"];
+                address_name = "address";
+                id_name = "id";
+                vel_name = "velocity";
+                position_name = "position";
+                sleep_name = "sleep";
                 
-                for (int i = 1; i <= number_of_mov; i++){
-                  
-                  message_walk.walk_number = 0; 
-                  publisher_walk->publish(message_walk);
-                  address_name = "address";
-                  id_name = "id";
-                  vel_name = "velocity";
-                  position_name = "position";
-                  sleep_name = "sleep";
-                  
-                  //RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
-                  if (goal_handle->is_canceling()) {
-                      result->finished = false;
-                      goal_handle->canceled(result);
-                      RCLCPP_INFO(this->get_logger(), "Goal canceled");
-                      return;
-                  }
-
-                  address_name = address_name + std::to_string(i);
-                  if (j[section][address_name] == 112){
-                    //      feedback no terminal do controle 4
-                    //RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
-                    auto setJointInfoMsg = JointStateMsg();
-                    id_name = id_name + std::to_string(i);
-                    setJointInfoMsg.id.push_back(j[section][id_name]);
-                    // message_single.id = j[section][id_name];
-                    vel_name = vel_name + std::to_string(i);
-
-                    setJointInfoMsg.info.push_back(j[section][vel_name]);
-                    setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
-                    pubisher_body_joints_->publish(setJointInfoMsg);
-
-                    // message_single.position = j[section][vel_name];
-                    // message_single.address = j[section][address_name];
-                    // publisher_single->publish(message_single);
-                    usleep(500000);
-                  }
-                  else if (j[section][address_name] == 116){
-                    position_name = position_name + std::to_string(i);
-                    position.push_back(j[section][position_name]);
-
-                    auto setJointInfoMsg = JointStateMsg();
-                    setJointInfoMsg.info = position.front();
-                    setJointInfoMsg.id = allIds;
-                    setJointInfoMsg.type = std::vector<std::uint8_t>(20, 0);
-    
-                    // message.position = position.front();
-                    //      feedback no terminal do controle 5
-                    //RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
-                    pubisher_body_joints_->publish(setJointInfoMsg);
-
-                    // publisher_->publish(message);
-                    sleep_name = sleep_name + std::to_string(i);
-                    sleep_sec = j[section][sleep_name];
-                    //      feedback no terminal do controle 6
-                    //RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
-                    usleep(sleep_sec*1000000);
-                    position.clear();
-                  }
-                
-                  movements_remaining = number_of_mov - i;
-                  // Publish feedback
-                  goal_handle->publish_feedback(feedback);
-                  //      feedback no terminal do controle 7
-                  //RCLCPP_INFO(this->get_logger(), "Feedback: %d movements remaining", movements_remaining);
+                RCLCPP_INFO(this->get_logger(), " i: %d ",  i);
+                if (goal_handle->is_canceling()) {
+                    result->finished = false;
+                    goal_handle->canceled(result);
+                    RCLCPP_INFO(this->get_logger(), "Goal canceled");
+                    return;
                 }
+
+                address_name = address_name + std::to_string(i);
+                if (j[section][address_name] == 112){
+                  RCLCPP_INFO(this->get_logger(), "VELOCIDADE");
+                  auto setJointInfoMsg = JointStateMsg();
+                  id_name = id_name + std::to_string(i);
+                  setJointInfoMsg.id.push_back(j[section][id_name]);
+                  // message_single.id = j[section][id_name];
+                  vel_name = vel_name + std::to_string(i);
+
+                  setJointInfoMsg.info.push_back(j[section][vel_name]);
+                  setJointInfoMsg.type.push_back(JointStateMsg::VELOCITY);
+                  pubisher_body_joints_->publish(setJointInfoMsg);
+
+                  // message_single.position = j[section][vel_name];
+                  // message_single.address = j[section][address_name];
+                  // publisher_single->publish(message_single);
+                  usleep(500000);
+                }
+                else if (j[section][address_name] == 116){
+                  position_name = position_name + std::to_string(i);
+                  position.push_back(j[section][position_name]);
+
+                  auto setJointInfoMsg = JointStateMsg();
+                  setJointInfoMsg.info = position.front();
+                  setJointInfoMsg.id = allIds;
+                  setJointInfoMsg.type = std::vector<std::uint8_t>(20, 0);
+  
+                  // message.position = position.front();
+
+                  RCLCPP_INFO(this->get_logger(), "POSIÇÃO %d %d", position[0][18], position[0][19]);
+                  pubisher_body_joints_->publish(setJointInfoMsg);
+
+                  // publisher_->publish(message);
+                  sleep_name = sleep_name + std::to_string(i);
+                  sleep_sec = j[section][sleep_name];
+                  RCLCPP_INFO(this->get_logger(), "Sleep: %f ", sleep_sec);
+                  usleep(sleep_sec*1000000);
+                  position.clear();
+                }
+              
+                movements_remaining = number_of_mov - i;
+                // Publish feedback
+                goal_handle->publish_feedback(feedback);
+                RCLCPP_INFO(this->get_logger(), "Feedback: %d movements remaining", movements_remaining);
               }
             }
+          }
         }
       result->finished = true;
       goal_handle->succeed(result);
-      //      feedback no terminal do controle 8
-      //RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+      RCLCPP_INFO(this->get_logger(), "Goal succeeded");
     }
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscriber_fase_zero;

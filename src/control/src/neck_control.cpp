@@ -86,8 +86,8 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
       else if(new_neck_position.info[0] < neck_right_limit) new_neck_position.info[0] = neck_right_limit;
       if(new_neck_position.info[1] > neck_up_limit) new_neck_position.info[1] = neck_up_limit;
       else if(new_neck_position.info[1] < neck_down_limit) new_neck_position.info[1] = neck_down_limit;
-      // feedback no terminal do neck position
-      //RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.info[0], new_neck_position.info[1]);
+
+      RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.info[0], new_neck_position.info[1]);
 
       set_neck_position_publisher_->publish(new_neck_position);
     }
@@ -99,9 +99,9 @@ void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
   ball.detected     =   msg->detected;
   //RCLCPP_INFO(this->get_logger(), "BALL '%s'", ball.detected ? "true" : "false");
   ball.left         =   msg->left;
-  ball.center       =   msg->center;
+  ball.center_left  =   msg->center_left;
   ball.right        =   msg->right;
-  //ball.center_right =   msg->center_right;
+  ball.center_right =   msg->center_right;
   
   ball.far          =   msg->far;
   ball.med          =   msg->med;
@@ -122,6 +122,26 @@ void NeckNode::search_ball()
   {
     auto new_neck_position = JointStateMsg();
 
+    if(this->search_ball_state < search_ball_samples[0])
+      {
+        search_ball_pos = {search_ball_limits[0],1300};
+        if(this->search_ball_state > 0) this->search_ball_pos[0] -= (((search_ball_limits[0]*2)-4096)/(search_ball_samples[0]))*search_ball_state;
+      }
+    if(this->search_ball_state >= search_ball_samples[0] && this->search_ball_state <= (search_ball_samples[0]+search_ball_samples[1]))
+      {
+        search_ball_pos = {(4096-search_ball_limits[1]),1550};
+        if(this->search_ball_state > (search_ball_samples[0])) this->search_ball_pos[0] += (((search_ball_limits[1]*2)-4096)/(search_ball_samples[1]))*(search_ball_state-search_ball_samples[0]);
+      }
+    if(this->search_ball_state >= (search_ball_samples[0]+search_ball_samples[1]))
+      {
+        search_ball_pos = {search_ball_limits[2],1800};
+        if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1])) this->search_ball_pos[0] -= (((search_ball_limits[2]*2)-4096)/(search_ball_samples[2]))*(search_ball_state-(search_ball_samples[0]+search_ball_samples[1]));
+      }
+    if(robotNumber > 2) 
+      {
+        this->search_ball_pos[0] = (search_ball_pos[0])*(0.25);
+        this->search_ball_pos[1] = (search_ball_pos[1])*(0.25);
+      }
     new_neck_position.id.push_back(19);
     new_neck_position.id.push_back(20);
   

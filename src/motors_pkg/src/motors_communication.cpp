@@ -35,7 +35,7 @@ MotorsCommunication::MotorsCommunication()
     
     initialMotorsSetup(BROADCAST_ID);
 
-    RCLCPP_DEBUG(this->get_logger(), "Run read write node"); 
+    RCLCPP_INFO(this->get_logger(), "Run read write node"); 
 
     this->declare_parameter("qos_depth", 10);
     int8_t qos_depth = 0;
@@ -98,10 +98,10 @@ void MotorsCommunication::timer_callback()
 
     for(int i=1; i<21; i++)
     {
-        RCLCPP_DEBUG(this->get_logger(), "Torque %d | %d",i, joints.torque[i]);
+        RCLCPP_INFO(this->get_logger(), "Torque %d | %d",i, joints.torque[i]);
     }
 
-    RCLCPP_DEBUG(this->get_logger(), "-------------------");
+    RCLCPP_INFO(this->get_logger(), "-------------------");
 
         for(int i=1; i<21; i++)
     {
@@ -112,7 +112,7 @@ void MotorsCommunication::timer_callback()
 
         for(int i=1; i<21; i++)
     {
-        RCLCPP_DEBUG(this->get_logger(), "Vel %d | %d",i, joints.velocity[i]);
+        RCLCPP_INFO(this->get_logger(), "Vel %d | %d",i, joints.velocity[i]);
     }
 
     auto allJointsPos = JointStateMsg();
@@ -140,7 +140,7 @@ void MotorsCommunication::getNoTorquePos()
 
             if (dxl_addparam_result != true)
             {
-                RCLCPP_ERROR(this->get_logger(), "[ID:%03d] groupSyncReadPos addparam failed", i);
+                RCLCPP_INFO(this->get_logger(), "[ID:%03d] groupSyncReadPos addparam failed", i);
             }else idPositionReaded.push_back(i);
 
         }
@@ -171,10 +171,10 @@ void MotorsCommunication::setAllJointPos()
     dxl_comm_result = groupSyncWritePos->txPacket();
 
     if (dxl_comm_result != COMM_SUCCESS) {
-        RCLCPP_WARN(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
     } 
     else if (dxl_error != 0) {
-        RCLCPP_ERROR(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
     } 
     else {
         //RCLCPP_INFO(this->get_logger(), "Set [ID: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d,%d,%d}] [Goal Position: {%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d,%d, %d,%d}]", 
@@ -226,10 +226,10 @@ void MotorsCommunication::setJointTorque(int id, int goalTorque)
     );
 
     if (dxl_comm_result != COMM_SUCCESS) {
-        RCLCPP_WARN(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getTxRxResult(dxl_comm_result));
         return;
     } else if (dxl_error != 0) {
-        RCLCPP_ERROR(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
+        RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
         return;
     }
 
@@ -281,7 +281,7 @@ bool openSerialPort()
         RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to open the port!");
         return false;
     } else {
-        RCLCPP_DEBUG(rclcpp::get_logger("read_write_node"), "Succeeded to open the port.");
+        RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to open the port.");
     }
 
     // Set the baudrate of the serial port (use DYNAMIXEL Baudrate)
@@ -290,7 +290,7 @@ bool openSerialPort()
         RCLCPP_ERROR(rclcpp::get_logger("read_write_node"), "Failed to set the baudrate!");
         return false;
     } else {
-        RCLCPP_DEBUG(rclcpp::get_logger("read_write_node"), "Succeeded to set the baudrate.");
+        RCLCPP_INFO(rclcpp::get_logger("read_write_node"), "Succeeded to set the baudrate.");
     }
 
     return true;

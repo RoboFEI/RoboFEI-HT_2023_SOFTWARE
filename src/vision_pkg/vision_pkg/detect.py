@@ -133,26 +133,24 @@ class BallDetection(Node):
     
 
     def image_callback(self, msg):
-        try:
-            self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+        self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
 
-            if self.get_image:
-                self.imageGetter.save(self.img)
+        if self.get_image:
+            self.imageGetter.save(self.img)
 
-            self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
+        self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
 
-            if self.show_divisions:
-                self.img = draw_lines(self.img, self.config)  #Draw camera divisions
+        if self.show_divisions:
+            self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
-            self.img = self.ball_detection(self.img, self.results)
+        self.img = self.ball_detection(self.img, self.results)
 
-            if self.enable_udp:
-                self.client.send_image(self.img)
-                
-            cv2.imshow('Ball', self.img) # Show image
-            cv2.waitKey(1)
-        except:
-            pass
+        if self.enable_udp:
+            self.client.send_image(self.img)
+             
+        cv2.imshow('Ball', self.img) # Show image
+        cv2.waitKey(1)
+
 
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)        
@@ -211,33 +209,33 @@ class BallDetection(Node):
         # identify the ball position in Y axis
         if (ball_px_pos[0] <= self.config.x_left):     #ball to the left
             ball_pos.left = True
-            self.get_logger().info("Bola à Esquerda")
+            self.get_logger().debug("Bola à Esquerda")
 
         elif (ball_px_pos[0] < self.config.x_center):  #ball to the center left
-            ball_pos.center = True
-            self.get_logger().info("Bola Centralizada")
+            ball_pos.center_left = True
+            self.get_logger().debug("Bola Centralizada a Esquerda")
 
-        # elif (ball_px_pos[0] < self.config.x_right):   #ball to the center right
-        #     ball_pos.center_right = True
-        #     self.get_logger().info("Bola Centralizada a Direita")
+        elif (ball_px_pos[0] < self.config.x_right):   #ball to the center right
+            ball_pos.center_right = True
+            self.get_logger().debug("Bola Centralizada a Direita")
 
         else:                                            #ball to the right
             ball_pos.right = True
-            self.get_logger().info("Bola à Direita")
+            self.get_logger().debug("Bola à Direita")
         
 
         # identify the ball position in Y axis
         if (ball_px_pos[1] > self.config.y_chute):     #ball near
             ball_pos.close = True
-            self.get_logger().info("Bola Perto")
+            self.get_logger().debug("Bola Perto")
         
         elif (ball_px_pos[1] <= self.config.y_longe):  #ball far
             ball_pos.far = True
-            self.get_logger().info("Bola Longe")
+            self.get_logger().debug("Bola Longe")
 
         else:                                           #Bola middle
             ball_pos.med = True
-            self.get_logger().info("Bola ao Centro")
+            self.get_logger().debug("Bola ao Centro")
 
         return ball_pos
         
@@ -253,17 +251,14 @@ class BallDetection(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    try:
-        ball_detection = BallDetection()
-        rclpy.spin(ball_detection)
 
-    except:
-        pass
+    ball_detection = BallDetection()
+    rclpy.spin(ball_detection)
 
-    finally:
-        cv2.destroyAllWindows()
-        ball_detection.destroy_node()
-        rclpy.try_shutdown()
+    ball_detection.destroy_node()
+    rclpy.shutdown()
+
+    cv2.destroyAllWindows()
  
 
 if __name__ == '__main__':

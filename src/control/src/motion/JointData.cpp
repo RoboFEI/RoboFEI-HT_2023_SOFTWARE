@@ -18,8 +18,8 @@ JointData::JointData()
         m_Enable[i] = true;
         m_Value[i] = MX28::CENTER_VALUE;
         m_Angle[i] = 0.0;
-        m_CWSlope[i] = SLOPE_EXTRASOFT;
-        m_CCWSlope[i] = SLOPE_EXTRASOFT;
+        m_CWSlope[i] = SLOPE_DEFAULT;
+        m_CCWSlope[i] = SLOPE_DEFAULT;
         m_PGain[i] = P_GAIN_DEFAULT;
         m_IGain[i] = I_GAIN_DEFAULT;
         m_DGain[i] = D_GAIN_DEFAULT;
