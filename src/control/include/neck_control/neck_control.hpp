@@ -23,9 +23,9 @@ struct BallInformation
 {
   bool detected     = false;
   bool left         = false;
-  bool center_left  = false;
+  //bool center_left  = false;
   bool right        = false;
-  bool center_right = false;
+  bool center       = false;
   bool far          = false;
   bool med          = false;
   bool close        = false;
