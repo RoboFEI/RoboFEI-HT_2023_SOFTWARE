@@ -133,24 +133,26 @@ class BallDetection(Node):
     
 
     def image_callback(self, msg):
-        self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+        try:
+            self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
 
-        if self.get_image:
-            self.imageGetter.save(self.img)
+            if self.get_image:
+                self.imageGetter.save(self.img)
 
-        self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
+            self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
 
-        if self.show_divisions:
-            self.img = draw_lines(self.img, self.config)  #Draw camera divisions
+            if self.show_divisions:
+                self.img = draw_lines(self.img, self.config)  #Draw camera divisions
 
-        self.img = self.ball_detection(self.img, self.results)
+            self.img = self.ball_detection(self.img, self.results)
 
-        if self.enable_udp:
-            self.client.send_image(self.img)
-             
-        cv2.imshow('Ball', self.img) # Show image
-        cv2.waitKey(1)
-
+            if self.enable_udp:
+                self.client.send_image(self.img)
+                
+            cv2.imshow('Ball', self.img) # Show image
+            cv2.waitKey(1)
+        except:
+            pass
 
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)        
@@ -251,14 +253,18 @@ class BallDetection(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    ball_detection = BallDetection()
-    rclpy.spin(ball_detection)
+    try:
+        ball_detection = BallDetection()
+        rclpy.spin(ball_detection)
 
-    ball_detection.destroy_node()
-    rclpy.shutdown()
+    except:
+        pass
 
-    cv2.destroyAllWindows()
-
+    finally:
+        cv2.destroyAllWindows()
+        ball_detection.destroy_node()
+        rclpy.try_shutdown()
+ 
 
 if __name__ == '__main__':
     main()
