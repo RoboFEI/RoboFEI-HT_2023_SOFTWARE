@@ -57,9 +57,7 @@ echo -e "${blue} Instalação do ROS2...${NC}"
 
 echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     sudo apt install python3-pip -y
-    sudo pip3 install opencv-python 
-    pip install -r src/vision_yolov7/vision_yolov7/requirements.txt
-    sudo pip install construct
+    sudo pip3 install opencv-python-headless
 
     #instalação da yolov8
     pip install ultralytics
@@ -163,8 +161,8 @@ echo -e "${blue} Instaling Softwares${NC}"
     sudo apt install byobu -y
 
     #install ssh-server
-    sudo apt-get update
-    sudo apt-get install openssh-server
+    sudo apt-get update -y
+    sudo apt-get install openssh-server -y
     sudo ufw enable
     sudo ufw allow 22
     sudo ufw allow 5050
