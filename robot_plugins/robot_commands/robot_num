@@ -1,0 +1,2 @@
+robot_number=$(python3 /home/robot_num.py)
+echo "Robot Number: $robot_number"
