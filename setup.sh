@@ -12,7 +12,7 @@ blue='\e[0;34m'
 red='\e[0;31m'
 NC='\e[0m' #No Color
 
-folder_path=$(find ~/ -name "RoboFEI-HT_2023_SOFTWARE")
+folder_path="~/RoboFEI-HT_2023_SOFTWARE"
 
 echo -e "${blue} Remove Sudo password${NC}"
     username=$(whoami)
@@ -66,19 +66,10 @@ echo -e "${blue} Instalação do ROS2...${NC}"
     #install ros2 dynamixel
     sudo apt-get install ros-humble-dynamixel-sdk -y
 
-    # If already have the file, delete for a new version
-    if [ -n "$(ls -a ~/ | grep .ros2_robot_plugin)" ]; then
-        rm -f ~/.ros2_robot_plugin
-    fi
-
-    # Copy the ros2 plugins file for home location as hidden file
-    cp "$folder_path"/robot_plugins/ros2_robot_plugin ~/.ros2_robot_plugin
-
     # If doesn't have the command in bashrc write in then
-    if ! grep -q "source ~/.ros2_robot_plugin" ~/.bashrc; then
-        echo "source ~/.ros2_robot_plugin" >> ~/.bashrc
+    if ! grep -q "source $folder_path/robot_plugins/ros2_robot_scripts.sh" ~/.bashrc; then
+        echo "source $folder_path/robot_plugins/ros2_robot_scripts.sh" >> ~/.bashrc
     fi
-
 
 echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     sudo apt install python3-pip -y
@@ -105,17 +96,8 @@ echo -e "${blue} setup new rules for usb names${NC}"
 #Bind Comand
 # If the terminal is zsh you need to run this command after "rehash" 
 echo -e "${blue} commands setup${NC}"
-    if [ ! -d "$folder_path"/robot_plugins/robot_commands ]; then
-        echo "${red}Robot commands folder not founded!${NC}"
-    else 
-        echo "${blue}Folder founded!${NC}"
-        for filename in "$folder_path"/robot_plugins/robot_commands/*; do
-            filename=$(basename $filename)
-            sudo rm /usr/local/bin/"$filename"
-            sudo cp "$folder_path"/robot_plugins/robot_commands/"$filename" /usr/local/bin
-            sudo chmod 777 /usr/local/bin/"$filename"
-        done
-        hash -r
+    if ! grep -q "source ~/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot_scripts.sh" ~/.bashrc; then
+        echo "source ~/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot_scripts.sh" >> ~/.bashrc
     fi
 
 echo -e "${blue} Instaling Softwares${NC}"
