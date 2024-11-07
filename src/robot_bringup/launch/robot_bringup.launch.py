@@ -62,7 +62,9 @@ def generate_launch_description():
         executable="neck_control",
         output = 'screen',
         parameters = [control_config],
-        arguments=['--ros-args', '--log-level', 'info'],
+        arguments=['--ros-args', '--log-level', log_level,
+                   '--log-level',  'rcl:=info',
+                   '--log-level',  'rmw_fastrtps_cpp:=info'],
         emulate_tty=True
     )
 
@@ -108,7 +110,12 @@ def generate_launch_description():
     imu = Node(
         package="um7",
         executable="um7_node",
-        output="screen"
+        output = 'screen',
+        parameters = [control_config],
+        arguments=['--ros-args', '--log-level', log_level,
+                   '--log-level',  'rcl:=info',
+                   '--log-level',  'rmw_fastrtps_cpp:=info'],
+        emulate_tty=True
     )
 
 

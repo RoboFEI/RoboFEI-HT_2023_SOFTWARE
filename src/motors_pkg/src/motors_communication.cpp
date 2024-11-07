@@ -105,15 +105,16 @@ void MotorsCommunication::timer_callback()
 
         for(int i=1; i<21; i++)
     {
-        RCLCPP_INFO(this->get_logger(), "Position %d | %d",i, joints.position[i]);
+        RCLCPP_DEBUG(this->get_logger(), "Position %d | %d",i, joints.position[i]);
     }
 
-    RCLCPP_INFO(this->get_logger(), "-------------------");
+    RCLCPP_DEBUG(this->get_logger(), "-------------------");
 
         for(int i=1; i<21; i++)
     {
         RCLCPP_DEBUG(this->get_logger(), "Vel %d | %d",i, joints.velocity[i]);
     }
+    RCLCPP_DEBUG(this->get_logger(), "\n\n");
 
     auto allJointsPos = JointStateMsg();
 
