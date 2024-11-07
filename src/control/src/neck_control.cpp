@@ -14,13 +14,13 @@ NeckNode::NeckNode()
 
   vision_subscriber_ = this->create_subscription<VisionInfo>(
     "ball_position", 10, std::bind(&NeckNode::listener_callback_vision, this, std::placeholders::_1), sub_opt);
-  
+
   vision_px_subscriber_ = this->create_subscription<Point2d>(
     "ball_px_position", 10, std::bind(&NeckNode::listener_callback_vision_px, this, std::placeholders::_1), sub_opt);
-    
+
   neck_position_subscriber_ = this->create_subscription<JointStateMsg>(
     "all_joints_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
-    
+
   set_neck_position_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
 
 
@@ -50,7 +50,7 @@ NeckNode::NeckNode()
   robotNumber = this->declare_parameter("robot_number", 2);
   if(robotNumber > 2)
   {
-    neck.pan  = 512;
+        neck.pan  = 512;
     neck.tilt = 512;  
   }
 }
@@ -86,8 +86,8 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
       else if(new_neck_position.info[0] < neck_right_limit) new_neck_position.info[0] = neck_right_limit;
       if(new_neck_position.info[1] > neck_up_limit) new_neck_position.info[1] = neck_up_limit;
       else if(new_neck_position.info[1] < neck_down_limit) new_neck_position.info[1] = neck_down_limit;
-      // feedback no terminal do neck position
-      //RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.info[0], new_neck_position.info[1]);
+
+      RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.info[0], new_neck_position.info[1]);
 
       set_neck_position_publisher_->publish(new_neck_position);
     }
@@ -102,7 +102,7 @@ void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
   ball.center       =   msg->center;
   ball.right        =   msg->right;
   //ball.center_right =   msg->center_right;
-  
+
   ball.far          =   msg->far;
   ball.med          =   msg->med;
   ball.close        =   msg->close;
@@ -117,27 +117,45 @@ void NeckNode::listener_callback_neck(const JointStateMsg::SharedPtr msg)
 
 void NeckNode::search_ball()
 {
-  
+
   if(search_ball_timer.delay(search_ball_delay))
   {
     auto new_neck_position = JointStateMsg();
 
+    if(this->search_ball_state < search_ball_samples[0])
+      {
+        search_ball_pos = {search_ball_limits[0],1300};
+        if(this->search_ball_state > 0) this->search_ball_pos[0] -= (((search_ball_limits[0]*2)-4096)/(search_ball_samples[0]))*search_ball_state;
+      }
+    if(this->search_ball_state >= search_ball_samples[0] && this->search_ball_state <= (search_ball_samples[0]+search_ball_samples[1]))
+      {
+        search_ball_pos = {(4096-search_ball_limits[1]),1550};
+        if(this->search_ball_state > (search_ball_samples[0])) this->search_ball_pos[0] += (((search_ball_limits[1]*2)-4096)/(search_ball_samples[1]))*(search_ball_state-search_ball_samples[0]);
+      }
+    if(this->search_ball_state >= (search_ball_samples[0]+search_ball_samples[1]))
+      {
+        search_ball_pos = {search_ball_limits[2],1800};
+        if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1])) this->search_ball_pos[0] -= (((search_ball_limits[2]*2)-4096)/(search_ball_samples[2]))*(search_ball_state-(search_ball_samples[0]+search_ball_samples[1]));
+      }
+    if(robotNumber > 2) 
+      {
+        this->search_ball_pos[0] = (search_ball_pos[0])*(0.25);
+        this->search_ball_pos[1] = (search_ball_pos[1])*(0.25);
+      }
     new_neck_position.id.push_back(19);
     new_neck_position.id.push_back(20);
-  
-    new_neck_position.info.push_back(this->search_ball_pos[0]);
+        new_neck_position.info.push_back(this->search_ball_pos[0]);
     new_neck_position.info.push_back(this->search_ball_pos[1]);
 
     new_neck_position.type.push_back(JointStateMsg::POSITION);
     new_neck_position.type.push_back(JointStateMsg::POSITION);
-    
+
     RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.info[0], new_neck_position.info[1]);
 
     if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
 
     this->search_ball_state += 1;
-
-    if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1]+search_ball_samples[2])) this->search_ball_state = 0;
+        if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1]+search_ball_samples[2])) this->search_ball_state = 0;
   }
 }
 

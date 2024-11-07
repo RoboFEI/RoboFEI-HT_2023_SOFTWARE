@@ -1,4 +1,4 @@
-#ifndef NECK_CONTROL_HPP_
+    #ifndef NECK_CONTROL_HPP_
 #define NECK_CONTROL_HPP_
 
 #include <chrono>
@@ -23,9 +23,8 @@ struct BallInformation
 {
   bool detected     = false;
   bool left         = false;
-  //bool center_left  = false;
-  bool right        = false;
   bool center       = false;
+  bool right        = false;
   bool far          = false;
   bool med          = false;
   bool close        = false;
@@ -74,12 +73,10 @@ class NeckNode : public rclcpp::Node
     State robot_state = State::follow_ball;
     BallPositionPx ball_pos_px;
     int cont_lost_ball = 0;
-
     int search_ball_delay = 10;
     std::vector<int> search_ball_limits = {2348,2498,2648}; //Não usar valores < 2048
     std::vector<int> search_ball_samples = {75,100,125};
     std::vector<int> search_ball_pos = {2048,2048};
-
     int search_ball_state = 0;
     int robotNumber;
 
@@ -95,13 +92,13 @@ class NeckNode : public rclcpp::Node
     int neck_down_limit;
     int neck_left_limit;
     int neck_right_limit;
-    
+
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_vision_px(const Point2d::SharedPtr msg);
     void listener_callback_neck(const JointStateMsg::SharedPtr msg); 
     void search_ball();
     void main_callback();
-       
+
 
     NeckNode();
     virtual ~NeckNode();
@@ -115,7 +112,7 @@ class NeckNode : public rclcpp::Node
     rclcpp::Subscription<JointStateMsg>::SharedPtr neck_position_subscriber_;
     rclcpp::Publisher<JointStateMsg>::SharedPtr set_neck_position_publisher_;
     rclcpp::TimerBase::SharedPtr main_timer_;
-    
+
 };
 
 #endif 
