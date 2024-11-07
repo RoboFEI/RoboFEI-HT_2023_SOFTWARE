@@ -3,14 +3,6 @@
 
 #include "motors_pkg/motors_communication.hpp"
 
-// #define PROTOCOL_VERSION 2   
-
-// #if PROTOCOL_VERSION == 2
-//     #include "motors_pkg/protocol2.h"
-// #else
-//     #include "motors_pkg/protocol1.h"
-// #endif
-
 // Default setting
 #define BAUDRATE 1000000  // Default Baudrate of DYNAMIXEL X series
 #define DEVICE_NAME "/dev/motors"  // [Linux]: "/dev/ttyUSB", [Windows]: "COM*"
@@ -81,6 +73,9 @@ void MotorsCommunication::initialMotorsSetup(int id)
         }
     }
 
+
+    // Define a slow velocity for start robot
+    setJointVel(id, 10);
 
     // Enable Torque of DYNAMIXEL
     setJointTorque(id, 1);
@@ -273,6 +268,7 @@ void MotorsCommunication::setJointVel(int id, int goalVel)
     } else if (dxl_error != 0) {
         RCLCPP_INFO(this->get_logger(), "%s", packetHandler->getRxPacketError(dxl_error));
     }
+    usleep(1000);
 }
 
 bool openSerialPort()

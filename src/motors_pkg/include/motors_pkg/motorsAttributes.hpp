@@ -1,4 +1,9 @@
+#ifndef MOTORS_ATTRIBUTES
+#define MOTORS_ATTRIBUTES
+
 #include <iostream>
+
+
 class motorsAttributes
 {
 public:
@@ -40,3 +45,12 @@ motorsAttributes::motorsAttributes(int robotNumber)
 motorsAttributes::~motorsAttributes()
 {
 }
+
+typedef struct Joints
+{
+  std::vector<std::uint32_t> position = std::vector<std::uint32_t>(21, 2048);
+  std::vector<std::uint32_t> velocity = std::vector<std::uint32_t>(21, 0);
+  std::vector<std::uint8_t> torque = std::vector<std::uint8_t>(21, 1);
+}Joints;
+
+#endif // MOTORS_ATTRIBUTES
