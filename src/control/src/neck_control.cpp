@@ -101,7 +101,6 @@ void NeckNode::listener_callback_vision(const VisionInfo::SharedPtr msg)
   ball.left         =   msg->left;
   ball.center       =   msg->center;
   ball.right        =   msg->right;
-  //ball.center_right =   msg->center_right;
 
   ball.far          =   msg->far;
   ball.med          =   msg->med;
