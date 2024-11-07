@@ -142,3 +142,6 @@ echo -e "${blue} Instaling Softwares${NC}"
     sudo ufw allow 22
     sudo ufw allow 5050
     sudo systemctl enable ufw
+
+    #Vision error fixed with this
+    pip install "numpy<2.0" 
