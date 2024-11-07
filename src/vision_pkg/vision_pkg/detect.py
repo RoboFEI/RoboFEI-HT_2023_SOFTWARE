@@ -146,16 +146,20 @@ class BallDetection(Node):
 
             self.img = self.ball_detection(self.img, self.results)
 
+            
             if self.enable_udp:
-                self.client.send_image(self.img)
-                
+                try:
+                    self.client.send_image(self.img)
+                except:
+                    self.get_logger().warn("Não está publicando no servidor udp")
+
             cv2.imshow('Ball', self.img) # Show image
             cv2.waitKey(1)
         except:
             pass
 
     def predict_image(self, img):
-        results = self.model(img, device=self.device, conf=0.3, max_det=3, verbose=False)        
+        results = self.model(img, device=self.device, conf=0.5, max_det=3, verbose=False)        
         return results[0]
 
 
