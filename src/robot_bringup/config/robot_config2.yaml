@@ -8,15 +8,15 @@
 
 /neck_node:
   ros__parameters:
-    neck_activate: true
+    neck_activate: True
 
-    x_p_gain: 0.5
-    y_p_gain: 0.4
+    x_p_gain: 0.35 
+    y_p_gain: 0.4 
 
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 0   #20
+    walk_counter  : 1   #20
 
 /decision_node:
   ros__parameters:
@@ -28,5 +28,5 @@
     img_qlty: 70 
     get_image: false
     fps_save: 2
-    enable_udp: True
+    enable_udp: false
 
