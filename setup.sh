@@ -1,18 +1,12 @@
-#font colors:
-#Black        0;30     Dark Gray     1;30
-#Blue         0;34     Light Blue    1;34
-#Green        0;32     Light Green   1;32
-#Cyan         0;36     Light Cyan    1;36
-#Red          0;31     Light Red     1;31
-#Purple       0;35     Light Purple  1;35
-#Brown/Orange 0;33     Yellow        1;33
-#Light Gray   0;37     White         1;37
+#!/usr/bin/env bash
 
 blue='\e[0;34m'
+green='\e[0;32m'
+yellow='\e[1;33m'
 red='\e[0;31m'
 NC='\e[0m' #No Color
 
-folder_path="~/RoboFEI-HT_2023_SOFTWARE"
+folder_path="$HOME/RoboFEI-HT_2023_SOFTWARE"
 
 echo -e "${blue} Remove Sudo password${NC}"
     username=$(whoami)
@@ -24,6 +18,7 @@ echo -e "${blue} Remove Sudo password${NC}"
 echo -e "${blue} Instalação do ROS2...${NC}"
     # if ros is installed just continue without try to install again
     if [ -z "$(printenv ROS_DISTRO)" ]; then
+        echo -e "${yellow} ROS2 não instalado, Instalando${NC}"
         #Setup Locale
         sudo apt update && sudo apt install locales -y
         sudo locale-gen en_US en_US.UTF-8 
@@ -50,9 +45,12 @@ echo -e "${blue} Instalação do ROS2...${NC}"
         echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
         echo "export _colcon_cd_root=/opt/ros/humble/" >> ~/.bashrc
         echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
+        echo -e "${green} Termino da instalação do ROS2! ${NC}"
     else 
-        source /opt/ros/humble/setup.bash
+        echo -e "${green} ROS2 já instalado! ${NC}"
     fi
+
 
     sudo apt update -y
 
@@ -67,8 +65,9 @@ echo -e "${blue} Instalação do ROS2...${NC}"
     sudo apt-get install ros-humble-dynamixel-sdk -y
 
     # If doesn't have the command in bashrc write in then
-    if ! grep -q "source $folder_path/robot_plugins/ros2_robot_scripts.sh" ~/.bashrc; then
-        echo "source $folder_path/robot_plugins/ros2_robot_scripts.sh" >> ~/.bashrc
+    if ! grep -q "source $folder_path/robot_plugins/ros2_robot_plugin.sh" ~/.bashrc; then
+        source $folder_path/robot_plugins/ros2_robot_plugin.sh
+        echo "source $folder_path/robot_plugins/ros2_robot_plugin.sh" >> ~/.bashrc
     fi
 
 echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
@@ -88,7 +87,7 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
 
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
-    sudo cp "$folder_path"/robot_plugins/robot-usb-ports.rules /etc/udev/rules.d/
+    sudo cp "$folder_path/robot_plugins/robot-usb-ports.rules" /etc/udev/rules.d/
     sudo udevadm control --reload-rules
     sudo udevadm trigger
     # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}
@@ -96,8 +95,9 @@ echo -e "${blue} setup new rules for usb names${NC}"
 #Bind Comand
 # If the terminal is zsh you need to run this command after "rehash" 
 echo -e "${blue} commands setup${NC}"
-    if ! grep -q "source ~/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot_scripts.sh" ~/.bashrc; then
-        echo "source ~/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot_scripts.sh" >> ~/.bashrc
+    if ! grep -q "source $folder_path/robot_plugins/robot_scripts.sh" ~/.bashrc; then
+        source $folder_path/robot_plugins/robot_scripts.sh
+        echo "source $folder_path/robot_plugins/robot_scripts.sh" >> ~/.bashrc
     fi
 
 echo -e "${blue} Instaling Softwares${NC}"

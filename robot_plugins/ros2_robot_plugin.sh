@@ -14,7 +14,7 @@ alias rtl='ros2 topic list'
 
 alias cb='colcon build --symlink-install'
 
-if [[ "$SHELL" == *"zsh"* ]] then
+if [[ "$SHELL" == *"zsh"* ]]; then
 	alias si='source install/setup.zsh'
 else
 	alias si='source install/setup.bash'
