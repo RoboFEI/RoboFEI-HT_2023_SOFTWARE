@@ -150,8 +150,8 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
   this->robot.camera_ball_position = *vision_info;
   if(robot.neck_pos.position20 < 1750)
   {
-    //NECK_CENTER_TH = get_center_th(robot.neck_pos.position20);
-    NECK_CENTER_TH = 100;
+    NECK_CENTER_TH = get_center_th(robot.neck_pos.position20);
+    // NECK_CENTER_TH = 100;
     NECK_LEFT_TH = NECK_TILT_CENTER + NECK_CENTER_TH;
     NECK_RIGHT_TH = NECK_TILT_CENTER - NECK_CENTER_TH;
   }

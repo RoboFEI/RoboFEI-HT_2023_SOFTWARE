@@ -157,8 +157,10 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
         //RCLCPP_WARN(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
         RCLCPP_WARN(this->get_logger(), "ball close");
         if(robot_align_for_kick_right()) robot.state = kick_ball;
+        //else if(robot_align_for_kick_left()) robot.state = kick_ball;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
         //else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+        else if (!robot.camera_ball_position.close) robot.state = searching_ball;
         else send_goal(gait);
         break;
 
@@ -170,6 +172,7 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
 		robot.state = ball_approach;
 		lost_ball_timer.reset();
 	    }   
+        else robot.state = searching_ball;
 	    break;
     }
 }
@@ -308,7 +311,7 @@ bool RobotBehavior::ball_in_right_foot()
 
 bool RobotBehavior::ball_in_left_foot()
 {
-    if(ball_is_locked() && robot.neck_pos.position19 > 530) return true;
+    if(ball_is_locked() && robot.neck_pos.position19 > 2250) return true;
     return false;
 }
 
