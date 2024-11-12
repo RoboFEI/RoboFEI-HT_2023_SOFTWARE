@@ -1,7 +1,7 @@
 #ifndef DECISION_NODE_HPP
 #define DECISION_NODE_HPP
 
-#define NECK_TILT_CENTER 2048
+#define NECK_TILT_CENTER 1900
 #define LIMIT_TH 80 //40
 
 #include <cstdio>
@@ -65,7 +65,8 @@ class DecisionNode : public rclcpp::Node
         float FALL_ACCEL_TH;
         int FALSES_FALLEN_TH;
 
-        int NECK_CENTER_TH  = 150; //185
+        int NECK_CENTER_TH = get_center_th(robot.neck_pos.position20);
+        //int NECK_CENTER_TH  = 150; //185
         int NECK_LEFT_TH = NECK_TILT_CENTER + NECK_CENTER_TH;
         int NECK_RIGHT_TH = NECK_TILT_CENTER - NECK_CENTER_TH;
         int NECK_LEFT_LIMIT;

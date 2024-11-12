@@ -87,7 +87,7 @@ void NeckNode::listener_callback_vision_px(const Point2d::SharedPtr msg)
       if(new_neck_position.info[1] > neck_up_limit) new_neck_position.info[1] = neck_up_limit;
       else if(new_neck_position.info[1] < neck_down_limit) new_neck_position.info[1] = neck_down_limit;
 
-      RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.info[0], new_neck_position.info[1]);
+      RCLCPP_DEBUG(this->get_logger(), "search ball id 19: %d  |  id 20: %d", new_neck_position.info[0], new_neck_position.info[1]);
 
       set_neck_position_publisher_->publish(new_neck_position);
     }
@@ -149,7 +149,7 @@ void NeckNode::search_ball()
     new_neck_position.type.push_back(JointStateMsg::POSITION);
     new_neck_position.type.push_back(JointStateMsg::POSITION);
 
-    RCLCPP_INFO(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.info[0], new_neck_position.info[1]);
+    RCLCPP_DEBUG(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.info[0], new_neck_position.info[1]);
 
     if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
 

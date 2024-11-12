@@ -71,7 +71,7 @@ DecisionNode::DecisionNode() : Node("decision_node")
 
     NECK_LEFT_LIMIT = this->declare_parameter("neck_left_limit", 2650);
     NECK_RIGHT_LIMIT = this->declare_parameter("neck_right_limit", 1350);
-    NECK_CLOSE_LIMIT = this->declare_parameter("neck_down_limit", 1350);
+    NECK_CLOSE_LIMIT = this->declare_parameter("neck_down_limit", 1150);
     robot_number = this->declare_parameter("robot_number", 2);
 }
 
