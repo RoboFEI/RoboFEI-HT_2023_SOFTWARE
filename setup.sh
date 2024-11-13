@@ -138,10 +138,7 @@ echo -e "${blue} Instaling Softwares${NC}"
     #install ssh-server
     sudo apt-get update -y
     sudo apt-get install openssh-server -y
-    sudo ufw enable
-    sudo ufw allow 22
-    sudo ufw allow 5050
-    sudo systemctl enable ufw
+    sudo ufw disable
 
     #Vision error fixed with this
     pip install "numpy<2.0" 
