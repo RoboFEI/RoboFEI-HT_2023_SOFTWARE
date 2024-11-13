@@ -31,13 +31,13 @@ def generate_launch_description():
 
     ld.add_action(vision_launcher)
 
-    gamecontroller_launcher = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [get_package_share_directory('robot_bringup'), '/launch/gamecontroller_bringup.launch.py']
-        )
-    )
+    # gamecontroller_launcher = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(
+    #         [get_package_share_directory('robot_bringup'), '/launch/gamecontroller_bringup.launch.py']
+    #     )
+    # )
 
-    ld.add_action(gamecontroller_launcher)
+    # ld.add_action(gamecontroller_launcher)
 
     imu_node = Node(
         package="um7",
@@ -61,5 +61,5 @@ def generate_launch_description():
     )
 
     ld.add_action(decision_launcher)
-    
+
     return ld   
