@@ -75,7 +75,7 @@ void MotorsCommunication::initialMotorsSetup(int id)
 
 
     // Define a slow velocity for start robot
-    setJointVel(id, 10);
+    setJointVel(id, 20);
 
     // Enable Torque of DYNAMIXEL
     setJointTorque(id, 1);

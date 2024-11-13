@@ -1,3 +1,11 @@
 #!/bin/bash
 
-ssh -X robo@192.168.7.$1
+for i in 1 2 3 4 5; do
+    timeout 0.6 ping -c 1 robo-nuc"$i".local &>/dev/null
+    if [ $? -eq 0 ]; then
+        ssh -X robo@robo-nuc"$i".local
+        break
+    else
+        echo "$i está offline."
+    fi
+done
