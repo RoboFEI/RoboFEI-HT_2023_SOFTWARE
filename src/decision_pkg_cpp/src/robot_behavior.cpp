@@ -119,7 +119,7 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
                 if(robot.ball_position == center) robot.state = ball_approach;      //anda ate a bola
                 else robot.state = aligning_with_the_ball;
             }
-        //else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) turn_to_ball();        //alinha o corpo com a bola
+        else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) send_goal(turn_left);        //alinha o corpo com a bola
         //else send_goal(gait); // gait
         break;
     
@@ -156,20 +156,28 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
     case ball_close:
         //RCLCPP_WARN(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
         RCLCPP_WARN(this->get_logger(), "ball close");
-        if(robot_align_for_kick_right()) robot.state = kick_ball;
+        if (neck_to_left() || centered_neck())
+        {
+            send_goal(walk_left);
+            if(robot_align_for_kick_right()) robot.state = kick_ball;
+        }
+        else if (neck_to_right())
+        {
+            send_goal(walk_right);
+            if(robot_align_for_kick_right()) robot.state = kick_ball;
+        }
         //else if(robot_align_for_kick_left()) robot.state = kick_ball;
-        else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-        //else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
-        else if (!robot.camera_ball_position.close) robot.state = searching_ball;
-        else send_goal(gait);
+        else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
+        else if (!ball_in_close_limit()) robot.state = searching_ball;
         break;
 
     case kick_ball:
         RCLCPP_ERROR(this->get_logger(), "kick");
+        send_action(gait);
         if(robot.movement != 3) send_goal(right_kick);
         else if(robot.finished_move)
 	    {
-		robot.state = ball_approach;
+		robot.state = searching_ball;
 		lost_ball_timer.reset();
 	    }   
         else robot.state = searching_ball;
@@ -305,7 +313,7 @@ bool RobotBehavior::robot_align_for_kick_right()
 
 bool RobotBehavior::ball_in_right_foot()
 {
-    if(ball_is_locked() && robot.neck_pos.position19 < 1800) return true;
+    if(ball_is_locked() && robot.neck_pos.position19 < 1850) return true;
     return false;
 }
 
