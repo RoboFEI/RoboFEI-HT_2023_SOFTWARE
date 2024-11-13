@@ -173,14 +173,12 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
 
     case kick_ball:
         RCLCPP_ERROR(this->get_logger(), "kick");
-        send_action(gait);
         if(robot.movement != 3) send_goal(right_kick);
         else if(robot.finished_move)
 	    {
-		robot.state = searching_ball;
-		lost_ball_timer.reset();
+            robot.state = searching_ball;
+            lost_ball_timer.reset();
 	    }   
-        else robot.state = searching_ball;
 	    break;
     }
 }

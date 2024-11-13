@@ -65,7 +65,7 @@ class BallDetection(Node):
         self.declare_parameter("enable_udp", True)
         self.enable_udp = self.get_parameter("enable_udp").get_parameter_value().bool_value
 
-        self.declare_parameter("server_ip", "192.168.7.10")
+        self.declare_parameter("server_ip", "10.42.0.1")
         self.server_ip = self.get_parameter("server_ip").get_parameter_value().string_value
 
         self.declare_parameter("server_port", 5050)
@@ -151,10 +151,11 @@ class BallDetection(Node):
                 try:
                     self.client.send_image(self.img)
                 except:
-                    self.get_logger().warn("Não está publicando no servidor udp")
+                    pass
+                    # self.get_logger().warn("Não está publicando no servidor udp")
 
-            cv2.imshow('Ball', self.img) # Show image
-            cv2.waitKey(1)
+            # cv2.imshow('Ball', self.img) # Show image
+            # cv2.waitKey(1)
         except:
             pass
 
@@ -215,33 +216,33 @@ class BallDetection(Node):
         # identify the ball position in Y axis
         if (ball_px_pos[0] <= self.config.x_left):     #ball to the left
             ball_pos.left = True
-            self.get_logger().info("Bola à Esquerda")
+            # self.get_logger().info("Bola à Esquerda")
 
         elif (ball_px_pos[0] < self.config.x_center):  #ball to the center left
             ball_pos.center = True
-            self.get_logger().info("Bola Centralizada")
+            # self.get_logger().info("Bola Centralizada")
 
         # elif (ball_px_pos[0] < self.config.x_right):   #ball to the center right
         #     ball_pos.center_right = True
-        #     self.get_logger().info("Bola Centralizada a Direita")
+        #     # self.get_logger().info("Bola Centralizada a Direita")
 
         else:                                            #ball to the right
             ball_pos.right = True
-            self.get_logger().info("Bola à Direita")
+            # self.get_logger().info("Bola à Direita")
         
 
         # identify the ball position in Y axis
         if (ball_px_pos[1] > self.config.y_chute):     #ball near
             ball_pos.close = True
-            self.get_logger().info("Bola Perto")
+            # self.get_logger().info("Bola Perto")
         
         elif (ball_px_pos[1] <= self.config.y_longe):  #ball far
             ball_pos.far = True
-            self.get_logger().info("Bola Longe")
+            # self.get_logger().info("Bola Longe")
 
         else:                                           #Bola middle
             ball_pos.med = True
-            self.get_logger().info("Bola ao Centro")
+            # self.get_logger().info("Bola ao Centro")
 
         return ball_pos
         
