@@ -1,33 +1,32 @@
-# Robot 2
+# Robot 1
 /**:
   ros__parameters:
     neck_up_limit   : 2048
-    neck_down_limit : 1350
+    neck_down_limit : 1200
     neck_left_limit : 2650
     neck_right_limit: 1350
     robot_number    : 2
 
 /neck_node:
   ros__parameters:
-    neck_activate: True
+    neck_activate: true
 
-    x_p_gain: 0.35 # 0.35 
-    y_p_gain: 0.30 #0.30 
+    x_p_gain: 0.20
+    y_p_gain: 0.15
 
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 20   #20
+    walk_counter  : 50  #150 
 
 /decision_node:
   ros__parameters:
-    FALL_ACCEL_TH: 8.5
+    FALL_ACCEL_TH: 7.0
     FALSES_FALLEN_TH: 30
 
 /image_node:
   ros__parameters:
-    img_qlty: 70 
+    img_qlty: 100 
     get_image: false
     fps_save: 2
     enable_udp: false
-
