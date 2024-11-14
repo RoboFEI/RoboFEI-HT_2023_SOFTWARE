@@ -4,7 +4,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 
 import sys
@@ -55,7 +55,24 @@ def generate_launch_description():
         emulate_tty=True
     )
 
+
+    initial_position = ExecuteProcess(
+        cmd=['ros2', 'action', 'send_goal', '/control_action', 'custom_interfaces/action/Control', '{action_number: 1}'],
+        output='screen'
+    ),
+
+    initial_position = ExecuteProcess(
+        cmd=['sleep', '0.2'],                 # cmd Befehl, warte 5 sec
+        output = 'screen',                  # optional, Ausgabe im CMD                    
+        on_exit = [ExecuteProcess(          # Am Ende (nach 5s) wird Aufgerufen
+            cmd=['ros2', 'action', 'send_goal', '/control_action', 'custom_interfaces/action/Control', '{action_number: 1}'],
+            output = 'screen',
+            )]
+    )
+
+
     ld.add_action(control)
     ld.add_action(gait)
     ld.add_action(neck_control)
+    ld.add_action(initial_position)
     return ld
