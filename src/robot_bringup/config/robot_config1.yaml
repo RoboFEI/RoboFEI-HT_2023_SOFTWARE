@@ -4,7 +4,7 @@
     neck_up_limit   : 2048
     neck_down_limit : 1150
     neck_left_limit : 2650
-    neck_right_limit: 1350
+    neck_right_limit: 1150
     robot_number    : 1
 
 /neck_node:
@@ -17,7 +17,7 @@
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 0  #150 
+    walk_counter  : 70  #150 
 
 /decision_node:
   ros__parameters:
