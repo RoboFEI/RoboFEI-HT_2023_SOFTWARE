@@ -123,8 +123,11 @@ class BallDetection(Node):
 
 
     def __del__(self):
-        self.client.close_socket()
-
+        if self.enable_udp:
+            try:
+                self.client.close_socket()
+            except:
+                pass
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         classes = self.model.names
@@ -266,7 +269,6 @@ def main(args=None):
         pass
 
     finally:
-        cv2.destroyAllWindows()
         ball_detection.destroy_node()
         rclpy.try_shutdown()
  
