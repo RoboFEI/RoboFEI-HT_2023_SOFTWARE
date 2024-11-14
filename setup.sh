@@ -134,11 +134,19 @@ echo -e "${blue} Instaling Softwares${NC}"
 
     #install byobu
     sudo apt install byobu -y
-
+    if ! grep -q "cd $folder_path" ~/.bashrc; then
+        echo "cd $folder_path" >> ~/.bashrc
+        echo "byobu" >> ~/.bashrc
+        source "$HOME/.bashrc"
+    fi
+    
     #install ssh-server
     sudo apt-get update -y
     sudo apt-get install openssh-server -y
     sudo ufw disable
 
     #Vision error fixed with this
-    pip install "numpy<2.0" 
+    pip install "numpy<2.0"
+
+    # Xbox driver
+    sudo apt install xboxdrv -y
