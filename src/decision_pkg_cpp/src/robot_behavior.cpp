@@ -21,7 +21,7 @@ RobotBehavior::~RobotBehavior()     //checkpoint
 
 void RobotBehavior::players_behavior()
 {
-    if (is_penalized()) RCLCPP_INFO(this->get_logger(), "Penalizado");  //robo penalizado
+    if (is_penalized())  RCLCPP_DEBUG(this->get_logger(), "Penalizado");  //robo penalizado
     else
     {
         if(robot_fallen(robot)) get_up();
@@ -73,7 +73,7 @@ void RobotBehavior::penalty()           //penalizado
 
 void RobotBehavior::normal_game()           //jogo normal
 {
-    // RCLCPP_INFO(this->get_logger(), "Normal Game: %d", gc_info.game_state);
+    // RCLCPP_DEBUG(this->get_logger(), "Normal Game: %d", gc_info.game_state);
     switch (gc_info.game_state)
     {
     case GameControllerMsg::GAMESTATE_INITAL: // conferido
@@ -194,19 +194,19 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
 
 void RobotBehavior::goalkeeper_normal_game() // caso o jogador seja o goleiro
 {
-    RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
+    RCLCPP_DEBUG(this->get_logger(), "robot state %d", robot.state);
     
     switch (robot.state)
     {
     case searching_ball:
-        RCLCPP_INFO(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
+        RCLCPP_DEBUG(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
         if(ball_is_locked()) robot.state = aligning_with_the_ball;  // caso a bola seja achada
         // else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) turn_to_ball();   //alinha o corpo com a bola
         else send_goal(stand_still);
         break;
     
     case aligning_with_the_ball:
-        RCLCPP_INFO(this->get_logger(), "Goalkeeper aligning with the_ball");
+        RCLCPP_DEBUG(this->get_logger(), "Goalkeeper aligning with the_ball");
         goalkeeper_align_with_the_ball();
         if(goalkeeper_align_with_the_ball()) robot.state = ball_approach; // se o goleiro esta centralizado, troca de estado
         // else if(ball_is_locked()) robot.state = ball_approach;
@@ -215,7 +215,7 @@ void RobotBehavior::goalkeeper_normal_game() // caso o jogador seja o goleiro
         break;
 
     case ball_approach:
-        RCLCPP_INFO(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
+        RCLCPP_DEBUG(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
         // if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = ball_close;    //perdeu a bola
         if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
         else if(!goalkeeper_align_with_the_ball()) robot.state = aligning_with_the_ball;
@@ -226,18 +226,18 @@ void RobotBehavior::goalkeeper_normal_game() // caso o jogador seja o goleiro
 
 void RobotBehavior::player_penalty()
 {
-    RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-    RCLCPP_INFO(this->get_logger(), "side Penalty: %d", side_penalty);
+    RCLCPP_DEBUG(this->get_logger(), "robot state %d", robot.state);
+    RCLCPP_DEBUG(this->get_logger(), "side Penalty: %d", side_penalty);
 
     switch (robot.state)
     {
     case searching_ball:
-        //RCLCPP_INFO(this->get_logger(), "Searching ball");
-        RCLCPP_INFO(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
+        //RCLCPP_DEBUG(this->get_logger(), "Searching ball");
+        RCLCPP_DEBUG(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
 
 	    if(ball_is_locked())
         {
-            RCLCPP_INFO(this->get_logger(), "BOLA ALINHADA");
+            RCLCPP_DEBUG(this->get_logger(), "BOLA ALINHADA");
             if(robot.ball_position == center) robot.state = ball_approach;
             else robot.state = aligning_with_the_ball;
         }
@@ -246,7 +246,7 @@ void RobotBehavior::player_penalty()
         break;
     
     case aligning_with_the_ball:
-        RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
+        RCLCPP_DEBUG(this->get_logger(), "Aligning with the_ball");
         if(robot_align_with_the_ball()) robot.state = ball_approach;
         //else if(ball_is_locked()) turn_to_ball();
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
@@ -254,7 +254,7 @@ void RobotBehavior::player_penalty()
         break;
 
     case ball_approach:
-        RCLCPP_INFO(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
+        RCLCPP_DEBUG(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
         if(ball_in_close_limit() && ball_is_locked() && robot.camera_ball_position.close) robot.state = ball_close;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball; // pode estar bugando
         else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
@@ -399,9 +399,9 @@ bool RobotBehavior::vision_stable() // feito
 
 void RobotBehavior::detect_ball_position() // Funciona
 {
-    // RCLCPP_INFO(this->get_logger(), "debug 1: centered_neck %d", centered_neck());
-    // RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_left %d", neck_to_left());
-    // RCLCPP_INFO(this->get_logger(), "debug 1: neck_to_right %d", neck_to_right());
+    // RCLCPP_DEBUG(this->get_logger(), "debug 1: centered_neck %d", centered_neck());
+    // RCLCPP_DEBUG(this->get_logger(), "debug 1: neck_to_left %d", neck_to_left());
+    // RCLCPP_DEBUG(this->get_logger(), "debug 1: neck_to_right %d", neck_to_right());
     if(robot.state == aligning_with_the_ball)
     {
         if(robot.neck_pos.position19 > NECK_TILT_CENTER) robot.ball_position = left;
@@ -412,7 +412,7 @@ void RobotBehavior::detect_ball_position() // Funciona
         if(centered_neck()) robot.ball_position = center;
         if(neck_to_left()) robot.ball_position = left;
         if(neck_to_right()) robot.ball_position = right;
-        RCLCPP_INFO(this->get_logger(), "ball side %d", robot.ball_position);
+        RCLCPP_DEBUG(this->get_logger(), "ball side %d", robot.ball_position);
     }
 
 }
@@ -424,7 +424,7 @@ bool RobotBehavior::neck_to_right() // testar
 
 bool RobotBehavior::neck_to_left() // testar
 {
-    RCLCPP_INFO(this->get_logger(), "Neck left th: %d\nrobot neck pos: %d", NECK_LEFT_TH, robot.neck_pos.position19); 
+    RCLCPP_DEBUG(this->get_logger(), "Neck left th: %d\nrobot neck pos: %d", NECK_LEFT_TH, robot.neck_pos.position19); 
     return NECK_LEFT_TH < robot.neck_pos.position19;
 }
 
@@ -460,11 +460,11 @@ bool RobotBehavior::is_penalized() // feito
 {
     if(gc_info.penalized)
     {
-        RCLCPP_INFO(this->get_logger(), "Robot Penalized, remain %d seconds", gc_info.seconds_till_unpenalized);
+        RCLCPP_DEBUG(this->get_logger(), "Robot Penalized, remain %d seconds", gc_info.seconds_till_unpenalized);
 
         if(gc_info.seconds_till_unpenalized < 5)
         {
-            RCLCPP_INFO(this->get_logger(), "Preparing to return, gait started");
+            RCLCPP_DEBUG(this->get_logger(), "Preparing to return, gait started");
             send_goal(gait);
         } 
         else
@@ -478,22 +478,22 @@ bool RobotBehavior::is_penalized() // feito
 
 void RobotBehavior::get_up() // feito
 {
-    RCLCPP_INFO(this->get_logger(), "Robot Fallen");
+    RCLCPP_DEBUG(this->get_logger(), "Robot Fallen");
 
     switch (robot.fall)
     {
     case FallenFront:
-        RCLCPP_INFO(this->get_logger(), "Stand up front");
+        RCLCPP_DEBUG(this->get_logger(), "Stand up front");
         send_goal(stand_up_front);
         break;
     
     case FallenBack:
-        RCLCPP_INFO(this->get_logger(), "Stand up back");
+        RCLCPP_DEBUG(this->get_logger(), "Stand up back");
         send_goal(stand_up_back);
         break;
 
     default:
-        RCLCPP_INFO(this->get_logger(), "Stand up sides");
+        RCLCPP_DEBUG(this->get_logger(), "Stand up sides");
         send_goal(stand_up_side);
         break;
     }

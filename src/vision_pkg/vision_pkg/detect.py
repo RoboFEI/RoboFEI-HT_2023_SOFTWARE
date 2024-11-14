@@ -155,7 +155,7 @@ class BallDetection(Node):
                     self.client.send_image(self.img)
                 except:
                     pass
-                    # self.get_logger().warn("Não está publicando no servidor udp")
+                    self.get_logger().debug("Não está publicando no servidor udp")
 
             # cv2.imshow('Ball', self.img) # Show image
             # cv2.waitKey(1)
@@ -219,33 +219,29 @@ class BallDetection(Node):
         # identify the ball position in Y axis
         if (ball_px_pos[0] <= self.config.x_left):     #ball to the left
             ball_pos.left = True
-            # self.get_logger().info("Bola à Esquerda")
+            self.get_logger().debug("Bola à Esquerda")
 
         elif (ball_px_pos[0] < self.config.x_center):  #ball to the center left
             ball_pos.center = True
-            # self.get_logger().info("Bola Centralizada")
-
-        # elif (ball_px_pos[0] < self.config.x_right):   #ball to the center right
-        #     ball_pos.center_right = True
-        #     # self.get_logger().info("Bola Centralizada a Direita")
+            self.get_logger().debug("Bola Centralizada")
 
         else:                                            #ball to the right
             ball_pos.right = True
-            # self.get_logger().info("Bola à Direita")
+            self.get_logger().debug("Bola à Direita")
         
 
         # identify the ball position in Y axis
         if (ball_px_pos[1] > self.config.y_chute):     #ball near
             ball_pos.close = True
-            # self.get_logger().info("Bola Perto")
+            self.get_logger().debug("Bola Perto")
         
         elif (ball_px_pos[1] <= self.config.y_longe):  #ball far
             ball_pos.far = True
-            # self.get_logger().info("Bola Longe")
+            self.get_logger().debug("Bola Longe")
 
         else:                                           #Bola middle
             ball_pos.med = True
-            # self.get_logger().info("Bola ao Centro")
+            self.get_logger().debug("Bola ao Centro")
 
         return ball_pos
         

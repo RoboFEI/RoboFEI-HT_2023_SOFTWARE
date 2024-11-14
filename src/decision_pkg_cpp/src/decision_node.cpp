@@ -181,7 +181,7 @@ void DecisionNode::send_goal(const Move &order)
 
   goal_msg.action_number = order;
 
-  RCLCPP_INFO(this->get_logger(), "Sending goal %d", goal_msg.action_number);
+  RCLCPP_DEBUG(this->get_logger(), "Sending goal %d", goal_msg.action_number);
 
   // ver se funciona e melhorar lógica depois
   if(order != this->robot.movement)
@@ -273,7 +273,7 @@ void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & resu
       return;
   }
   robot.finished_move = true;
-  RCLCPP_INFO(this->get_logger(), "Goal finish");
+  RCLCPP_DEBUG(this->get_logger(), "Goal finish");
 }
 
 // int main(int argc, char * argv[])
