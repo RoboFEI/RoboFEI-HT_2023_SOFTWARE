@@ -17,7 +17,7 @@
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 20  #150 
+    walk_counter  : 100  #150 
 
 /decision_node:
   ros__parameters:
