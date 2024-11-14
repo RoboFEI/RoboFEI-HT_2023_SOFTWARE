@@ -1,7 +1,7 @@
 #ifndef DECISION_NODE_HPP
 #define DECISION_NODE_HPP
 
-#define NECK_TILT_CENTER 1900
+#define NECK_TILT_CENTER 2047
 #define LIMIT_TH 80 //40
 
 #include <cstdio>
