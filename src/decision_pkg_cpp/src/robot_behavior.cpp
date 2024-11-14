@@ -179,7 +179,7 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
         }
         //else if(robot_align_for_kick_left()) robot.state = kick_ball;
         else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
-        else if (robot.neck_pos.position20 > 1150) robot.state = searching_ball;
+        else if (robot.neck_pos.position20 > 1450) robot.state = aligning_with_the_ball;
         break;
 
     case kick_ball:
