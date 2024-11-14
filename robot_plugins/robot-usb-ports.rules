@@ -3,7 +3,6 @@ KERNEL=="ttyUSB*",  ATTRS{serial}=="A6022L8Q" , SYMLINK+="imu", MODE="0777"
 KERNEL=="ttyUSB*",  ATTRS{serial}=="AL01G5F0" , SYMLINK+="imu", MODE="0777"
 
 # Motors Rules
-KERNEL=="ttyUSB*", ATTRS{serial}=="AI05A3SZ", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", ATTRS{serial}=="A50285BI", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", ATTRS{serial}=="A600TJVN", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", ATTRS{serial}=="AI03TZHR", SYMLINK+="motors", MODE="0777"
