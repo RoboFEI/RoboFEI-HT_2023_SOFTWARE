@@ -1,11 +1,20 @@
 #!/bin/bash
 
-for i in 1 2 3 4 5; do
-    timeout 0.6 ping -c 1 robo-nuc"$i".local &>/dev/null
-    if [ $? -eq 0 ]; then
-        ssh -X robo@robo-nuc"$i".local
-        break
-    else
-        echo "$i está offline."
-    fi
-done
+cont=1
+connected=0
+
+while [ $cont -le 5  ] && [ $connected -eq 0 ]; do
+    echo "Tentativa $cont"
+
+    for i in 1 2 3; do
+        timeout 0.6 ping -c 1 robo-nuc"$i".local &>/dev/null
+        if [ $? -eq 0 ]; then
+            ssh -X robo@robo-nuc"$i".local
+            connected=1
+            break
+        else
+            echo "$i está offline."
+        fi
+    done
+    cont=$(( $cont + 1 ))
+done 
