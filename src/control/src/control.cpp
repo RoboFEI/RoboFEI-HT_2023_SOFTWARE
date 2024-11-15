@@ -138,7 +138,7 @@ private:
         const rclcpp_action::GoalUUID & uuid,
         std::shared_ptr<const Control_action::Goal> goal)
     {
-        RCLCPP_INFO(this->get_logger(), "Received action %d", goal->action_number);
+        RCLCPP_DEBUG(this->get_logger(), "Received action %d", goal->action_number);
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
@@ -147,7 +147,7 @@ private:
     rclcpp_action::CancelResponse handle_cancel(
         const std::shared_ptr<GoalHandleAction> goal_handle)
     {
-        RCLCPP_INFO(this->get_logger(), "Received request to cancel action");
+        RCLCPP_DEBUG(this->get_logger(), "Received request to cancel action");
         (void)goal_handle;
         return rclcpp_action::CancelResponse::ACCEPT;
     }
@@ -163,152 +163,152 @@ private:
     void choose_movement(int movement){
       switch (movement) {
         case 1: 
-          RCLCPP_INFO(this->get_logger(), "Stand Still");
+          RCLCPP_DEBUG(this->get_logger(), "Stand Still");
           parameters = false;
           section = "Stand Still";
           break;
         case 2: 
-          RCLCPP_INFO(this->get_logger(), "Greeting");
+          RCLCPP_DEBUG(this->get_logger(), "Greeting");
           parameters = false;
           section = "Greeting";
           break;
         case 3: 
-          RCLCPP_INFO(this->get_logger(), "Right Kick");
+          RCLCPP_DEBUG(this->get_logger(), "Right Kick");
           parameters = false;
           section = "Right Kick";
           break;
         case 4: 
-          RCLCPP_INFO(this->get_logger(), "Left Kick");
+          RCLCPP_DEBUG(this->get_logger(), "Left Kick");
           parameters = false;
           section = "Left Kick";
           break;
         case 5: 
-          RCLCPP_INFO(this->get_logger(), "Turn Right");
+          RCLCPP_DEBUG(this->get_logger(), "Turn Right");
           parameters = true;
           parameter_number = 11;  
           break;
         case 6: 
-          RCLCPP_INFO(this->get_logger(), "Turn Left");
+          RCLCPP_DEBUG(this->get_logger(), "Turn Left");
           parameters = true;
           parameter_number = 12;  
           break;
         case 7: 
-          RCLCPP_INFO(this->get_logger(), "Goodbye");
+          RCLCPP_DEBUG(this->get_logger(), "Goodbye");
           parameters = false;
           section = "Goodbye";
           break;
         case 8: 
-          RCLCPP_INFO(this->get_logger(), "Search Ball");
+          RCLCPP_DEBUG(this->get_logger(), "Search Ball");
           parameters = false;
           section = "Search Ball";
           break;
         case 9: //melhor que o 10
-          RCLCPP_INFO(this->get_logger(), "Turn Around Ball Clockwise");
+          RCLCPP_DEBUG(this->get_logger(), "Turn Around Ball Clockwise");
           parameters = true;
           parameter_number = 5;  
           break;
         case 10: 
-          RCLCPP_INFO(this->get_logger(), "Turn Around Ball Anticlockwise");
+          RCLCPP_DEBUG(this->get_logger(), "Turn Around Ball Anticlockwise");
           parameters = true;
           parameter_number = 6;  
           break;
         case 11: 
-          RCLCPP_INFO(this->get_logger(), "Goalkeeper Fall Left");
+          RCLCPP_DEBUG(this->get_logger(), "Goalkeeper Fall Left");
           parameters = false;
           section = "Goalkeeper Fall Left";
           break;
         case 12: 
-          RCLCPP_INFO(this->get_logger(), "Goalkeeper Fall Right");
+          RCLCPP_DEBUG(this->get_logger(), "Goalkeeper Fall Right");
           parameters = false;
           section = "Goalkeeper Fall Right";
           break;
         case 13: //
-          RCLCPP_INFO(this->get_logger(), "Goalkeeper Middle");
+          RCLCPP_DEBUG(this->get_logger(), "Goalkeeper Middle");
           parameters = false;
           section = "Goalkeeper Middle";
           break;
         case 14: 
           parameters = true;
-          RCLCPP_INFO(this->get_logger(), "Walking"); 
+          RCLCPP_DEBUG(this->get_logger(), "Walking"); 
           parameter_number = 1;  
           break;
         case 15: 
           parameters = true;
-          RCLCPP_INFO(this->get_logger(), "Gait"); 
+          RCLCPP_DEBUG(this->get_logger(), "Gait"); 
           parameter_number = 2;  
           break;
         case 16: 
-          RCLCPP_INFO(this->get_logger(), "Stand Up Back");
+          RCLCPP_DEBUG(this->get_logger(), "Stand Up Back");
           parameters = false;
           section = "Stand Up Back";
           break;
         case 17: 
-          RCLCPP_INFO(this->get_logger(), "Stand Up Front");
+          RCLCPP_DEBUG(this->get_logger(), "Stand Up Front");
           parameters = false;
           section = "Stand Up Front";
           break;
         case 18:
-          RCLCPP_INFO(this->get_logger(), "Fallen Side Left");
+          RCLCPP_DEBUG(this->get_logger(), "Fallen Side Left");
           parameters = false;
           section = "Fallen Side Left";
           break; 
         case 19:
-          RCLCPP_INFO(this->get_logger(), "Fallen Side Right");
+          RCLCPP_DEBUG(this->get_logger(), "Fallen Side Right");
           parameters = false;
           section = "Fallen Side Right";
           break;
         case 20: 
-          RCLCPP_INFO(this->get_logger(), "Andar esquerda");
+          RCLCPP_DEBUG(this->get_logger(), "Andar esquerda");
           parameters = true;
           parameter_number = 8;  
           break;
         case 21: // OK
-          RCLCPP_INFO(this->get_logger(), "Andar direita");
+          RCLCPP_DEBUG(this->get_logger(), "Andar direita");
           parameters = true;
           parameter_number = 7;  
           break;
         case 26: // Andar pra trás
-          RCLCPP_INFO(this->get_logger(), "Walking Backward");
+          RCLCPP_DEBUG(this->get_logger(), "Walking Backward");
           parameters = true;
           parameter_number = 9;
           break; 
         case 28: 
-          RCLCPP_INFO(this->get_logger(), "Goodbye Loop");
+          RCLCPP_DEBUG(this->get_logger(), "Goodbye Loop");
           parameters = false;
           section = "Goodbye Loop";
           break; 
         case 29:
-          RCLCPP_INFO(this->get_logger(), "Goalkeeper Searching Ball");
+          RCLCPP_DEBUG(this->get_logger(), "Goalkeeper Searching Ball");
           parameters = false;
           section = "Goalkeeper Searching Ball";
           break;
         case 30: 
-          RCLCPP_INFO(this->get_logger(), "Right Kick Penalti");
+          RCLCPP_DEBUG(this->get_logger(), "Right Kick Penalti");
           parameters = false;
           section = "Right Kick Penalti";
           break;
         case 31: 
-          RCLCPP_INFO(this->get_logger(), "Right Kick Variant R");
+          RCLCPP_DEBUG(this->get_logger(), "Right Kick Variant R");
           parameters = false;
           section = "Right Kick Variant R";
           break;
         case 32: 
-          RCLCPP_INFO(this->get_logger(), "Right Kick Variant L");
+          RCLCPP_DEBUG(this->get_logger(), "Right Kick Variant L");
           parameters = false;
           section = "Right Kick Variant L";
           break;
         case 33: 
-          RCLCPP_INFO(this->get_logger(), "Left Kick Variant R");
+          RCLCPP_DEBUG(this->get_logger(), "Left Kick Variant R");
           parameters = false;
           section = "Left Kick Variant R";
           break;
         case 34: 
-          RCLCPP_INFO(this->get_logger(), "Left Kick Variant L");
+          RCLCPP_DEBUG(this->get_logger(), "Left Kick Variant L");
           parameters = false;
           section = "Left Kick Variant L";
           break;
         case 35: 
-          RCLCPP_INFO(this->get_logger(), "Left Kick Penalti");
+          RCLCPP_DEBUG(this->get_logger(), "Left Kick Penalti");
           parameters = false;
           section = "Left Kick Penalti";
           break;
@@ -345,7 +345,7 @@ private:
         if(body_activate_ || movement == 1) // when body deactivate only recive move 1
         {
 
-          RCLCPP_INFO(this->get_logger(), "Executing goal");
+          RCLCPP_DEBUG(this->get_logger(), "Executing goal");
 
           // message_single.id = 254;
           // message_single.address = 112;
@@ -370,9 +370,7 @@ private:
               do_gait = false;
               contador = 0;
             }
-              RCLCPP_INFO(this->get_logger(), "Gait trocando movimentacao %d", contador);
-              RCLCPP_INFO(this->get_logger(), "Gait trocando movimentacao %d", contador);
-            RCLCPP_INFO(this->get_logger(), "Gait trocando movimentacao %d", contador);
+            RCLCPP_DEBUG(this->get_logger(), "Gait trocando movimentacao %d", contador);
           }
 
           choose_movement(movement);          
@@ -381,7 +379,7 @@ private:
             if (goal_handle->is_canceling()) {
                 result->finished = false;
                 goal_handle->canceled(result);
-                RCLCPP_INFO(this->get_logger(), "Goal canceled");
+                RCLCPP_DEBUG(this->get_logger(), "Goal canceled");
                 return;
             }
             message_walk.walk_number = parameter_number;  
@@ -410,7 +408,7 @@ private:
                 if (goal_handle->is_canceling()) {
                     result->finished = false;
                     goal_handle->canceled(result);
-                    RCLCPP_INFO(this->get_logger(), "Goal canceled");
+                    RCLCPP_DEBUG(this->get_logger(), "Goal canceled");
                     return;
                 }
 
@@ -430,7 +428,7 @@ private:
                   // message_single.position = j[section][vel_name];
                   // message_single.address = j[section][address_name];
                   // publisher_single->publish(message_single);
-                  usleep(500000);
+                  // usleep(500000);
                 }
                 else if (j[section][address_name] == 116){
                   position_name = position_name + std::to_string(i);
