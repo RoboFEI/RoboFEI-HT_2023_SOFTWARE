@@ -106,9 +106,9 @@ void RobotBehavior::normal_game()           //jogo normal
 
 void RobotBehavior::player_normal_game()                //estado de jogo normal; jogo rolando 
 {
-    RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-    RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
-    RCLCPP_WARN(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
+    //RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
+    //RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+    //RCLCPP_WARN(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
     
     switch (robot.state)
     {
@@ -167,20 +167,18 @@ void RobotBehavior::player_normal_game()                //estado de jogo normal;
         {
             send_goal(walk_left);
         }
-        else if ((robot.neck_pos.position19 < 1950) && (robot.neck_pos.position19 > 1700))
-
+        else if ((robot.neck_pos.position19 < 1950) && (robot.neck_pos.position19 > 1780))
         {
             //send_goal(walk);
             robot.state = kick_ball;
         }
-        else if (robot.neck_pos.position19 < 1700)
-
+        else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
+        else if (robot.neck_pos.position20 > 1450) robot.state = aligning_with_the_ball;
+        else if (robot.neck_pos.position19 < 1780)
         {
             send_goal(walk_right);
         }
         //else if(robot_align_for_kick_left()) robot.state = kick_ball;
-        else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
-        else if (robot.neck_pos.position20 > 1450) robot.state = aligning_with_the_ball;
         break;
 
     case kick_ball:
