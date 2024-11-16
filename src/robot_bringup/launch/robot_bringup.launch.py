@@ -49,7 +49,7 @@ def generate_launch_description():
         emulate_tty=True
     )
 
-    ld.add_action(imu_node)
+    # ld.add_action(imu_node)
 
     decision_launcher = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
