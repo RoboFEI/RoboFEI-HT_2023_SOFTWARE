@@ -41,7 +41,7 @@ enum Move
     gait                = 15,
     stand_up_back       = 16,
     stand_up_front      = 17,
-    stand_up_side       = 8,
+    stand_up_side       = 18,
     walk_left           = 20,
     walk_right          = 21
 };
