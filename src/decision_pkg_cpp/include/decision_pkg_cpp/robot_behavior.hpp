@@ -18,7 +18,11 @@ class RobotBehavior : public DecisionNode
         void normal_game_prepair();
         void player_normal_game();
         void goalkeeper_normal_game(); // feito, precisa testar
+        void bala_normal_game();
+        void kicker_normal_game();
         bool is_goalkeeper(int robot_num); // feito
+        bool is_bala(int robot_num);
+        bool is_kicker(int robot_num);
         bool ball_is_locked();
         bool vision_stable();
         bool ball_in_camera_center();
