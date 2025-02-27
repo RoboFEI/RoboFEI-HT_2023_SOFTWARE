@@ -472,7 +472,7 @@ private:
         }
       result->finished = true;
       goal_handle->succeed(result);
-      // RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+      // RCLCPP_INFO(this->get_logger(), "Goal succeeded");oi
     }
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscriber_fase_zero;

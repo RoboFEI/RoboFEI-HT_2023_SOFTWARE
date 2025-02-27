@@ -9,7 +9,7 @@
 
 /neck_node:
   ros__parameters:
-    neck_activate: true
+    neck_activate: false
 
     x_p_gain: 0.20
     y_p_gain: 0.15
@@ -17,7 +17,7 @@
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 150  #150 
+    walk_counter  : 1 #150 
 
 /decision_node:
   ros__parameters:
