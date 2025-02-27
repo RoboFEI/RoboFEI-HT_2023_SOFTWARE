@@ -312,6 +312,16 @@ private:
           parameters = false;
           section = "Left Kick Penalti";
           break;
+        case 36: 
+          RCLCPP_DEBUG(this->get_logger(), "Macarena");
+          parameters = false;
+          section = "Macarena";
+          break;
+        case 37:
+          RCLCPP_DEBUG(this->get_logger(), "Reboladinha");
+          parameters = false;
+          section = "Reboladinha";
+          break;
       }
       auto atualMove = intMsg();
       atualMove.data = movement;
