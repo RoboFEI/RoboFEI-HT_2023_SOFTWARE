@@ -73,7 +73,6 @@ void RobotBehavior::penalty()           //penalizado
 
 void RobotBehavior::normal_game()           //jogo normal
 {
-    int centro = 0;
     // RCLCPP_DEBUG(this->get_logger(), "Normal Game: %d", gc_info.game_state);
     switch (gc_info.game_state)
     {
@@ -85,7 +84,7 @@ void RobotBehavior::normal_game()           //jogo normal
         
         while(robot.neck_pos.position19 >= 1450 && robot.neck_pos.position19 <= 2380){
             send_goal(walk);
-            RCLCPP_INFO(this->get_logger(), "macaquito dançando : %d", robot.neck_pos.position19 );      
+            RCLCPP_INFO(this->get_logger(), "neck_position : %d", robot.neck_pos.position19 );      
             break;
         }
         send_goal(stand_still);
@@ -263,31 +262,30 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
     case ball_close:
         //RCLCPP_WARN(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
         //RCLCPP_WARN(this->get_logger(), "ball close");
-        if (robot.neck_pos.position19 > 1950)
-        {
-            send_goal(walk_left);
-        }
-        else if ((robot.neck_pos.position19 < 1950) && (robot.neck_pos.position19 > 1780))
-        {
-            //send_goal(walk);
-            robot.state = kick_ball;
-        }
+        if (robot.neck_pos.position19 > 2359) send_goal(walk_left);
+        else if (robot.neck_pos.position19 < 1744) send_goal(walk_right);
+
+        else if ((robot.neck_pos.position19 < 2359) && (robot.neck_pos.position19 > 1744) && (robot.neck_pos.position20 < 1230)) robot.state = kick_ball;
+        
         else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
-        else if (robot.neck_pos.position20 > 1450) robot.state = aligning_with_the_ball;
-        else if (robot.neck_pos.position19 < 1780)
-        {
-            send_goal(walk_right);
-        }
+        else if (robot.neck_pos.position20 > 1400) robot.state = aligning_with_the_ball;
         //else if(robot_align_for_kick_left()) robot.state = kick_ball;
         break;
 
     case kick_ball:
         //RCLCPP_ERROR(this->get_logger(), "kick");
-        if(robot.movement != 3)  send_goal(right_kick);
-        else if(robot.finished_move)
+        if(robot.movement != 3 || robot.movement != 4) 
         {
-            robot.state = searching_ball;
-            lost_ball_timer.reset();
+            if (robot.neck_pos.position19 >= 2048) 
+            {
+                send_goal(left_kick);
+                robot.state = searching_ball;
+            }
+            else 
+            {
+                send_goal(right_kick);        
+                robot.state = searching_ball;
+            } 
         }
         //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
         break;
