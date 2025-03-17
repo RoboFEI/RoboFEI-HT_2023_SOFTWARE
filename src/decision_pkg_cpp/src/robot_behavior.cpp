@@ -85,7 +85,7 @@ void RobotBehavior::normal_game()           //jogo normal
         
         while(robot.neck_pos.position19 >= 1450 && robot.neck_pos.position19 <= 2380){
             send_goal(walk);
-            RCLCPP_INFO(this->get_logger(), "macaquito dançando : %d", robot.neck_pos.position19 );      
+            //RCLCPP_INFO(this->get_logger(), "macaquito dançando : %d", robot.neck_pos.position19 );      
             break;
         }
         send_goal(stand_still);
@@ -269,7 +269,6 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         }
         else if ((robot.neck_pos.position19 < 1950) && (robot.neck_pos.position19 > 1780))
         {
-            //send_goal(walk);
             robot.state = kick_ball;
         }
         else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
