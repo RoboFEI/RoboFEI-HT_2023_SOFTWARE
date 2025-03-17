@@ -73,7 +73,6 @@ void RobotBehavior::penalty()           //penalizado
 
 void RobotBehavior::normal_game()           //jogo normal
 {
-    int centro = 0;
     // RCLCPP_DEBUG(this->get_logger(), "Normal Game: %d", gc_info.game_state);
     switch (gc_info.game_state)
     {
@@ -271,22 +270,26 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         {
             robot.state = kick_ball;
         }
+      
         else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
-        else if (robot.neck_pos.position20 > 1450) robot.state = aligning_with_the_ball;
-        else if (robot.neck_pos.position19 < 1780)
-        {
-            send_goal(walk_right);
-        }
+        else if (robot.neck_pos.position20 > 1400) robot.state = aligning_with_the_ball;
         //else if(robot_align_for_kick_left()) robot.state = kick_ball;
         break;
 
     case kick_ball:
         //RCLCPP_ERROR(this->get_logger(), "kick");
-        if(robot.movement != 3)  send_goal(right_kick);
-        else if(robot.finished_move)
+        if(robot.movement != 3 || robot.movement != 4) 
         {
-            robot.state = searching_ball;
-            lost_ball_timer.reset();
+            if (robot.neck_pos.position19 >= 2048) 
+            {
+                send_goal(left_kick);
+                robot.state = searching_ball;
+            }
+            else 
+            {
+                send_goal(right_kick);        
+                robot.state = searching_ball;
+            } 
         }
         //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
         break;
