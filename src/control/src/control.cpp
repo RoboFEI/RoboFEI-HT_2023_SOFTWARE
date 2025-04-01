@@ -267,45 +267,10 @@ private:
           parameters = true;
           parameter_number = 7;  
           break;
-        case 26: // Andar pra trás
-          RCLCPP_DEBUG(this->get_logger(), "Walking Backward");
-          parameters = true;
-          parameter_number = 9;
-          break; 
-        case 28: 
-          RCLCPP_DEBUG(this->get_logger(), "Goodbye Loop");
-          parameters = false;
-          section = "Goodbye Loop";
-          break; 
-        case 29:
-          RCLCPP_DEBUG(this->get_logger(), "Goalkeeper Searching Ball");
-          parameters = false;
-          section = "Goalkeeper Searching Ball";
-          break;
         case 30: 
           RCLCPP_DEBUG(this->get_logger(), "Right Kick Penalti");
           parameters = false;
           section = "Right Kick Penalti";
-          break;
-        case 31: 
-          RCLCPP_DEBUG(this->get_logger(), "Right Kick Variant R");
-          parameters = false;
-          section = "Right Kick Variant R";
-          break;
-        case 32: 
-          RCLCPP_DEBUG(this->get_logger(), "Right Kick Variant L");
-          parameters = false;
-          section = "Right Kick Variant L";
-          break;
-        case 33: 
-          RCLCPP_DEBUG(this->get_logger(), "Left Kick Variant R");
-          parameters = false;
-          section = "Left Kick Variant R";
-          break;
-        case 34: 
-          RCLCPP_DEBUG(this->get_logger(), "Left Kick Variant L");
-          parameters = false;
-          section = "Left Kick Variant L";
           break;
         case 35: 
           RCLCPP_DEBUG(this->get_logger(), "Left Kick Penalti");
@@ -472,7 +437,7 @@ private:
         }
       result->finished = true;
       goal_handle->succeed(result);
-      // RCLCPP_INFO(this->get_logger(), "Goal succeeded");oi
+      // RCLCPP_INFO(this->get_logger(), "Goal succeeded");
     }
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscriber_fase_zero;
