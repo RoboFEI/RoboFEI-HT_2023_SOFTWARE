@@ -83,11 +83,11 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
 
     echo -e "${blue} Robot Number: ${NC}"
     read rob_num
-    echo "robot_number=$rob_num\nprint(robot_number)" | sudo tee /home/robot_num.py
+    echo "robot_number=$rob_num" | sudo tee /home/robot_num.py
 
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
-    sudo cp "$folder_path/robot_plugins/robot-usb-ports.rules" /etc/udev/rules.d/
+    sudo cp "/home/robo/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot-usb-ports.rules" /etc/udev/rules.d/
     sudo udevadm control --reload-rules
     sudo udevadm trigger
     # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}

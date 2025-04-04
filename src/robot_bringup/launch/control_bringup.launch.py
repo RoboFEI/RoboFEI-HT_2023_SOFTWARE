@@ -59,7 +59,7 @@ def generate_launch_description():
     initial_position = ExecuteProcess(
         cmd=['ros2', 'action', 'send_goal', '/control_action', 'custom_interfaces/action/Control', '{action_number: 1}'],
         output='screen'
-    ),
+    )
 
     initial_position = ExecuteProcess(
         cmd=['sleep', '0.2'],                 # cmd Befehl, warte 5 sec
