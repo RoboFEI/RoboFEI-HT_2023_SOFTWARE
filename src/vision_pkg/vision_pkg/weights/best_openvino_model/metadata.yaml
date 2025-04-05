@@ -1,7 +1,7 @@
-description: Ultralytics best model trained on /home/robo/Documents/treino_bola_azul/dataset/data.yaml
+description: Ultralytics best model trained on full_dataset/data.yaml
 author: Ultralytics
-date: '2024-09-10T13:58:20.138376'
-version: 8.2.74
+date: '2025-04-05T11:26:32.613102'
+version: 8.3.98
 license: AGPL-3.0 License (https://ultralytics.com/license)
 docs: https://docs.ultralytics.com
 stride: 32
@@ -12,3 +12,9 @@ imgsz:
 - 640
 names:
   0: ball
+args:
+  batch: 1
+  half: false
+  int8: false
+  dynamic: true
+  nms: false
