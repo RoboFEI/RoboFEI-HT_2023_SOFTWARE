@@ -207,7 +207,7 @@ void MotionManager::GetIniParameter()
 void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces::msg::Walk> walk_msg_) const
     {
 				//	feedback no terminal do gait_publisher motion manager numero 1
-		//RCLCPP_INFO(this->get_logger(), "CALLBACK WALK MM");
+		RCLCPP_INFO(this->get_logger(), "CALLBACK WALK MM");
 		auto message_fase = std_msgs::msg::Bool();
 		message_fase.data = false;
         walk = walk_msg_->walk_number;
