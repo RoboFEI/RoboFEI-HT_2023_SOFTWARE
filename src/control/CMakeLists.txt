@@ -31,56 +31,19 @@ include_directories(${CURSES_INCLUDE_DIR})
 find_library(LIBRT rt) 
 set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses)
-
-
+    
 include_directories(include)
 include_directories(src/minIni)
 include_directories(include/json/include/nlohmann)
 
-
-add_library(motion SHARED
-  src/motion/MotionManager.cpp
-  src/motion/modules/Walking.cpp
-  src/motion/AngleEstimator.cpp
-  src/math/Matrix.cpp
-  src/math/Plane.cpp
-  src/math/Point.cpp
-  src/math/Vector.cpp
-  src/math/QuadraticStateTransform.cpp
-  src/math/MotionState.cpp
-  src/motion/JointData.cpp
-  src/motion/Kinematics.cpp
-  src/motion/MotionStatus.cpp
-  src/motion/AngleEstimator.cpp
-  src/motion/modules/Action.cpp
-  src/motion/modules/Walking.cpp
-  src/minIni/minIni.cpp
-  src/GaitMove.cpp
-  src/ReadConfig.cpp
-)
-
 set(CMAKE_C_FLAGS " -lncurses")
 
-#set(SOURCES
-#  /home/robo/ROS2/walk_test/src/control/src/minIni/minIni.cpp
-#  /home/robo/ROS2/walk_test/src/control/src/action_editor/cmd_process.cpp
-#  )
-
-#add_executable(action ${SOURCES})
-#ament_target_dependencies(action
-#  rclcpp
-#  custom_interfaces
-#  Curses
-#)
-#target_link_libraries(action ${CURSES_LIBRARY})
-
+# robot_joy_control
 add_executable(robot_joy_control src/robot_joy_control.cpp)
 ament_target_dependencies(robot_joy_control
   rclcpp
   rclcpp_action
-
   sensor_msgs
-
   custom_interfaces
 )
 
@@ -88,30 +51,16 @@ install(TARGETS
   robot_joy_control
   DESTINATION lib/${PROJECT_NAME})
 
-#Neck control definitions
+# Neck control definitions
 add_executable(neck_control src/neck_control.cpp)
 ament_target_dependencies(neck_control std_msgs vision_msgs rclcpp custom_interfaces)
 
 install(TARGETS
   neck_control
   DESTINATION lib/${PROJECT_NAME})
+  
 
-ament_target_dependencies(motion
-  rclcpp
-  rclcpp_components
-  custom_interfaces
-  sensor_msgs
-  std_msgs
-)
-
-# rosidl_target_interfaces(motion ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
-rclcpp_components_register_node(motion
-   PLUGIN "Robot::MotionManager"
-   EXECUTABLE gait_publisher
- )
-
-# Build
+# Control
 add_executable(control src/control.cpp)
 ament_target_dependencies(control
   custom_interfaces
@@ -121,25 +70,43 @@ ament_target_dependencies(control
   rclcpp_action
 )
 
-# Build
-add_executable(decision src/dec.cpp)
-ament_target_dependencies(decision
-  custom_interfaces
-  rclcpp
-)
-
-
-# Install
 install(TARGETS
   control
-  decision
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(TARGETS motion
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
+# gait publisher
+add_executable(gait_publisher
+  src/motion/MotionManager.cpp
+  src/motion/AngleEstimator.cpp
+  src/motion/JointData.cpp
+  src/motion/MotionStatus.cpp
+
+  src/motion/modules/Walking.cpp
+  src/motion/modules/Action.cpp
+  
+  src/math/MotionState.cpp
+  src/math/Matrix.cpp
+  src/math/Vector.cpp
+  src/math/Point.cpp
+  src/math/QuadraticStateTransform.cpp
+  
+  src/minIni/minIni.cpp
 )
+
+
+ament_target_dependencies(gait_publisher
+  custom_interfaces
+  rclcpp
+  sensor_msgs
+  std_msgs
+  rclcpp_action
+)
+
+install(TARGETS
+  gait_publisher
+  DESTINATION lib/${PROJECT_NAME})
+
 
 install(
   DIRECTORY include/
