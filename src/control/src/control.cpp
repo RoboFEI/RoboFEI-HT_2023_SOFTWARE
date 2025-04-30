@@ -95,8 +95,6 @@ public:
   {
     RCLCPP_INFO(this->get_logger(), "Running action node");
     subscriber_fase_zero = this->create_subscription<std_msgs::msg::Bool>("/fase_zero", 1, std::bind(&Control::topic_callback_fase, this, _1));
-    // publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
-    // publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
     pubisher_body_joints_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
     publisher_walk = this->create_publisher<custom_interfaces::msg::Walk>("walking", 10);
     publisher_atual_move = this->create_publisher<intMsg>("move_running", 10);
@@ -467,11 +465,7 @@ int main(int argc, char * argv[])
   system(string1);//prioridade
   //GaitMove gaitMove(ini);
   rclcpp::init(argc, argv);
-  // if(MotionManager::GetInstance()->Initialize() == false)
-  //   {
-  //     printf("Fail to initialize Motion Manager!\n");
-  //     return 0;
-  // }
+
   rclcpp::spin(std::make_shared<Control>());
   rclcpp::shutdown();
   return 0;
