@@ -1,0 +1,7 @@
+path: /home/bola_ladmarks_train/full_dataset
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+nc: 2
+names: [ball, goalpost]
+datasets: [AlRihla, Conext21, Torso21]

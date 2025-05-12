@@ -50,10 +50,47 @@ DecisionNode::DecisionNode() : Node("decision_node")
         std::bind(&DecisionNode::listener_calback_running_move, this, _1)
     );
 
+    // subscriber que vai ler se jogaremos com localização ou sem
+    localization_subscriber = this->create_subscription<std_msgs::msg::Bool>(
+      "localization_active", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_localization_status, this, _1)
+    );
+
+    // decide se deve chutar ou nao
+    goalpost_position = this->create_subscription<std_msgs::msg::String>(
+      "kick_decision", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_goalpost_status, this, _1)
+    );
+
+    goalpost_division_lines = this->create_subscription<VisionMsg>(
+      "goalpost_position", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_goalpost_lines, this, _1)
+    );
+
+    goalpost_px_position = this->create_subscription<vision_msgs::msg::Point2D>(
+      "goalpost_px_position", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_goalpost_px, this, _1)
+    );
+    
+    neck_position_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
+
+    neck_control_lock_pub_ = this->create_publisher<std_msgs::msg::Bool>("neck_control_locked", 10);
+
     this->action_client_ = rclcpp_action::create_client<ControlActionMsg>(
       this,
       "control_action"
     );
+
+    neck_track_timer_ = this->create_wall_timer(
+      std::chrono::milliseconds(100),
+      std::bind(&DecisionNode::set_neck_position, this)
+    );
+    neck_track_timer_->cancel();  
+    neck_timer_active_ = false;  
 
     send_goal_options.goal_response_callback =
       std::bind(&DecisionNode::goal_response_callback, this, _1);
@@ -217,8 +254,7 @@ void DecisionNode::send_goal(const Move &order)
     robot.finished_move = false;
   }
 
-
-//testar
+  //testar
   // if(order != this->robot.movement)
   // {
   //   if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
@@ -236,9 +272,76 @@ void DecisionNode::send_goal(const Move &order)
   //   robot.movement = order;
   //   robot.finished_move = false;
   // }
-
-
 }
+
+  void DecisionNode::listener_callback_localization_status(const std_msgs::msg::Bool localization_msg)
+  {
+    robot.localization_msg = localization_msg;
+  }
+
+
+  void DecisionNode::listener_callback_goalpost_status(const std_msgs::msg::String goalpost_position)
+  {
+    robot.goalpost_position = goalpost_position;
+  }
+
+  void DecisionNode::listener_callback_goalpost_px(const vision_msgs::msg::Point2D::SharedPtr goalpost_px_position)
+  {
+    robot.goalpost_px_position = *goalpost_px_position;
+  }
+
+  void DecisionNode::set_neck_position()
+  {
+    if (!unlock_msg.data)
+    {
+        float pan;
+        float tilt;
+        
+        float x_offset = robot.goalpost_px_position.x;
+        float y_offset = robot.goalpost_px_position.y;
+
+        pan = 2000 - x_offset * 0.7;
+        tilt = 2000 - y_offset * 0.35;
+
+        // Limites
+        if (pan > 3050) pan = 3050;
+        else if (pan < 1350) pan = 1350;
+
+        if (tilt > 2048) tilt = 2048;
+        else if (tilt < 1050) tilt = 1050;
+    
+
+        auto new_neck_position = JointStateMsg();
+        new_neck_position.id.push_back(19);
+        new_neck_position.id.push_back(20);
+        new_neck_position.info.push_back(pan);
+        new_neck_position.info.push_back(tilt);
+        new_neck_position.type.push_back(JointStateMsg::POSITION);
+        new_neck_position.type.push_back(JointStateMsg::POSITION);
+
+        RCLCPP_INFO(this->get_logger(), "🔭 Fixando olhar no gol: pan=%.0f | tilt=%.0f", pan, tilt);
+        neck_position_publisher_->publish(new_neck_position);
+    }
+  }
+
+
+  void DecisionNode::free_neck()
+  {
+      unlock_msg.data = true;  // libera
+      neck_control_lock_pub_->publish(unlock_msg);
+  }
+
+  void DecisionNode::lock_neck()
+  {
+      unlock_msg.data = false;  // bloqueia
+      neck_control_lock_pub_->publish(unlock_msg);
+  }
+  
+  void DecisionNode::listener_callback_goalpost_lines(const VisionMsg::SharedPtr goalpost_division_lines)
+  {
+    robot.goalpost_division_lines = *goalpost_division_lines;
+  }
+
 
 void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr &goal_handle)
 {

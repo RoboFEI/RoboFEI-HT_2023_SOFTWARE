@@ -15,6 +15,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+#include "rclcpp/time.hpp"
 
 #include "custom_interfaces/msg/humanoid_league_msgs.hpp"
 // #include "custom_interfaces/msg/neck_position.hpp"
@@ -23,6 +24,7 @@
 #include "custom_interfaces/action/control.hpp"
 
 #include "std_msgs/msg/int32.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 
@@ -58,8 +60,15 @@ class DecisionNode : public rclcpp::Node
                                  const float &robot_accel_y,
                                  const float &robot_accel_z); 
         void listener_callback_vision(const VisionMsg::SharedPtr vision_info); 
-        void listener_calback_running_move(const intMsg::SharedPtr atualMove);      
-        
+        void listener_calback_running_move(const intMsg::SharedPtr atualMove);  
+        void listener_callback_localization_status(const std_msgs::msg::Bool localization_msg);
+        void listener_callback_goalpost_status(const std_msgs::msg::String goalpost_position); 
+        void listener_callback_goalpost_lines(const VisionMsg::SharedPtr goalpost_division_lines); 
+        void listener_callback_goalpost_px(const vision_msgs::msg::Point2D::SharedPtr goalpost_px_position); 
+        void set_neck_position(); 
+        void free_neck();
+        void lock_neck();
+
         void send_goal(const Move &move);
 
         float FALL_ACCEL_TH;
@@ -73,8 +82,15 @@ class DecisionNode : public rclcpp::Node
         int NECK_RIGHT_LIMIT;
         int NECK_CLOSE_LIMIT;
 
+        // Timer pra acompanhar o goalpost
+        rclcpp::TimerBase::SharedPtr neck_track_timer_; // para atualizar os valores do pescoço e ele olhar pro gol
+        bool neck_timer_active_;  
+        float last_pan_ = -1;
+        float last_tilt_ = -1;
+
         int robot_number;
-        
+        std_msgs::msg::Bool unlock_msg; //para decidir se vai voltar ao searching_ball
+
         DecisionNode();
         virtual ~DecisionNode();
 
@@ -85,7 +101,12 @@ class DecisionNode : public rclcpp::Node
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
         rclcpp::Subscription<VisionMsg>::SharedPtr vision_subscriber_;
         rclcpp::Subscription<intMsg>::SharedPtr running_move_subscriber_;
-
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr localization_subscriber;
+        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr goalpost_position; // de acordo com o SHOOT ou DONT SHOOT
+        rclcpp::Subscription<VisionMsg>::SharedPtr goalpost_division_lines; // de acordo com as grades da visao 
+        rclcpp::Subscription<vision_msgs::msg::Point2D>::SharedPtr goalpost_px_position;
+        rclcpp::Publisher<JointStateMsg>::SharedPtr neck_position_publisher_;
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr neck_control_lock_pub_; // para publicar posições pro pescoço
         rclcpp_action::Client<ControlActionMsg>::SharedPtr action_client_;
         rclcpp_action::Client<ControlActionMsg>::SendGoalOptions send_goal_options = rclcpp_action::Client<ControlActionMsg>::SendGoalOptions();
 

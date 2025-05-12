@@ -14,6 +14,7 @@
 #include "custom_interfaces/msg/joint_state.hpp"
 #include "custom_interfaces/msg/set_position.hpp"
 #include "std_msgs/msg/multi_array_dimension.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "vision_msgs/msg/point2_d.hpp"
 
 
@@ -47,7 +48,8 @@ enum class Side
 enum class State
 {
   follow_ball,
-  search_ball
+  search_ball,
+  search_goalpost,  
 };
 
 struct BallPositionPx
@@ -87,6 +89,8 @@ class NeckNode : public rclcpp::Node
     float y_p_gain;
 
     bool neck_activate_;
+    bool neck_locked_;
+    bool received_neck_lock_;
 
     int neck_up_limit;
     int neck_down_limit;
@@ -95,7 +99,9 @@ class NeckNode : public rclcpp::Node
 
     void listener_callback_vision(const VisionInfo::SharedPtr msg);
     void listener_callback_vision_px(const Point2d::SharedPtr msg);
-    void listener_callback_neck(const JointStateMsg::SharedPtr msg); 
+    void listener_callback_neck(const JointStateMsg::SharedPtr msg);
+    void neck_lock_callback(const std_msgs::msg::Bool::SharedPtr msg);
+
     void search_ball();
     void main_callback();
 
@@ -112,7 +118,7 @@ class NeckNode : public rclcpp::Node
     rclcpp::Subscription<JointStateMsg>::SharedPtr neck_position_subscriber_;
     rclcpp::Publisher<JointStateMsg>::SharedPtr set_neck_position_publisher_;
     rclcpp::TimerBase::SharedPtr main_timer_;
-
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr neck_control_lock_sub_;
 };
 
 #endif 
