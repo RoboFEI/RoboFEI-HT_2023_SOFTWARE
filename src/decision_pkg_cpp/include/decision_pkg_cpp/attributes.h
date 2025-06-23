@@ -5,10 +5,12 @@
 #include "custom_interfaces/msg/vision.hpp"
 #include "custom_interfaces/msg/humanoid_league_msgs.hpp"
 #include "std_msgs/msg/bool.hpp" 
+#include "std_msgs/msg/int32.hpp" 
 #include "std_msgs/msg/string.hpp" 
 #include "custom_interfaces/msg/joint_state.hpp"
 #include "custom_interfaces/msg/set_position.hpp"
 #include "vision_msgs/msg/point2_d.hpp"
+#include "geometry_msgs/msg/vector3_stamped.hpp" 
 
 enum State
 {
@@ -72,14 +74,17 @@ struct Robot
 
     bool finished_move = true;
     State state = searching_ball;
-    //State state2 = search_goalpost;
     NeckPosition neck_pos;
     custom_interfaces::msg::Vision camera_ball_position;
     RobotBallPosition ball_position = center;
     std_msgs::msg::Bool localization_msg;
-    std_msgs::msg::String goalpost_position;
+    std_msgs::msg::Int32 goalpost_count;
     custom_interfaces::msg::Vision goalpost_division_lines;
     vision_msgs::msg::Point2D goalpost_px_position;
+    geometry_msgs::msg::Vector3Stamped imu_gyro;
+    float imu_yaw_rad = 0.0;
+    
+
 };
 
 #endif // ATTRIBUTES_H

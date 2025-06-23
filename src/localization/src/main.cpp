@@ -2,7 +2,7 @@
 #include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/imu.hpp"                  
-#include "geometry_msgs/msg/vector3_stamped.hpp"    //rpy
+#include "geometry_msgs/msg/vector3_stamped.hpp"    //rpy - imu
 
 // LOCALIZAÇÃO PARA O MUNDIAL DE SALVADOR 2025
 
@@ -39,13 +39,11 @@ private:
         publisher_->publish(msg);
     }
 
-
-    
     void listener_callback_imu_gyro(const geometry_msgs::msg::Vector3Stamped rpy_msg)           //prints imu/rpy
     {
-        RCLCPP_INFO(this->get_logger(), "%f", rpy_msg.vector.x);
-        RCLCPP_INFO(this->get_logger(), "%f", rpy_msg.vector.y);
-        RCLCPP_INFO(this->get_logger(), "%f", rpy_msg.vector.z);
+        RCLCPP_INFO(this->get_logger(), "X: %f", rpy_msg.vector.x);
+        RCLCPP_INFO(this->get_logger(), "Y: %f", rpy_msg.vector.y);
+        RCLCPP_INFO(this->get_logger(), "Z: %f", rpy_msg.vector.z);
         
     }
 
@@ -55,8 +53,6 @@ private:
 
     //RCLCPP_INFO(this->get_logger(), "Localization package has started");
     //RCLCPP_WARN(this->get_logger(), "imu %d",  robot_align_for_kick_left());
-
-
 };
 
 int main(int argc, char **argv)

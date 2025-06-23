@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import Int32 
 from collections import deque
 
 
@@ -118,9 +118,8 @@ class BallDetection(Node):
         self.goalpost_center_publisher_ = self.create_publisher(Point2D, '/goalpost_center_px', 2)
         self.goalpost_center_publisher_
 
-        # publisher que decide se o robo esta alinhado para chutar de acordo com a trave
-        self.decide_kick_target = self.create_publisher(String, '/kick_decision', 2)
-        self.decide_kick_target
+        self.goalpost_count_publisher_ = self.create_publisher(Int32, '/goalpost_count', 2)
+        self.goalpost_count_publisher_
 
         self.cont_real_ball_detections = 0
         self.cont_real_goalpost_detections = 0
@@ -222,7 +221,10 @@ class BallDetection(Node):
                 self.goalpost_position_publisher_.publish(goalpost_area)
                 self.goalpost_px_positions_for_decision = []  # ISSO É OBRIGATÓRIO
 
-                self.get_logger().warn("❌ Nenhuma trave detectada — limpando para decisão.")
+                #self.get_logger().warn("❌ Nenhuma trave detectada — limpando para decisão.")
+                goalpost_count_msg = Int32()
+                goalpost_count_msg.data = len(goalpost_px_positions)
+                self.goalpost_count_publisher_.publish(goalpost_count_msg)
                 return img_cp
 
             
@@ -236,7 +238,12 @@ class BallDetection(Node):
                 new_goalpost_pos_area = self.get_goalpost_pos_area(goalpost_px_pos)
                 self.goalpost_pos_area_filter(new_goalpost_pos_area, 1)
 
-            # 🔥 NOVO: calcula o centro do gol SE detectou pelo menos 2 traves
+                goalpost_count_msg = Int32()
+                goalpost_count_msg.data = len(goalpost_px_positions)
+                self.goalpost_count_publisher_.publish(goalpost_count_msg)
+
+
+            # calcula o centro do gol se detectou pelo menos 2 traves
             if len(goalpost_px_positions) >= 0:
                 # Ordena traves pela posição x (esquerda para direita)
                 goalpost_px_positions.sort(key=lambda pos: pos[0])
@@ -256,7 +263,6 @@ class BallDetection(Node):
 
                 self.goalpost_px_positions_for_decision = goalpost_px_positions  # salva para decisão
 
-
                 # Desenha o centro do gol na imagem
                 cv2.circle(img_cp, (int(center_x), int(center_y)), 8, (0, 0, 255), -1)  # vermelho
 
@@ -264,87 +270,6 @@ class BallDetection(Node):
             self.get_logger().error(f"Erro na goalpost_detection: {str(e)}")
 
         return img_cp
-    
-    # def decide_kick(self, ball_px_pos, goalpost_px_positions): # nn estamos usando por enquanto
-    #     if ball_px_pos is None or ball_px_pos.size == 0:
-    #         self.get_logger().debug("❌ Sem bola detectada.")
-    #         self.kick_ready_streak = 0
-    #         self.kick_fail_tolerance = 0
-    #         return
-
-    #     if not goalpost_px_positions or len(goalpost_px_positions) == 0:
-    #         self.get_logger().debug("❌ Nenhuma trave visível.")
-    #         self.kick_ready_streak = 0
-    #         self.kick_fail_tolerance = 0
-    #         self.decide_kick_target.publish(String(data="DONT_SHOOT"))
-    #         return
-
-    #     try:
-    #         self.last_ball_positions.append(ball_px_pos)
-    #         if len(self.last_ball_positions) < 3:
-    #             return
-    #         avg_ball_pos = np.mean(self.last_ball_positions, axis=0)
-
-    #         if len(goalpost_px_positions) == 1:
-    #             # ✅ CASO 1: UMA TRAVE
-    #             post = goalpost_px_positions[0]
-    #             lado = "esquerda" if post[0] < self.img_width / 2 else "direita"
-
-    #             if lado == "esquerda":
-    #                 chute_valido = avg_ball_pos[0] > post[0] + 20
-    #             else:
-    #                 chute_valido = avg_ball_pos[0] < post[0] - 20
-
-    #             if chute_valido:
-    #                 self.kick_fail_tolerance = 0
-    #                 self.kick_ready_streak += 1
-    #                 self.get_logger().info(f"✅ Bola do lado certo da trave à {lado}. (streak={self.kick_ready_streak})")
-    #             else:
-    #                 self.kick_fail_tolerance += 1
-    #                 self.get_logger().info(f"⚠️ Bola do lado errado da trave à {lado}.")
-    #                 if self.kick_fail_tolerance > 1:
-    #                     self.kick_ready_streak = 0
-
-    #         elif len(goalpost_px_positions) >= 2:
-    #             # ✅ CASO 2: DUAS TRAVES
-    #             goalpost_px_positions.sort(key=lambda pos: pos[0])
-    #             left_post = goalpost_px_positions[0]
-    #             right_post = goalpost_px_positions[1]
-
-    #             estimated_width = abs(right_post[0] - left_post[0])
-    #             if estimated_width < 80:
-    #                 self.get_logger().warn("⚠️ Distância entre traves muito pequena.")
-    #                 self.kick_ready_streak = 0
-    #                 self.kick_fail_tolerance = 0
-    #                 return
-
-    #             margin = 30
-    #             min_x = left_post[0] - margin
-    #             max_x = right_post[0] + margin
-
-    #             if min_x <= avg_ball_pos[0] <= max_x:
-    #                 self.kick_fail_tolerance = 0
-    #                 self.kick_ready_streak += 1
-    #                 self.get_logger().info(f"✅ Bola centralizada entre as traves. (streak={self.kick_ready_streak})")
-    #             else:
-    #                 self.kick_fail_tolerance += 1
-    #                 self.get_logger().info("⚠️ Bola fora da área central entre as traves.")
-    #                 if self.kick_fail_tolerance > 1:
-    #                     self.kick_ready_streak = 0
-
-    #         # ✅ Decisão final segura
-    #         if self.kick_ready_streak >= 3:
-    #             self.decide_kick_target.publish(String(data="SHOOT"))
-    #         else:
-    #             self.decide_kick_target.publish(String(data="DONT_SHOOT"))
-
-    #     except Exception as e:
-    #         self.get_logger().error(f"Erro ao decidir chute: {str(e)}")
-    #         self.kick_ready_streak = 0
-    #         self.kick_fail_tolerance = 0
-    #         self.decide_kick_target.publish(String(data="DONT_SHOOT"))
-
-
 
     
     def ball_detection(self, img, results):
