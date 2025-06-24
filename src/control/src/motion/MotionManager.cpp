@@ -128,7 +128,11 @@ void MotionManager::GetIniParameter()
 			else if (walk == 13){
 				printf("CALLBACK TURN ROBOT LEFT\n");
 				Walking::GetInstance()->LoadINISettings(ini, "Turn Robot Left slow");
-			}
+			} 
+      else if (walk == 14){
+        printf("CALLBACK Paradinho\n");
+        Walking::GetInstance()->LoadINISettings(ini, "Paradinho");
+      }
 
       last_movement = walk;
 			this->LoadINISettings(ini);
@@ -150,8 +154,8 @@ void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces:
 {
   auto message_fase = std_msgs::msg::Bool();
   message_fase.data = false;
-walk = walk_msg_->walk_number;
-
+  walk = walk_msg_->walk_number;
+  
   if (walk != 0)
   {
     message_fase.data = true;
@@ -170,12 +174,11 @@ walk = walk_msg_->walk_number;
       const_cast<MotionManager*>(this)->SetEnable(true);
       Walking::GetInstance()->Stop();
       const_cast<MotionManager*>(this)->keep_walking = true;
-    }
-  }
-
-  publisher_fase_zero->publish(message_fase);
+    } 
+  } 
+ 
+  publisher_fase_zero->publish(message_fase); 
 }
-
 bool MotionManager::Initialize(bool fadeIn)
 {
   int value, error;

@@ -57,7 +57,7 @@ def generate_launch_description():
 
 
     initial_position = ExecuteProcess(
-        cmd=['ros2', 'action', 'send_goal', '/control_action', 'custom_interfaces/action/Control', '{action_number: 1}'],
+        cmd=['ros2', 'action', 'send_goal', '/control_action', 'custom_interfaces/action/Control', '{action_number: 38}'],
         output='screen'
     )
 
@@ -65,7 +65,7 @@ def generate_launch_description():
         cmd=['sleep', '0.2'],                 # cmd Befehl, warte 5 sec
         output = 'screen',                  # optional, Ausgabe im CMD                    
         on_exit = [ExecuteProcess(          # Am Ende (nach 5s) wird Aufgerufen
-            cmd=['ros2', 'action', 'send_goal', '/control_action', 'custom_interfaces/action/Control', '{action_number: 1}'],
+            cmd=['ros2', 'action', 'send_goal', '/control_action', 'custom_interfaces/action/Control', '{action_number: 38}'],
             output = 'screen',
             )]
     )

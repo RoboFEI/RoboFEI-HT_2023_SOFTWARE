@@ -83,7 +83,7 @@ public:
   int robot_number_;
   int cWalk;
 
-  std::vector<int> stepMoves = {1, 2, 3, 4, 7, 30, 31, 32, 33, 34, 35};
+  std::vector<int> stepMoves = {1, 2, 3, 4, 7, 30, 31, 32, 33, 34, 35, 38};
   std::vector<int> paramMoves = {5, 6, 9, 10, 14, 20, 21};
 
   bool body_activate_;
@@ -95,8 +95,6 @@ public:
   {
     RCLCPP_INFO(this->get_logger(), "Running action node");
     subscriber_fase_zero = this->create_subscription<std_msgs::msg::Bool>("/fase_zero", 1, std::bind(&Control::topic_callback_fase, this, _1));
-    // publisher_ = this->create_publisher<custom_interfaces::msg::SetPosition>("set_position", 10); 
-    // publisher_single = this->create_publisher<custom_interfaces::msg::SetPositionOriginal>("set_position_single", 10);
     pubisher_body_joints_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
     publisher_walk = this->create_publisher<custom_interfaces::msg::Walk>("walking", 10);
     publisher_atual_move = this->create_publisher<intMsg>("move_running", 10);
@@ -286,6 +284,11 @@ private:
           RCLCPP_DEBUG(this->get_logger(), "Reboladinha");
           parameters = false;
           section = "Reboladinha";
+          break;
+        case 38:
+          RCLCPP_DEBUG(this->get_logger(), "Paradinho");
+          parameters = true;
+          parameter_number = 14;
           break;
       }
       auto atualMove = intMsg();
