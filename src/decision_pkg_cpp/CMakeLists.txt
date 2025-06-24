@@ -12,6 +12,7 @@ find_package(rclcpp_action REQUIRED)
 find_package(custom_interfaces REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(vision_msgs REQUIRED)
 
 include_directories(include)
 
@@ -22,6 +23,7 @@ ament_target_dependencies(decision
   custom_interfaces
   geometry_msgs
   sensor_msgs
+  vision_msgs
 )
 
 add_executable(robot_behavior src/robot_behavior.cpp)
@@ -31,6 +33,7 @@ ament_target_dependencies(robot_behavior
   custom_interfaces
   geometry_msgs
   sensor_msgs
+  vision_msgs
 )
 
 install(TARGETS

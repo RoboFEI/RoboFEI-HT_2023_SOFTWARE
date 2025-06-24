@@ -470,11 +470,7 @@ int main(int argc, char * argv[])
   system(string1);//prioridade
   //GaitMove gaitMove(ini);
   rclcpp::init(argc, argv);
-  // if(MotionManager::GetInstance()->Initialize() == false)
-  //   {
-  //     printf("Fail to initialize Motion Manager!\n");
-  //     return 0;
-  // }
+
   rclcpp::spin(std::make_shared<Control>());
   rclcpp::shutdown();
   return 0;

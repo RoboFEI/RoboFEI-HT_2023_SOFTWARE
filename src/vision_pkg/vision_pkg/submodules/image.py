@@ -22,6 +22,32 @@ def drawBallBox(img, results, ball_index):
 
     return img_cp, ball_pos
 
+def drawGoalpostBox(img, results, goalpost_indices):
+    img_cp = img.copy()
+    goalpost_positions = []
+
+    for idx in goalpost_indices:
+        goalpost_box_xywh = results.boxes[idx].xywhn.numpy()
+        array_box_xywh = np.reshape(goalpost_box_xywh, -1)
+
+        center_x = int(array_box_xywh[0] * img.shape[1])
+        center_y = int(array_box_xywh[1] * img.shape[0])
+        width = int(array_box_xywh[2] * img.shape[1])
+        height = int(array_box_xywh[3] * img.shape[0])
+
+        x1 = int(center_x - width / 2)
+        y1 = int(center_y - height / 2)
+        x2 = int(center_x + width / 2)
+        y2 = int(center_y + height / 2)
+
+        cv2.rectangle(img_cp, (x1, y1), (x2, y2), (0, 255, 255), 2)  # amarelo
+        cv2.circle(img_cp, (center_x, center_y), 5, (0, 255, 255), -1)
+
+        goalpost_positions.append(np.array([center_x, center_y], dtype=float))
+
+    return img_cp, goalpost_positions
+
+
 def resize_image(img, scale_percent=100):
 
     width = int(img.shape[1] * scale_percent / 100)
@@ -45,3 +71,15 @@ def findBall(img, results, classesValues):
         
     return img_cp, ballPositionPx
  
+
+def findGoalpost(img, results, classesValues):
+    img_cp = img.copy()
+
+    try:
+        goalpost_indices = np.where(results.boxes.cls == classesValues['goalpost'])[0]
+    except:
+        goalpost_indices = []
+
+    img_cp, goalpost_positions = drawGoalpostBox(img_cp, results, goalpost_indices)
+    
+    return img_cp, goalpost_positions

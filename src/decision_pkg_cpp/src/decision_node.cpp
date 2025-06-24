@@ -32,6 +32,10 @@ DecisionNode::DecisionNode() : Node("decision_node")
         std::bind(&DecisionNode::listener_callback_imu_gyro, this, _1)
     );
 
+    imu_rpy_subscriber_ = this->create_subscription<geometry_msgs::msg::Vector3Stamped>(
+      "/imu/rpy", rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_imu_rpy, this, std::placeholders::_1));  
+  
     imu_accel_subscriber_ = this->create_subscription<ImuAccelMsg>(
         "imu/data",
         rclcpp::QoS(10),
@@ -50,10 +54,46 @@ DecisionNode::DecisionNode() : Node("decision_node")
         std::bind(&DecisionNode::listener_calback_running_move, this, _1)
     );
 
+    // subscriber que vai ler se jogaremos com localização ou sem
+    localization_subscriber = this->create_subscription<std_msgs::msg::Bool>(
+      "localization_active", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_localization_status, this, _1)
+    );
+
+    goalpost_division_lines = this->create_subscription<VisionMsg>(
+      "goalpost_position", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_goalpost_lines, this, _1)
+    );
+
+    goalpost_px_position = this->create_subscription<vision_msgs::msg::Point2D>(
+      "goalpost_px_position", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_goalpost_px, this, _1)
+    );
+
+    goalpost_count = this->create_subscription<std_msgs::msg::Int32>(
+      "goalpost_count", 
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_goalpost_count, this, _1)
+    );
+    
+    neck_position_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
+
+    neck_control_lock_pub_ = this->create_publisher<std_msgs::msg::Bool>("neck_control_locked", 10);
+
     this->action_client_ = rclcpp_action::create_client<ControlActionMsg>(
       this,
       "control_action"
     );
+
+    neck_track_timer_ = this->create_wall_timer(
+      std::chrono::milliseconds(100),
+      std::bind(&DecisionNode::set_neck_position, this)
+    );
+    neck_track_timer_->cancel();  
+    neck_timer_active_ = false;  
 
     send_goal_options.goal_response_callback =
       std::bind(&DecisionNode::goal_response_callback, this, _1);
@@ -94,6 +134,12 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
     // RCLCPP_INFO(this->get_logger(), "Secondary Game State: %d", this->gc_info.secondary_state);
 }
 
+void DecisionNode::listener_callback_imu_rpy(const geometry_msgs::msg::Vector3Stamped::SharedPtr rpy)
+{
+    robot.imu_yaw_rad = rpy->vector.z;
+    //RCLCPP_INFO(this->get_logger(), "🧭 Yaw recebido: %.3f rad", robot.imu_yaw_rad);
+}
+
 void DecisionNode::listener_callback_neck_pos(const JointStateMsg::SharedPtr neck_pos)
 {
     this->robot.neck_pos.position19 = neck_pos->info[19];
@@ -105,10 +151,9 @@ void DecisionNode::listener_callback_neck_pos(const JointStateMsg::SharedPtr nec
 
 void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro)
 {
-    this->imu_gyro = *imu_gyro;
+    this->robot.imu_gyro = *imu_gyro;
     // RCLCPP_INFO(this->get_logger(), "Recive Imu Gyro Info");
     // RCLCPP_INFO(this->get_logger(), "Yaw: %f\n", this->imu_gyro.vector.z);
-    
 }
 
 void DecisionNode::listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel)
@@ -217,8 +262,7 @@ void DecisionNode::send_goal(const Move &order)
     robot.finished_move = false;
   }
 
-
-//testar
+  //testar
   // if(order != this->robot.movement)
   // {
   //   if(order == stand_up_back || order == stand_up_front || order == stand_up_side)
@@ -236,9 +280,132 @@ void DecisionNode::send_goal(const Move &order)
   //   robot.movement = order;
   //   robot.finished_move = false;
   // }
-
-
 }
+
+  void DecisionNode::listener_callback_goalpost_lines(const VisionMsg::SharedPtr goalpost_division_lines)
+  {
+    robot.goalpost_division_lines = *goalpost_division_lines;
+  }
+
+  void DecisionNode::listener_callback_localization_status(const std_msgs::msg::Bool localization_msg)
+  {
+    robot.localization_msg = localization_msg;
+  }
+
+  void DecisionNode::listener_callback_goalpost_px(const vision_msgs::msg::Point2D::SharedPtr goalpost_px_position)
+  {
+    robot.goalpost_px_position = *goalpost_px_position;
+  }
+
+  void DecisionNode::listener_callback_goalpost_count(const std_msgs::msg::Int32::SharedPtr goalpost_count)
+  {
+    robot.goalpost_count = *goalpost_count;
+  }
+
+  void DecisionNode::set_neck_position()
+  {
+    if (!unlock_msg.data)
+    {
+        float pan;
+        float tilt;
+        
+        float x_offset = robot.goalpost_px_position.x;
+        float y_offset = robot.goalpost_px_position.y;
+
+        pan = 2000 - x_offset * 0.7;
+        tilt = 2000 - y_offset * 0.35;
+
+        // Limites
+        if (pan > 3050) pan = 3050;
+        else if (pan < 1350) pan = 1350;
+
+        if (tilt > 2048) tilt = 2048;
+        else if (tilt < 1050) tilt = 1050;
+    
+
+        auto new_neck_position = JointStateMsg();
+        new_neck_position.id.push_back(19);
+        new_neck_position.id.push_back(20);
+        new_neck_position.info.push_back(pan);
+        new_neck_position.info.push_back(tilt);
+        new_neck_position.type.push_back(JointStateMsg::POSITION);
+        new_neck_position.type.push_back(JointStateMsg::POSITION);
+
+        neck_position_publisher_->publish(new_neck_position);
+    }
+  } 
+
+  void DecisionNode::look_right()
+  {
+    if (!unlock_msg.data)
+    {
+      // Marca o início da publicação
+      neck_publish_start_time_ = this->now();
+  
+      // Cria o timer que publica a cada 100ms
+      neck_publish_timer_ = this->create_wall_timer(
+      std::chrono::milliseconds(100),
+      std::bind(&DecisionNode::publish_neck_position, this));
+  
+      RCLCPP_INFO(this->get_logger(), "🚀 Iniciou publicação contínua da posição do pescoço por 2 segundos.");
+    }
+  }
+  
+  void DecisionNode::publish_neck_position()
+  {
+    rclcpp::Duration elapsed = this->now() - neck_publish_start_time_;
+  
+    if (elapsed.seconds() >= 5.0)
+    {
+      neck_publish_timer_->cancel();
+      waiting_look_right = true;
+      RCLCPP_INFO(this->get_logger(), "✅ Finalizou publicação da posição do pescoço após 2 segundos.");
+      return;
+    }
+    RCLCPP_INFO(this->get_logger(), "Tempo: %f", elapsed.seconds());
+    // Publica a posição do pescoço
+    float pan = 2000;
+    float tilt = 2000;
+  
+    auto new_neck_position = JointStateMsg();
+    new_neck_position.id.push_back(19);
+    new_neck_position.id.push_back(20);
+    new_neck_position.info.push_back(pan);
+    new_neck_position.info.push_back(tilt);
+    new_neck_position.type.push_back(JointStateMsg::POSITION);
+    new_neck_position.type.push_back(JointStateMsg::POSITION);
+  
+    neck_position_publisher_->publish(new_neck_position);
+  }
+  
+
+  void DecisionNode::look_down_to_ball()
+{
+    auto msg = JointStateMsg();
+
+    float pan = 2000;  // centralizado
+    float tilt = 1350; // olhando para baixo (ajuste fino aqui)
+
+    msg.id = {19, 20};
+    msg.info = {pan, tilt};
+    msg.type = {JointStateMsg::POSITION, JointStateMsg::POSITION};
+
+    neck_position_publisher_->publish(msg);
+}
+
+
+  void DecisionNode::free_neck()
+  {
+      unlock_msg.data = true;  // libera
+      neck_control_lock_pub_->publish(unlock_msg);
+  }
+
+  void DecisionNode::lock_neck()
+  {
+      unlock_msg.data = false;  // bloqueia
+      neck_control_lock_pub_->publish(unlock_msg);
+  }
+
 
 void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr &goal_handle)
 {

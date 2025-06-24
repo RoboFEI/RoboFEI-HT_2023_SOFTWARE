@@ -20,6 +20,12 @@ NeckNode::NeckNode()
 
   neck_position_subscriber_ = this->create_subscription<JointStateMsg>(
     "all_joints_position", 10, std::bind(&NeckNode::listener_callback_neck, this, std::placeholders::_1), sub_opt);
+  
+  neck_control_lock_sub_ = this->create_subscription<std_msgs::msg::Bool>(
+      "neck_control_locked", 10,
+      std::bind(&NeckNode::neck_lock_callback, this, std::placeholders::_1)
+  );
+  
 
   set_neck_position_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
 
@@ -53,6 +59,8 @@ NeckNode::NeckNode()
         neck.pan  = 512;
     neck.tilt = 512;  
   }
+
+  received_neck_lock_ = false;
 }
 
 NeckNode::~NeckNode()
@@ -114,47 +122,55 @@ void NeckNode::listener_callback_neck(const JointStateMsg::SharedPtr msg)
   //RCLCPP_INFO(this->get_logger(), "id 19 '%d' / id 20: '%d'", neck.pan, neck.tilt);
 }
 
+void NeckNode::neck_lock_callback(const std_msgs::msg::Bool::SharedPtr msg)
+{
+    neck_locked_ = msg->data;
+    received_neck_lock_ = true;
+}
+
 void NeckNode::search_ball()
 {
-
-  if(search_ball_timer.delay(search_ball_delay))
+  if (neck_locked_ || !received_neck_lock_)
   {
-    auto new_neck_position = JointStateMsg();
+    if(search_ball_timer.delay(search_ball_delay))
+    {
+      auto new_neck_position = JointStateMsg();
 
-    if(this->search_ball_state < search_ball_samples[0])
-      {
-        search_ball_pos = {search_ball_limits[0],1300};
-        if(this->search_ball_state > 0) this->search_ball_pos[0] -= (((search_ball_limits[0]*2)-4096)/(search_ball_samples[0]))*search_ball_state;
-      }
-    if(this->search_ball_state >= search_ball_samples[0] && this->search_ball_state <= (search_ball_samples[0]+search_ball_samples[1]))
-      {
-        search_ball_pos = {(4096-search_ball_limits[1]),1550};
-        if(this->search_ball_state > (search_ball_samples[0])) this->search_ball_pos[0] += (((search_ball_limits[1]*2)-4096)/(search_ball_samples[1]))*(search_ball_state-search_ball_samples[0]);
-      }
-    if(this->search_ball_state >= (search_ball_samples[0]+search_ball_samples[1]))
-      {
-        search_ball_pos = {search_ball_limits[2],1800};
-        if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1])) this->search_ball_pos[0] -= (((search_ball_limits[2]*2)-4096)/(search_ball_samples[2]))*(search_ball_state-(search_ball_samples[0]+search_ball_samples[1]));
-      }
-    if(robotNumber > 2) 
-      {
-        this->search_ball_pos[0] = (search_ball_pos[0])*(0.25);
-        this->search_ball_pos[1] = (search_ball_pos[1])*(0.25);
-      }
-    new_neck_position.id.push_back(19);
-    new_neck_position.id.push_back(20);
-        new_neck_position.info.push_back(this->search_ball_pos[0]);
-    new_neck_position.info.push_back(this->search_ball_pos[1]);
+      if(this->search_ball_state < search_ball_samples[0])
+        {
+          search_ball_pos = {search_ball_limits[0],1300};
+          if(this->search_ball_state > 0) this->search_ball_pos[0] -= (((search_ball_limits[0]*2)-4096)/(search_ball_samples[0]))*search_ball_state;
+        }
+      if(this->search_ball_state >= search_ball_samples[0] && this->search_ball_state <= (search_ball_samples[0]+search_ball_samples[1]))
+        {
+          search_ball_pos = {(4096-search_ball_limits[1]),1550};
+          if(this->search_ball_state > (search_ball_samples[0])) this->search_ball_pos[0] += (((search_ball_limits[1]*2)-4096)/(search_ball_samples[1]))*(search_ball_state-search_ball_samples[0]);
+        }
+      if(this->search_ball_state >= (search_ball_samples[0]+search_ball_samples[1]))
+        {
+          search_ball_pos = {search_ball_limits[2],1800};
+          if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1])) this->search_ball_pos[0] -= (((search_ball_limits[2]*2)-4096)/(search_ball_samples[2]))*(search_ball_state-(search_ball_samples[0]+search_ball_samples[1]));
+        }
+      if(robotNumber > 2) 
+        {
+          this->search_ball_pos[0] = (search_ball_pos[0])*(0.25);
+          this->search_ball_pos[1] = (search_ball_pos[1])*(0.25);
+        }
+      new_neck_position.id.push_back(19);
+      new_neck_position.id.push_back(20);
+          new_neck_position.info.push_back(this->search_ball_pos[0]);
+      new_neck_position.info.push_back(this->search_ball_pos[1]);
 
-    new_neck_position.type.push_back(JointStateMsg::POSITION);
-    new_neck_position.type.push_back(JointStateMsg::POSITION);
+      new_neck_position.type.push_back(JointStateMsg::POSITION);
+      new_neck_position.type.push_back(JointStateMsg::POSITION);
 
-    RCLCPP_DEBUG(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.info[0], new_neck_position.info[1]);
+      RCLCPP_DEBUG(this->get_logger(), "search ball id 19: %d  |  id 20: %d!", new_neck_position.info[0], new_neck_position.info[1]);
 
-    if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
+      if(neck_activate_) set_neck_position_publisher_->publish(new_neck_position);
 
-    this->search_ball_state += 1;
-        if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1]+search_ball_samples[2])) this->search_ball_state = 0;
+      this->search_ball_state += 1;
+          if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1]+search_ball_samples[2])) this->search_ball_state = 0;
+    }
   }
 }
 

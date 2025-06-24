@@ -23,7 +23,10 @@ class RobotBehavior : public DecisionNode
         bool is_goalkeeper(int robot_num); // feito
         bool is_bala(int robot_num);
         bool is_kicker(int robot_num);
+        void kicker_localization_game();
+        void bala_localization_game();
         bool ball_is_locked();
+        bool goalpost_is_locked(); 
         bool vision_stable();
         bool ball_in_camera_center();
         bool ball_in_robot_limits();
@@ -53,6 +56,8 @@ class RobotBehavior : public DecisionNode
     private:
 
         AssyncTimer lost_ball_timer;
+        AssyncTimer look_right_timer;
+        AssyncTimer check_goalpost_timer;
         bool is_penalized();
         void get_up();
 

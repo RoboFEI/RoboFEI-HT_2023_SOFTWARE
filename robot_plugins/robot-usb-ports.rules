@@ -16,3 +16,4 @@ KERNEL=="ttyUSB*", ATTRS{serial}=="AI05A3SZ", SYMLINK+="motors", MODE="0777"
 
 # Camera Rules
 KERNEL=="video*", ATTRS{product}=="HD Pro Webcam C920",ATTR{index}=="0", SYMLINK+="camera", MODE="0777"
+
