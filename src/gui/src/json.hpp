@@ -7,8 +7,9 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <regex>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 namespace fs = std::filesystem;
 
 class Json
@@ -20,11 +21,33 @@ class Json
         void printJson();
         void teste();
 
-        // Json();
-        // virtual ~Json();
+        bool contains(const std::string& move_name) const{
+            return j.contains(move_name);
+        }
+
+        json& getMoveJson(const std::string& move_name){
+            return j[move_name];
+        }
+
+        void setMoveValue(const std::string& move_name, const std::string& key, const json& value){
+            j[move_name][key] = value;
+        }
+
+        void saveJson(const std::string& path){
+            std::ofstream file(path);
+            if(file.is_open()){
+                // Salva com indentação mínima, sem quebra de linha em arrays.
+                file << j.dump(4) << std::endl;
+                file.close();
+            }
+        }
+        
     
     private:
         json j;
 };
 
+// Função de pós-processamento
+void postProcessFile(const std::string& path);
+ 
 #endif

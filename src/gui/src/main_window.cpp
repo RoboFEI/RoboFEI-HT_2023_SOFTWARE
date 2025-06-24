@@ -314,7 +314,7 @@ void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosiçõ
 
 void MainWindow::on_nextStep_button_clicked()
 {
-  if(atualStep < atualMovesList.size())
+  if(atualStep < (int)atualMovesList.size())
   {
     atualStep++;
     displayStepInfo();
@@ -366,12 +366,49 @@ void MainWindow::sendJointPos(std::vector<int> jointsPos)
   joint_state_publisher_ ->publish(jointPos);
 }
 
+// wip: adicionar a parte de salvar do gui para o json.
 void MainWindow::on_saveStep_button_clicked()
 {
   if(atualStep == 0) return;
-  
+
+  lastPositions = getAllPositions();
   atualMovesList[atualStep-1][0] = lastPositions;
   atualMovesList[atualStep-1][1] = lastVelocitys;
+
+  // pega o nome do movimento atual
+  std::string moveName = ui_->movesList->currentText().toStdString();
+
+  // verifica se o movimento atual existe no json
+  if(!motions.contains(moveName)){
+    RCLCPP_WARN(this->get_logger(), "Movimento %s não encontrado no JSON", moveName.c_str());
+    return;
+  }
+
+  //Formata as chaves para salvar no json 
+  std::string posKey = "position" + std::to_string(atualStep);
+  std::string sleepKey = "sleep" + std::to_string(atualStep);
+  std::string addressKey = "address" + std::to_string(atualStep);
+
+  // Salva no JSON
+  motions.setMoveValue(moveName, addressKey, 116);
+  motions.setMoveValue(moveName, posKey, lastPositions);
+  motions.setMoveValue(moveName, sleepKey, 1.0);  // valor fixo como você pediu
+
+
+  // Recupera a referência ao json do movimento
+  json& moveJson = motions.getMoveJson(moveName);
+
+  // Debug print
+  std::cout << addressKey << ": " << moveJson[addressKey] << std::endl;
+  std::cout << posKey << ": " << moveJson[posKey] << std::endl;
+  std::cout << sleepKey << ": " << moveJson[sleepKey] << std::endl;
+
+  std::string jsonFilePath = folder_path + "/src/control/Data/motion" + std::to_string(robot_number_) + ".json";
+  motions.saveJson(jsonFilePath);
+  postProcessFile(jsonFilePath);
+
+  RCLCPP_INFO(this->get_logger(), "Step %d salvo com sucesso no JSON.", atualStep);
+
 }
 
 void MainWindow::checkUnsaved()
