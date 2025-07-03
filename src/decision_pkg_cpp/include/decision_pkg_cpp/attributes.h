@@ -50,8 +50,19 @@ enum Move
     stand_up_front      = 17,
     stand_up_side       = 18,
     walk_left           = 20,
-    walk_right          = 21
+    walk_right          = 24,
+    turn_ball_left      = 9,
+    turn_ball_right      = 10
 };
+
+enum ReadyEtapa
+        {
+            ETAPA_WALK,
+            ETAPA_TURN,
+            ETAPA_PARAR
+        };
+
+ReadyEtapa ready_etapa = ETAPA_WALK;
 
 enum RobotBallPosition
 {

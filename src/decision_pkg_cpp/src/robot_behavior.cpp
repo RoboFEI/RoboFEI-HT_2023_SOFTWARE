@@ -85,32 +85,49 @@ void RobotBehavior::normal_game()           //jogo normal
         break;
     
     case GameControllerMsg::GAMESTATE_READY:
+    {
+        int neck = robot.neck_pos.position19;
         
-        static bool yaw_fixed = false;  // variável estática local para garantir que IMU atualiza 1 vez so
 
-        if (!yaw_fixed) // atualizar ponto zero da IMU
+        RCLCPP_INFO(this->get_logger(), "🎯 READY | Etapa: %d | Neck: %d", ready_etapa, neck);
+
+        switch (ready_etapa)
         {
-            yaw_reference_ = robot.imu_yaw_rad;
-            yaw_reference_set_ = true;
-            yaw_fixed = true;
+        case ETAPA_WALK:
+            if (neck >= 1450 && neck <= 2635)
+            {
+                send_goal(walk);
+                //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
+            }
+            else
+            {
+                send_goal(stand_still);
+                ready_etapa = ETAPA_TURN;
+                //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
+            }
+            break;
 
-            // RCLCPP_INFO(this->get_logger(), "🧭 Referência de yaw FIXADA no READY: %.3f rad", yaw_reference_);
-        }
+        case ETAPA_TURN:
+            if (neck > 2068 || neck < 2028)
+            {
+                send_goal(turn_left);
+                //RCLCPP_INFO(this->get_logger(), "↩️ Virando até alinhar com 2048");
+            }
+            else
+            {
+                ready_etapa = ETAPA_PARAR;
+                //RCLCPP_INFO(this->get_logger(), "✅ Alinhou com a bola, indo para PARAR");
+            }
+            break;
 
-        while(robot.neck_pos.position19 >= 1450 && robot.neck_pos.position19 <= 2635){ // robo anda em direção ao centro
-            send_goal(walk);
+        case ETAPA_PARAR:
+            send_goal(stand_still);
+            //RCLCPP_INFO(this->get_logger(), "🛑 Parado (etapa final)");
             break;
         }
-        send_goal(stand_still);
-        
-        if(robot.neck_pos.position19 < 2048){ // definir lado do campo 1 - right 0 - left
-            opposite_side = 1;
-        }else{
-            opposite_side = 0;
-        }
 
-        // RCLCPP_INFO(this->get_logger(), "opposite side: %d", opposite_side); 
         break;
+    }
         
     case GameControllerMsg::GAMESTATE_SET: // feito
         send_goal(stand_still);
@@ -294,7 +311,7 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
             send_goal(walk_left);
             // RCLCPP_INFO(this->get_logger(), "walking left");
         }
-        else if ((robot.neck_pos.position19 > 1360) && (robot.neck_pos.position19 < 2600))
+        else if (robot.neck_pos.position20 < 1230)
         {
             robot.state = kick_ball;
         }
@@ -385,17 +402,17 @@ void RobotBehavior::kicker_localization_game()                //estado de jogo n
         // entrei pelo lado direito
         if (opposite_side == 0)
         {
-            if (delta_yaw > 0.1 && delta_yaw <= 0.6) // gol alinado
+            if (delta_yaw > 0.1 && delta_yaw <= 0.6 && robot.neck_pos.position20 < 1230) // gol alinado
             {
                 robot.state = kick_ball;
             }
             else if (delta_yaw > 0.6 && delta_yaw <= 2)
             {
-                send_goal(turn_left);
+                send_goal(turn_ball_left);
             }
             else
             {
-                send_goal(turn_right);
+                send_goal(turn_ball_right);
             }
         }
         if(!robot.camera_ball_position.detected) robot.state = searching_ball;
@@ -849,11 +866,6 @@ void RobotBehavior::get_up() // feito
     case FallenBack:
         RCLCPP_DEBUG(this->get_logger(), "Stand up back");
         send_goal(stand_up_back);
-        break;
-
-    default:
-        RCLCPP_DEBUG(this->get_logger(), "Stand up sides");
-        send_goal(stand_up_side);
         break;
     }
 }

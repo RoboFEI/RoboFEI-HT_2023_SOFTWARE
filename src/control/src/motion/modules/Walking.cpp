@@ -407,7 +407,7 @@ void Walking::Process()
 	double TIME_UNIT = MotionModule::TIME_UNIT;
 	//                     R_HIP_YAW, R_HIP_ROLL, R_HIP_PITCH, R_KNEE, R_ANKLE_PITCH, R_ANKLE_ROLL, L_HIP_YAW, L_HIP_ROLL, L_HIP_PITCH, L_KNEE, L_ANKLE_PITCH, L_ANKLE_ROLL, R_ARM_SWING, L_ARM_SWING
 //	int dir[14]          = {   -1,         1,          1,         1,         -1,            1,          -1,         1,         -1,         -1,         1,            1,           1,           -1      }; // Robos Antigos
-	int dir[14]          = {   -1,        -1,          1,         1,         -1,            1,          -1,        -1,         -1,         -1,         1,            1,           1,           -1      }; // Robos Novos
+	int dir[14]          = {   -1,        -1,          1,         1,         1,            1,          -1,        -1,         -1,         -1,         -1,            1,           1,           -1      }; // Robos Novos
     double initAngle[14] = {   0.0,       0.0,        0.0,       0.0,        0.0,          0.0,         0.0,       0.0,        0.0,        0.0,       0.0,          0.0,         0.0,          0.0    };
 	int outValue[14];
 

@@ -41,6 +41,10 @@ class Json
                 file.close();
             }
         }
+        json& getJson();
+
+        
+
         
     
     private:
