@@ -1,23 +1,23 @@
-# Robot 3
+# Robot 3 ROBOTTER
 /**:
   ros__parameters:
-    neck_up_limit   : 512
-    neck_down_limit : 300
-    neck_left_limit : 724
-    neck_right_limit: 300
+    neck_up_limit   : 2048
+    neck_down_limit : 1200
+    neck_left_limit : 2650
+    neck_right_limit: 1350
     robot_number    : 3
 
 /neck_node:
   ros__parameters:
     neck_activate: true
 
-    x_p_gain: 0.35
+    x_p_gain: 0.20
     y_p_gain: 0.15
 
 /control:
   ros__parameters:
     body_activate : true
-    walk_counter  : 1 
+    walk_counter  : 1  #150 
 
 /decision_node:
   ros__parameters:
@@ -29,4 +29,4 @@
     img_qlty: 100 
     get_image: false
     fps_save: 2
-    enable_udp: True    
+    enable_udp: false
