@@ -85,6 +85,18 @@ echo -e "${blue} Instalação das bibliotecas necessárias...${NC}"
     read rob_num
     echo "robot_number=$rob_num" | sudo tee /home/robot_num.py
 
+    if ! grep -q "ROS_DOMAIN_ID=" ~/.bashrc; then
+    echo "export ROS_DOMAIN_ID=$rob_num" >> ~/.bashrc
+    else
+        sed -i "s/^export ROS_DOMAIN_ID=.*/export ROS_DOMAIN_ID=$rob_num/" ~/.bashrc
+    fi
+
+    if ! grep -q "ROS_NAMESPACE=" ~/.bashrc; then
+        echo "export ROS_NAMESPACE=/robo$rob_num" >> ~/.bashrc
+    else
+        sed -i "s|^export ROS_NAMESPACE=.*|export ROS_NAMESPACE=/robo$rob_num|" ~/.bashrc
+    fi
+
 echo -e "${blue} setup new rules for usb names${NC}"
     sudo rm /etc/udev/rules.d/robot-usb-ports.rules
     sudo cp "/home/robo/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot-usb-ports.rules" /etc/udev/rules.d/
