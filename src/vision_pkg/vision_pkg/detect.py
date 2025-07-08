@@ -199,7 +199,7 @@ class BallDetection(Node):
                     self.get_logger().debug("Não está publicando no servidor udp")
 
             #cv2.imshow('Ball', self.img) # Show image
-           # cv2.waitKey(1)
+            #cv2.waitKey(1)
         except:
             
             pass

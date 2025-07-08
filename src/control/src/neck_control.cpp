@@ -151,7 +151,7 @@ void NeckNode::search_ball()
           search_ball_pos = {search_ball_limits[2],1800};
           if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1])) this->search_ball_pos[0] -= (((search_ball_limits[2]*2)-4096)/(search_ball_samples[2]))*(search_ball_state-(search_ball_samples[0]+search_ball_samples[1]));
         }
-      if(robotNumber > 2) 
+      if(robotNumber > 3) 
         {
           this->search_ball_pos[0] = (search_ball_pos[0])*(0.25);
           this->search_ball_pos[1] = (search_ball_pos[1])*(0.25);

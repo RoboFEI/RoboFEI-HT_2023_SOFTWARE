@@ -102,7 +102,8 @@ echo -e "${blue} setup new rules for usb names${NC}"
     sudo cp "/home/robo/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot-usb-ports.rules" /etc/udev/rules.d/
     sudo udevadm control --reload-rules
     sudo udevadm trigger
-    # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial}
+    # udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep ATTRS{serial} - placa antiga
+    # udevadm info -a -n /dev/ttyUSB0 | grep KERNELS - placa nova
 
 #Bind Comand
 # If the terminal is zsh you need to run this command after "rehash" 
