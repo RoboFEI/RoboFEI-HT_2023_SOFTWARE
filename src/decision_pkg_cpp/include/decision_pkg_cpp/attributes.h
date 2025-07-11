@@ -56,11 +56,11 @@ enum Move
 };
 
 enum ReadyEtapa
-        {
-            ETAPA_WALK,
-            ETAPA_TURN,
-            ETAPA_PARAR
-        };
+{
+    ETAPA_WALK,
+    ETAPA_TURN,
+    ETAPA_PARAR
+};
 
 ReadyEtapa ready_etapa = ETAPA_WALK;
 
