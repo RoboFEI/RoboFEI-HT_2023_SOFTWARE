@@ -81,6 +81,12 @@ void RobotBehavior::normal_game()           //jogo normal
     switch (gc_info.game_state)
     {
     case GameControllerMsg::GAMESTATE_INITAL: // conferido
+
+        if(robot.neck_pos.position19 < 2048){ // definir lado do campo 1 - right 0 - left
+            opposite_side = 1;
+        }else{
+            opposite_side = 0;
+        }
         send_goal(stand_still);
         break;
     
@@ -98,26 +104,42 @@ void RobotBehavior::normal_game()           //jogo normal
 
         }
         //RCLCPP_INFO(this->get_logger(), "🎯 READY | Etapa: %d | Neck: %d", ready_etapa, neck);    
-        if(robot.neck_pos.position19 < 2048){ // definir lado do campo 1 - right 0 - left
-            opposite_side = 1;
-        }else{
-            opposite_side = 0;
-        }
         
+        
+        RCLCPP_INFO(this->get_logger(), "%d", opposite_side);
         switch (ready_etapa)
         {
         case ETAPA_WALK:
-            if (neck >= 1450 && neck <= 2635)
+            if (opposite_side == 0)
             {
-                send_goal(walk);
-                //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
+                if (neck >= 1700)
+                {
+                    send_goal(walk);
+                    //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
+                }
+                else
+                {
+                    send_goal(stand_still);
+                    ready_etapa = ETAPA_TURN;
+                    //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
+                }
             }
-            else
+            else  if(opposite_side == 1)
             {
-                send_goal(stand_still);
-                ready_etapa = ETAPA_TURN;
-                //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
+                if (neck >= 1500)
+                {
+                    send_goal(walk);
+                    //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
+                }
+                else
+                {
+                    send_goal(stand_still);
+                    ready_etapa = ETAPA_TURN;
+                    //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
+                }   
             }
+                
+            
             break;
 
         case ETAPA_TURN:
@@ -282,7 +304,7 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         break;
     
     case aligning_with_the_ball:
-        RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
+        //RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
         if(robot_align_with_the_ball()) robot.state = ball_approach;
         //else if(ball_is_locked()) robot.state = ball_approach;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
@@ -314,7 +336,8 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
 
     case ball_close:
         //RCLCPP_INFO(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
-        RCLCPP_INFO(this->get_logger(), "ball close");
+        //RCLCPP_INFO(this->get_logger(), "ball close");
+        
         if (robot.neck_pos.position19 < 1360)
         {
             send_goal(walk_right);
