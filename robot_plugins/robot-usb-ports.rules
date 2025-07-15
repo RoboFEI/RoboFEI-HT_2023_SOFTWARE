@@ -23,6 +23,8 @@ KERNEL=="ttyUSB*", ATTRS{serial}=="AI05A3SZ", SYMLINK+="motors", MODE="0777"
 # Placa nova
 KERNEL=="ttyUSB*", KERNELS=="3-8.2", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", KERNELS=="1-5.2", SYMLINK+="motors", MODE="0777"
+KERNEL=="ttyUSB*", KERNELS=="1-6.1", SYMLINK+="motors", MODE="0777"
+KERNEL=="ttyUSB*", KERNELS=="1-5.3", SYMLINK+="motors", MODE="0777"
 
 # Camera Rules
 KERNEL=="video*", ATTRS{product}=="HD Pro Webcam C920",ATTR{index}=="0", SYMLINK+="camera", MODE="0777"
