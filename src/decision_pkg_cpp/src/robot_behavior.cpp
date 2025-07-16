@@ -362,7 +362,7 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         //RCLCPP_INFO(this->get_logger(), "kick");
         if(robot.movement != 3 && robot.movement != 4) 
         {
-            if (robot.neck_pos.position19 >= 2048) 
+            if (robot.neck_pos.position19 >= 2000) 
                 {   
                     RCLCPP_INFO(this->get_logger(), "kick_left");
                     send_goal(left_kick);
