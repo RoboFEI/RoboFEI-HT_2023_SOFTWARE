@@ -385,12 +385,68 @@ void MainWindow::sendJointPos(std::vector<int> jointsPos)
 
 void MainWindow::on_saveStep_button_clicked()
 {
-  if(atualStep == 0) return;
-  
-  atualMovesList[atualStep-1][0] = lastPositions;
-  atualMovesList[atualStep-1][1] = lastVelocitys;
-  atualMovesList[atualStep-1][2] = lastSleep;
+  if (atualStep == 0) return;
+
+  // 1) Atualiza seu vetor interno
+  lastPositions       = getAllPositions();
+  atualMovesList[atualStep - 1][0] = lastPositions;
+  atualMovesList[atualStep - 1][1] = lastVelocitys;
+
+  // 2) Obtém o JSON do movimento
+  std::string moveName = ui_->movesList->currentText().toStdString();
+  if (!motions.contains(moveName)) {
+    RCLCPP_WARN(this->get_logger(),
+                "Movimento %s não encontrado no JSON",
+                moveName.c_str());
+    return;
+  }
+  json &moveJson = motions.getMoveJson(moveName);
+
+  // 3) Mapeia o atualStep (GUI) para o sufixo real no JSON
+  int totalSuffix = moveJson["number of movements"];
+  int posCount    = 0;
+  int targetI     = -1;
+
+  // varre todos os sufixos de 1 até totalSuffix
+  for (int i = 1; i <= totalSuffix; ++i) {
+    std::string addrKey = "address" + std::to_string(i);
+    if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
+      // é um bloco de posição
+      ++posCount;
+      if (posCount == atualStep) {
+        targetI = i;
+        break;
+      }
+    }
+  }
+
+  if (targetI < 0) {
+    RCLCPP_WARN(this->get_logger(),
+                "Não encontrei o %dº bloco de posição em %s",
+                atualStep, moveName.c_str());
+    return;
+  }
+
+  // 4) Sobrescreve **só** position/ sleep para esse sufixo
+  std::string suf = std::to_string(targetI);
+  // address já é 116, não precisa regravar
+  moveJson["position" + suf] = lastPositions;
+  moveJson["sleep"    + suf] = 1.0;
+
+  // 5) Grava e pós-processa
+  std::string jsonFilePath =
+    folder_path +
+    "/src/control/Data/motion" +
+    std::to_string(robot_number_) +
+    ".json";
+  motions.saveJson(jsonFilePath);
+  postProcessFile(jsonFilePath);
+
+  RCLCPP_INFO(this->get_logger(),
+              "✅ Step %d (sufixo %d) salvo com sucesso em %s",
+              atualStep, targetI, moveName.c_str());
 }
+
 
 void MainWindow::checkUnsaved()
 {
