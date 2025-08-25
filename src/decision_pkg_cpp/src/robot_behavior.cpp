@@ -441,17 +441,17 @@ void RobotBehavior::kicker_localization_game()                //estado de jogo n
         RCLCPP_DEBUG(this->get_logger(), "ball close");
         
             
-        delta_yaw = fabs(robot.imu_yaw_rad - yaw_reference_); // estabelece a referencia do "zero" da IMU
+        delta_yaw = fabs(robot.imu_yaw_rad - yaw_reference_); // estabelece a referencia do "zero" da IMU   // numero absoluto
         //RCLCPP_INFO(this->get_logger(), "Delta yaw: %f", delta_yaw);
         RCLCPP_INFO(this->get_logger(), "Delta yaw ABS: %f", fabs(delta_yaw));
 
-        if (delta_yaw > M_PI) delta_yaw -= 2*M_PI; 
+        if (delta_yaw > M_PI) delta_yaw -= 2*M_PI;          //gira 180?
         if (delta_yaw < -M_PI) delta_yaw += 2*M_PI;
         
-        // entrei pelo lado direito
+        // entrei pelo lado esquerdo
         if (opposite_side == 0)
         {
-            if (delta_yaw > 0.1 && delta_yaw <= 0.6 && robot.neck_pos.position20 < 1230) // gol alinado
+            if (delta_yaw > 0.1 && delta_yaw <= 0.6 && robot.neck_pos.position20 < 1230) // gol alinhado
             {
                 robot.state = kick_ball;
             }
@@ -624,6 +624,24 @@ void RobotBehavior::goalkeeper_normal_game() // caso o jogador seja o goleiro
         else if(!goalkeeper_align_with_the_ball()) robot.state = aligning_with_the_ball;
         else send_goal(squat);       
         break;
+
+    case ball_close:
+        RCLCPP_DEBUG(this->get_logger(), "Goalkeeper ball close");
+        robot.state = kick_ball;
+        break;
+
+    case kick_ball:
+        RCLCPP_ERROR(this->get_logger(), "Goalkeeper kick");
+        if ((!robot.camera_ball_position.detected) || (robot.ball_position != center))
+	    {
+            send_goal(gait);
+            robot.state = searching_ball;
+            lost_ball_timer.reset();
+	    }
+        else send_goal(walk);
+
+        //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
+	    break;
     }
 }
 
@@ -914,6 +932,15 @@ void RobotBehavior::get_up() // feito
     case FallenBack:
         RCLCPP_DEBUG(this->get_logger(), "Stand up back");
         send_goal(stand_up_back);
+        break;
+
+    case NotFallen:
+        break;
+
+    case FallenRight:
+        break;
+
+    case FallenLeft:
         break;
     }
 }
