@@ -363,7 +363,7 @@ void MainWindow::sendJointPos(std::vector<int> jointsPos)
     jointPos.info.push_back(jointsPos[i]);
     jointPos.type.push_back(JointStateMsg::POSITION);
   }
-  joint_state_publisher_->publish(jointPos);
+  joint_state_publisher_ ->publish(jointPos);
 }
 
 // wip: adicionar a parte de salvar do gui para o json.
@@ -420,7 +420,7 @@ void MainWindow::on_saveStep_button_clicked()
   // 5) Grava e pós-processa
   std::string jsonFilePath =
     folder_path +
-    "/src/control/Data/motion" +
+    "/src/control/Data/teste" +
     std::to_string(robot_number_) +
     ".json";
   motions.saveJson(jsonFilePath);
