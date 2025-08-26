@@ -1242,6 +1242,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="saveIntoNextStep_button">
+            <property name="text">
+             <string>Save Into Next Step</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="saveMove_button">
             <property name="text">
              <string>Save Move</string>
@@ -1251,6 +1258,29 @@
          </layout>
         </item>
        </layout>
+      </widget>
+      <widget class="QLabel" name="sleep_text">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>510</y>
+         <width>67</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Sleep:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="sleep_value">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>510</y>
+         <width>113</width>
+         <height>30</height>
+        </rect>
+       </property>
       </widget>
      </widget>
     </item>

@@ -363,7 +363,7 @@ void MainWindow::sendJointPos(std::vector<int> jointsPos)
     jointPos.info.push_back(jointsPos[i]);
     jointPos.type.push_back(JointStateMsg::POSITION);
   }
-  joint_state_publisher_ ->publish(jointPos);
+  joint_state_publisher_->publish(jointPos);
 }
 
 // wip: adicionar a parte de salvar do gui para o json.
@@ -411,16 +411,25 @@ void MainWindow::on_saveStep_button_clicked()
     return;
   }
 
-  // 4) Sobrescreve **só** position/ sleep para esse sufixo
+  // 4) Obtém o valor do sleep da interface (NOVO)
+  bool is_valid;
+  QString sleep_text = ui_->sleep_value->text();
+  double sleep_value = sleep_text.toDouble(&is_valid);
+  if (!is_valid) {
+      RCLCPP_INFO(this->get_logger(), "Erro! Valor de sleep inválido");
+      sleep_value = 1.0;
+  }
+
+  // 5) Sobrescreve position e sleep para esse sufixo
   std::string suf = std::to_string(targetI);
   // address já é 116, não precisa regravar
   moveJson["position" + suf] = lastPositions;
-  moveJson["sleep"    + suf] = 1.0;
+  moveJson["sleep"    + suf] = sleep_value; // Agora usa o valor da interface
 
-  // 5) Grava e pós-processa
+  // 6) Grava e pós-processa
   std::string jsonFilePath =
     folder_path +
-    "/src/control/Data/teste" +
+    "/src/control/Data/motion" +
     std::to_string(robot_number_) +
     ".json";
   motions.saveJson(jsonFilePath);
@@ -429,6 +438,94 @@ void MainWindow::on_saveStep_button_clicked()
   RCLCPP_INFO(this->get_logger(),
               "✅ Step %d (sufixo %d) salvo com sucesso em %s",
               atualStep, targetI, moveName.c_str());
+}
+
+void MainWindow::on_saveIntoNextStep_button_clicked() {
+    // 1) Obtém o JSON do movimento primeiro para verificar se existe próximo step
+    std::string moveName = ui_->movesList->currentText().toStdString();
+    if (!motions.contains(moveName)) {
+        RCLCPP_WARN(this->get_logger(),
+                    "Movimento %s não encontrado no JSON",
+                    moveName.c_str());
+        return;
+    }
+    json &moveJson = motions.getMoveJson(moveName);
+
+    // 2) Verifica se existe um próximo step disponível
+    int totalSuffix = moveJson["number of movements"];
+    int posCount = 0;
+    int targetI = -1;
+    int stepToSave = atualStep + 1; // Tentamos salvar no próximo step
+
+    // Conta quantos blocos de posição existem e encontra o último
+    int lastAvailableStep = 0;
+    for (int i = 1; i <= totalSuffix; ++i) {
+        std::string addrKey = "address" + std::to_string(i);
+        if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
+            ++posCount;
+            lastAvailableStep = posCount; // Mantém o último step disponível
+        }
+    }
+
+    // Se não há próximo step, salva no último step disponível
+    if (stepToSave > posCount) {
+        RCLCPP_WARN(this->get_logger(),
+                    "⚠️  Não há próximo step disponível! Salvando no último step %d (máximo: %d)",
+                    lastAvailableStep, posCount);
+        stepToSave = lastAvailableStep;
+    }
+
+    // 3) Atualiza vetor interno
+    lastPositions = getAllPositions();
+    atualMovesList[stepToSave - 1][0] = lastPositions;
+    atualMovesList[stepToSave - 1][1] = lastVelocitys;
+
+    // 4) Mapeia stepToSave para o sufixo real no JSON
+    posCount = 0; // Reseta o contador
+    for (int i = 1; i <= totalSuffix; ++i) {
+        std::string addrKey = "address" + std::to_string(i);
+        if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
+            ++posCount;
+            if (posCount == stepToSave) {
+                targetI = i;
+                break;
+            }
+        }
+    }
+
+    if (targetI < 0) {
+        RCLCPP_WARN(this->get_logger(),
+                    "Não encontrei o %dº bloco de posição em %s",
+                    stepToSave, moveName.c_str());
+        return;
+    }
+
+    // 5) Sobrescreve position/sleep
+    std::string suf = std::to_string(targetI);
+
+    bool is_valid;
+    QString sleep_text = ui_->sleep_value->text();
+    double sleep_value = sleep_text.toDouble(&is_valid);
+    if (!is_valid) {
+        RCLCPP_INFO(this->get_logger(), "Erro! Valor de sleep inválido");
+        sleep_value = 1.0;
+    }
+
+    moveJson["position" + suf] = lastPositions;
+    moveJson["sleep" + suf] = sleep_value;
+
+    // 6) Grava e pós-processa
+    std::string jsonFilePath =
+        folder_path +
+        "/src/control/Data/motion" +
+        std::to_string(robot_number_) +
+        ".json";
+    motions.saveJson(jsonFilePath);
+    postProcessFile(jsonFilePath);
+
+    RCLCPP_INFO(this->get_logger(),
+                "✅ Step %d (sufixo %d) salvo com sucesso em %s",
+                stepToSave, targetI, moveName.c_str());
 }
 
 

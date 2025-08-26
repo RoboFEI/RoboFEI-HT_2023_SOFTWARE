@@ -106,6 +106,7 @@ private slots:
   void on_nextStep_button_clicked();
   void on_prevStep_button_clicked();
   void on_saveStep_button_clicked();
+  void on_saveIntoNextStep_button_clicked();
   void on_playMove_button_clicked();
   void on_playUntilMove_button_clicked();
   void on_stop_button_clicked();
