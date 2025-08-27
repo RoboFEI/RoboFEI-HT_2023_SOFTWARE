@@ -28,3 +28,9 @@ KERNEL=="ttyUSB*", KERNELS=="1-5.3", SYMLINK+="motors", MODE="0777"
 
 # Camera Rules
 KERNEL=="video*", ATTRS{product}=="HD Pro Webcam C920",ATTR{index}=="0", SYMLINK+="camera", MODE="0777"
+
+# Logitech HD Pro Webcam C920
+KERNEL=="video*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", SYMLINK+="camera_c920", MODE="0777"
+
+# Lenovo FHD Webcam
+KERNEL=="video*", ATTRS{idVendor}=="17ef", ATTRS{idProduct}=="4831", SYMLINK+="camera_lenovo", MODE="0777"

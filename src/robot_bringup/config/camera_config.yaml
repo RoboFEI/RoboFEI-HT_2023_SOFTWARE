@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    video_device: "/dev/camera"
+    video_device: "/dev/camera_lenovo"
     framerate: 30.0
     io_method: "mmap"
     frame_id: "camera"
@@ -10,14 +10,14 @@
     image_height: 480
     camera_name: "test_camera"
     camera_info_url: "package://usb_cam/config/camera_info.yaml"
-    brightness: 128  #0
-    contrast: 128    #16
-    saturation: 128  #10
-    sharpness: 138   #7
+    brightness: 0  #0
+    contrast: 12    #16
+    saturation: 12  #10
+    sharpness: 12   #7
     gain: 0
     auto_white_balance: true
-    white_balance: -1
+    white_balance: 0
     autoexposure: true
-    exposure: 100
+    exposure: 1
     autofocus: false
     focus: -1
