@@ -74,20 +74,6 @@ MainWindow::MainWindow(
   QShortcut *sC3 = new QShortcut(QKeySequence("Ctrl+S"), this);
   this->connect(sC3, &QShortcut::activated, this, &MainWindow::on_saveStep_button_clicked);
 
-  QShortcut *sC4 = new QShortcut(QKeySequence("Ctrl+Right"), this);
-  this->connect(sC4, &QShortcut::activated, this, &MainWindow::on_nextStep_button_clicked);
-
-  QShortcut *sC5 = new QShortcut(QKeySequence("Ctrl+Left"), this);
-  this->connect(sC5, &QShortcut::activated, this, &MainWindow::on_prevStep_button_clicked);
-
-  // //Espelhar valores dos motores
-  // QShortcut *sC6 = new QShortcut(QKeySequence(""), this);
-  // this->connect(sC6, &QShortcut::activated, this, &MainWindow::);
-
-  //mandar o parado
-  QShortcut *sC7 = new QShortcut(QKeySequence("Ctrl+P"), this);
-  this->connect(sC7, &QShortcut::activated, this, &MainWindow::sendStandStill);
-
   for(auto PosLineEdit : allPosLineEdit)
   {
     this->connect(PosLineEdit, &QLineEdit::returnPressed, this, &MainWindow::sendSingleInfo);
@@ -316,12 +302,9 @@ void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosiçõ
 {
   lastPositions = atualMovesList[atualStep-1][0];
   lastVelocitys = atualMovesList[atualStep-1][1];
-  lastSleep     = atualMovesList[atualStep-1][2];
   
   sendJointVel(lastVelocitys);
   sendJointPos(lastPositions);
-
-  ui_->label_sleep->setText(QString("%1").arg(lastSleep[0]/1000.0));
 
   if(mode == 0) on_pos_button_clicked();
   else on_vel_button_clicked(); 
@@ -331,7 +314,7 @@ void MainWindow::displayStepInfo() //mudar para enviar pros motores as prosiçõ
 
 void MainWindow::on_nextStep_button_clicked()
 {
-  if(atualStep < atualMovesList.size() && atualStep != 0)
+  if(atualStep < (int)atualMovesList.size())
   {
     atualStep++;
     displayStepInfo();
@@ -351,7 +334,7 @@ void MainWindow::sendJointVel(std::vector<int> jointsVel)
 {
   auto jointVel = JointStateMsg();
 
-  if(count(jointsVel.begin(), jointsVel.end(), jointsVel[0]) == jointsVel.size())
+  if (std::count(jointsVel.begin(), jointsVel.end(), jointsVel[0]) == static_cast<int>(jointsVel.size()))
   {
     jointVel.id.push_back(254);
     jointVel.info.push_back(jointsVel[0]);
@@ -380,9 +363,10 @@ void MainWindow::sendJointPos(std::vector<int> jointsPos)
     jointPos.info.push_back(jointsPos[i]);
     jointPos.type.push_back(JointStateMsg::POSITION);
   }
-  joint_state_publisher_ ->publish(jointPos);
+  joint_state_publisher_->publish(jointPos);
 }
 
+// wip: adicionar a parte de salvar do gui para o json.
 void MainWindow::on_saveStep_button_clicked()
 {
   if (atualStep == 0) return;
@@ -427,13 +411,22 @@ void MainWindow::on_saveStep_button_clicked()
     return;
   }
 
-  // 4) Sobrescreve **só** position/ sleep para esse sufixo
+  // 4) Obtém o valor do sleep da interface (NOVO)
+  bool is_valid;
+  QString sleep_text = ui_->sleep_value->text();
+  double sleep_value = sleep_text.toDouble(&is_valid);
+  if (!is_valid) {
+      RCLCPP_INFO(this->get_logger(), "Erro! Valor de sleep inválido");
+      sleep_value = 1.0;
+  }
+
+  // 5) Sobrescreve position e sleep para esse sufixo
   std::string suf = std::to_string(targetI);
   // address já é 116, não precisa regravar
   moveJson["position" + suf] = lastPositions;
-  moveJson["sleep"    + suf] = 1.0;
+  moveJson["sleep"    + suf] = sleep_value; // Agora usa o valor da interface
 
-  // 5) Grava e pós-processa
+  // 6) Grava e pós-processa
   std::string jsonFilePath =
     folder_path +
     "/src/control/Data/motion" +
@@ -445,6 +438,94 @@ void MainWindow::on_saveStep_button_clicked()
   RCLCPP_INFO(this->get_logger(),
               "✅ Step %d (sufixo %d) salvo com sucesso em %s",
               atualStep, targetI, moveName.c_str());
+}
+
+void MainWindow::on_saveIntoNextStep_button_clicked() {
+    // 1) Obtém o JSON do movimento primeiro para verificar se existe próximo step
+    std::string moveName = ui_->movesList->currentText().toStdString();
+    if (!motions.contains(moveName)) {
+        RCLCPP_WARN(this->get_logger(),
+                    "Movimento %s não encontrado no JSON",
+                    moveName.c_str());
+        return;
+    }
+    json &moveJson = motions.getMoveJson(moveName);
+
+    // 2) Verifica se existe um próximo step disponível
+    int totalSuffix = moveJson["number of movements"];
+    int posCount = 0;
+    int targetI = -1;
+    int stepToSave = atualStep + 1; // Tentamos salvar no próximo step
+
+    // Conta quantos blocos de posição existem e encontra o último
+    int lastAvailableStep = 0;
+    for (int i = 1; i <= totalSuffix; ++i) {
+        std::string addrKey = "address" + std::to_string(i);
+        if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
+            ++posCount;
+            lastAvailableStep = posCount; // Mantém o último step disponível
+        }
+    }
+
+    // Se não há próximo step, salva no último step disponível
+    if (stepToSave > posCount) {
+        RCLCPP_WARN(this->get_logger(),
+                    "⚠️  Não há próximo step disponível! Salvando no último step %d (máximo: %d)",
+                    lastAvailableStep, posCount);
+        stepToSave = lastAvailableStep;
+    }
+
+    // 3) Atualiza vetor interno
+    lastPositions = getAllPositions();
+    atualMovesList[stepToSave - 1][0] = lastPositions;
+    atualMovesList[stepToSave - 1][1] = lastVelocitys;
+
+    // 4) Mapeia stepToSave para o sufixo real no JSON
+    posCount = 0; // Reseta o contador
+    for (int i = 1; i <= totalSuffix; ++i) {
+        std::string addrKey = "address" + std::to_string(i);
+        if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
+            ++posCount;
+            if (posCount == stepToSave) {
+                targetI = i;
+                break;
+            }
+        }
+    }
+
+    if (targetI < 0) {
+        RCLCPP_WARN(this->get_logger(),
+                    "Não encontrei o %dº bloco de posição em %s",
+                    stepToSave, moveName.c_str());
+        return;
+    }
+
+    // 5) Sobrescreve position/sleep
+    std::string suf = std::to_string(targetI);
+
+    bool is_valid;
+    QString sleep_text = ui_->sleep_value->text();
+    double sleep_value = sleep_text.toDouble(&is_valid);
+    if (!is_valid) {
+        RCLCPP_INFO(this->get_logger(), "Erro! Valor de sleep inválido");
+        sleep_value = 1.0;
+    }
+
+    moveJson["position" + suf] = lastPositions;
+    moveJson["sleep" + suf] = sleep_value;
+
+    // 6) Grava e pós-processa
+    std::string jsonFilePath =
+        folder_path +
+        "/src/control/Data/motion" +
+        std::to_string(robot_number_) +
+        ".json";
+    motions.saveJson(jsonFilePath);
+    postProcessFile(jsonFilePath);
+
+    RCLCPP_INFO(this->get_logger(),
+                "✅ Step %d (sufixo %d) salvo com sucesso em %s",
+                stepToSave, targetI, moveName.c_str());
 }
 
 
@@ -475,16 +556,8 @@ void MainWindow::checkUnsaved()
     {
       allPosLabel[i]->setStyleSheet("QLabel {background-color: yellow; color : none; }");
     }
-    else allPosLabel[i]->setStyleSheet("QLabel {background-color: none; color : black; }");  
-  }
-
-  if(atualMovesList[atualStep-1][2][0] != lastSleep[0])
-  {
-    ui_->label_sleep->setStyleSheet("QLabel {background-color: yellow; color : none; }");
-  }
-  else
-  {
-    ui_->label_sleep->setStyleSheet("QLabel {background-color: none; color : black; }");  
+    else allPosLabel[i]->setStyleSheet("QLabel {background-color: none; color : black; }");
+  
   }
 }
 
@@ -528,39 +601,16 @@ void MainWindow::on_deletStep_button_clicked()
 {
   if(atualStep == 0 || atualMovesList.size() == 1) return;
   atualMovesList.erase(atualMovesList.begin()+atualStep-1);
-  // atualStep = atualStep - 1;
-  // if(atualStep == -1) atualStep = 0;
-  on_prevStep_button_clicked();
+  atualStep = atualStep - 2;
+  if(atualStep == -1) atualStep = 0;
+  on_nextStep_button_clicked();
 }
 
 void MainWindow::on_newStep_button_clicked()
 {
-  if(atualStep == 0 || ui_->movesList->currentText() == QString("Stand Still")) return;
+  if(atualStep == 0) return;
   std::vector<std::vector<int>> newMove = atualMovesList[atualStep-1];
   atualMovesList.emplace(atualMovesList.begin()+atualStep-1, newMove);
   atualStep += 1;
   displayStepInfo();
-}
-
-void MainWindow::on_sleep_returnPressed()
-{
-  int sleepFloat = ui_->sleep->text().toFloat();
-  if(sleepFloat < 0) return;
-
-  lastSleep[0] = int(sleepFloat*1000);
-  ui_->label_sleep->setText(QString("%1").arg(lastSleep[0]/1000));
-}
-
-void MainWindow::sendStandStill()
-{
-  std::vector<std::vector<std::vector<int>>> standStill = motions.getMove("Stand Still");
-  sendJointVel(standStill[0][1]);
-  sendJointPos(standStill[0][0]);
-  usleep(standStill[0][2][0]*1e3);
-}
-
-void MainWindow::on_saveMove_button_clicked()
-{
-  on_saveStep_button_clicked();
-  motions.saveJson(atualMovesList, ui_->movesList->currentText().toUtf8().constData());
 }

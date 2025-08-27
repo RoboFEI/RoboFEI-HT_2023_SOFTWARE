@@ -1,30 +1,35 @@
 #include "json.hpp"
-
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <regex>
+#include <filesystem>
 #include <typeinfo>
+#include <string>
+
+namespace fs = std::filesystem;
 
 std::string folder_path2 = fs::current_path();
 
-// Json::Json()
-// {
-// }
-
-// Json::~Json()
-// {
-// }
-
 void Json::openJson(std::string json_path)
 {
-    jsonPath = json_path;
     std::ifstream fJson(json_path);
-    j = json::parse(fJson);
-    
+    try {
+        j = json::parse(fJson);
+        std::cout << "Debug: arquivo aberto com sucesso: " << json_path << std::endl;
+    } catch (const std::exception &e) {
+        std::cerr << "Erro ao abrir o json: " << e.what() << std::endl;
+    }
+}
+
+json& Json::getJson() {
+    return j;
 }
 
 std::vector<std::string> Json::getKeys()
 {
-    std::vector<std::string> keys;
-    for (auto it = j.begin(); it != j.end(); ++it)
-    {
+    std::vector<std::string> keys;  
+    for (auto it = j.begin(); it != j.end(); ++it) {
         keys.push_back(it.key());
     }
     return keys;
@@ -34,214 +39,155 @@ std::vector<std::vector<std::vector<int>>> Json::getMove(std::string move_name)
 {
     std::vector<std::vector<std::vector<int>>> moves;
     std::vector<int> position;
-    std::vector<int> velocity = std::vector<int>(18, 32);
-    std::vector<int> sleep = std::vector<int>(1, 0);
+    std::vector<int> velocity(18, 32);
+    std::vector<int> sleep(1, 0);
     int move = 0;
 
-    std::cout << "loading move: " << move_name << "\n";
-    std::cout << "number of movements: " << j[move_name]["number of movements"] << "\n";
+    std::cout << "Loading move: " << move_name << "\n";
+    std::cout << "Number of movements: " << j[move_name]["number of movements"] << "\n";
 
-    int lower_limiter = 3;
-    int upper_limiter = int(j[move_name]["number of movements"]) - 1;
-    if(move_name == "Stand Still")
+    int total = j[move_name]["number of movements"];
+    int i = 1;
+
+    while (i <= total)
     {
-        lower_limiter = 1;
-        upper_limiter = j[move_name]["number of movements"];
-    } 
+        int current_i = i;
 
-    for(int i=lower_limiter; i<=upper_limiter; i++)
+        std::string address_json = "address" + std::to_string(current_i);
+
+        // Processa blocos de configuração (id/velocity)
+        while (j[move_name].contains(address_json) && j[move_name][address_json] != 116)
+        {
+            std::string id_json = "id" + std::to_string(current_i);
+            std::string velocity_json = "velocity" + std::to_string(current_i);
+
+            if (j[move_name].contains(id_json) && j[move_name].contains(velocity_json)) {
+                int id = int(j[move_name][id_json]) - 1;
+
+                if (j[move_name][id_json] == 254)
+                    velocity = std::vector<int>(20, j[move_name][velocity_json]);
+                else if (id >= 0 && id < static_cast<int>(velocity.size()))
+                    velocity[id] = j[move_name][velocity_json];
+            }
+
+            current_i++;
+            address_json = "address" + std::to_string(current_i);
+        }
+
+        // Pega positionX se existir
+        std::string position_json = "position" + std::to_string(current_i);
+        if (j[move_name].contains(position_json) && j[move_name][position_json].is_array()) {
+            position = std::vector<int>(j[move_name][position_json]);
+        } else {
+            position.clear();  // garante que não estamos usando lixo
+        }
+
+        // Pega sleepX
+        std::string sleep_json = "sleep" + std::to_string(current_i);
+        if (j[move_name].contains(sleep_json)) {
+            float aux = j[move_name][sleep_json];
+            sleep[0] = static_cast<int>(aux * 1000);
+        }
+
+        // Debug
+        if (!position.empty()) {
+            for (auto pos : position) std::cout << pos << " ";
+            std::cout << "\n";
+        }
+
+        for (auto vel : velocity) std::cout << vel << " ";
+        std::cout << "\n";
+
+        for (auto delay : sleep) std::cout << delay << " ";
+        std::cout << "\n\n";
+
+        // Adiciona movimento se tiver posição
+        if (!position.empty()) {
+            moves.push_back(std::vector<std::vector<int>>(3));
+            moves[move][0] = position;
+            moves[move][1] = velocity;
+            moves[move][2] = sleep;
+            move++;
+        }
+
+        i = current_i + 1;
+        position.clear();  // limpa para o próximo passo
+    }
+
+    // Print final
+    for (const auto& i : moves)
     {
-        moves.push_back(std::vector<std::vector<int>>(3));
-
-        std::string address_json = "address" + std::to_string(i);
-
-        while(j[move_name][address_json] != 116) // to get the velocity
-        {
-            std::string id_json = "id" + std::to_string(i);
-            std::string velocity_json = "velocity" + std::to_string(i);
-            
-            int id = int(j[move_name][id_json]) - 1;
-            if(j[move_name][id_json] == 254) velocity = std::vector<int>(18, j[move_name][velocity_json]);
-            else velocity[id] = j[move_name][velocity_json];
-
-            i++;
-            address_json = "address" + std::to_string(i);
-        }
-
-        //to get position
-        std::string position_json =  "position" + std::to_string(i);
-        position = std::vector<int>(j[move_name][position_json]);
-
-        std::string sleep_json = "sleep" + std::to_string(i);
-        float aux = j[move_name][sleep_json];
-        sleep[0] = (int)(aux*1000);
-        
-        //Debug
-        for(auto pos : position)
-        {
-            std::cout << pos << " ";
-        }
-        std::cout << "\n";
-
-        for(auto vel : velocity)
-        {
-            std::cout << vel << " ";
-        }
-        std::cout << "\n";
-
-        for(auto delay : sleep)
-        {
-            std::cout << delay << " ";
-        }
-        std::cout << "\n";
-        std::cout << "\n";
-        std::cout << "\n";
-
-        moves[move][0] = position;
-        moves[move][1] = velocity;
-        moves[move][2] = sleep;
-        move++;
+        std::cout << "Position: ";
+        for (auto j : i[0]) std::cout << j << " ";
+        std::cout << "\nVelocity: ";
+        for (auto j : i[1]) std::cout << j << " ";
+        std::cout << "\nSleep: ";
+        for (auto j : i[2]) std::cout << j << " ";
+        std::cout << "\n\n";
     }
 
     return moves;
 }
 
-void Json::saveJson(std::vector<std::vector<std::vector<int>>> move, std::string moveName)
-{
-    j[moveName].clear();
-
-    std::vector<int> lastVel = move[0][1];
-    std::vector<int> newVel;
-    int numOfMoves = 1;
-
-    if(moveName != "Stand Still")
-    {
-        j[moveName] = j["Stand Still"];
-        lastVel = std::vector<int> (18, j["Stand Still"]["velocity1"]);
-        numOfMoves = 3;
-    }
-
-    std::string address = "address";
-    std::string position = "position";
-    std::string id = "id";
-    std::string vel = "velocity";
-    std::string sleep = "sleep";
-    
-    for(int i=0; i<move.size(); i++)
-    {
-        newVel = move[i][1];
-        if(lastVel != newVel || numOfMoves == 1)
-        {
-            if(std::count(newVel.begin(), newVel.end(), newVel[0]) == newVel.size()) // Todas as veocidades são diferentes
-            {
-                j[moveName][address+std::to_string(numOfMoves)] = 112;
-                j[moveName][id+std::to_string(numOfMoves)] = 254;
-                j[moveName][vel+std::to_string(numOfMoves)] = newVel[0];
-                numOfMoves++;
-            }
-            else
-            {
-                if(getMode(newVel) == getMode(lastVel)) // Maioria das velocidades são iguais
-                {
-                    for(int i=0; i<newVel.size(); i++)
-                    {
-                        if(newVel[i] != lastVel[i])
-                        {
-                            j[moveName][address+std::to_string(numOfMoves)] = 112;
-                            j[moveName][id+std::to_string(numOfMoves)] = i+1;
-                            j[moveName][vel+std::to_string(numOfMoves)] = newVel[i];
-                            numOfMoves++;
-                        }
-                    }
-                }
-                else 
-                {
-                    int newMode = getMode(newVel);
-                    j[moveName][address+std::to_string(numOfMoves)] = 112;
-                    j[moveName][id+std::to_string(numOfMoves)] = 254;
-                    j[moveName][vel+std::to_string(numOfMoves)] = newMode;
-                    numOfMoves++;
-
-                    for(int i=0; i<newVel.size(); i++)
-                    {
-                        if(newVel[i] != newMode)
-                        {
-                            j[moveName][address+std::to_string(numOfMoves)] = 112;
-                            j[moveName][id+std::to_string(numOfMoves)] = i+1;
-                            j[moveName][vel+std::to_string(numOfMoves)] = newVel[i];
-                            numOfMoves++;
-                        }
-                    }
-                }
-            }
-
-        }
-
-        j[moveName][address+std::to_string(numOfMoves)] = 116;
-        j[moveName][position+std::to_string(numOfMoves)] = move[i][0];
-        j[moveName][sleep+std::to_string(numOfMoves)] = move[i][2][0]/1000.0;
-        numOfMoves++;
-
-        lastVel = newVel;
-
-    }
-
-    if(moveName != "Stand Still")
-    {
-
-        j[moveName][address+std::to_string(numOfMoves)] = 116;
-        j[moveName][position+std::to_string(numOfMoves)] = j["Stand Still"]["position2"];
-        j[moveName][sleep+std::to_string(numOfMoves)] = j["Stand Still"]["sleep2"];
-        numOfMoves++;
-    }
-
-    j[moveName]["number of movements"] = numOfMoves-1;
-
-    std::cout << j << std::endl;
-
-    // j.dump(4);
-
-    // // j["Stand Still"];
-
-    // fTeste >> saida;    
-    std::ofstream file(jsonPath);
-
-    file << std::setw(4) << j;
-
-}
-
-int Json::getMode(std::vector<int> valueList)
-{
-    int mode = valueList[0];
-    int qtd = std::count(valueList.begin(), valueList.end(), valueList[0]);
-
-    for(int item : valueList)
-    {
-        if(std::count(valueList.begin(), valueList.end(), item) > qtd)
-        {
-            qtd = std::count(valueList.begin(), valueList.end(), item);
-            mode = item;
-        }
-    }
-    return mode;
-}
-
 void Json::printJson()
 {
-    // for (auto it = j.begin(); it != j.end(); ++it)
-    // {
-    //     std::cout << "key: " << it.key() << '\n';
-    // }
+    for (auto it = j.begin(); it != j.end(); ++it) {
+        std::cout << "Key: " << it.key() << '\n';
+    }
 
-    std::cout << "key: " << j["Stand Still"]["number of movements"] << '\n';
+    std::cout << "Right Kick - number of movements: " << j["Right Kick"]["number of movements"] << '\n';
 }
 
-void Json::moveToJson()
-{
-    
-}
 
-void Json::teste()
+
+void postProcessFile(const std::string& path)
 {
-    std::cout << "teste";
+    std::ifstream in(path);
+    std::string content((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    in.close();
+
+    // Adiciona quebra no começo e fim
+    content = "\n" + content + "\n";
+
+    // 1. Compacta arrays em linha única
+    std::regex array_regex(R"(\[\s*((?:\d+\s*,\s*)*\d+)\s*\])");
+    std::smatch match;
+
+    std::string processed;
+    std::string::const_iterator searchStart(content.cbegin());
+
+    while (std::regex_search(searchStart, content.cend(), match, array_regex)) {
+        processed.append(match.prefix());
+
+        std::string inside = match[1].str();
+        inside = std::regex_replace(inside, std::regex(R"([\n\r\t]+)"), " ");
+        inside = std::regex_replace(inside, std::regex(" {2,}"), " ");
+
+        processed.append("[" + inside + "]");
+        searchStart = match.suffix().first;
+    }
+
+    processed.append(searchStart, content.cend());
+
+    // 2. Adiciona quebra de linha DEPOIS de velocityN e sleepN sem vírgula extra
+    processed = std::regex_replace(processed, std::regex(R"(("velocity\d+"\s*:\s*\d+))"), "$1");
+    processed = std::regex_replace(processed, std::regex(R"(("sleep\d+"\s*:\s*[\d.]+))"), "$1");
+
+    // 3. Quebra de linha depois deles (sem adicionar vírgula)
+    processed = std::regex_replace(processed, std::regex(R"(("velocity\d+":\s*\d+))"), "$1\n        ");
+    processed = std::regex_replace(processed, std::regex(R"(("sleep\d+":\s*[\d.]+))"), "$1\n        ");
+
+    // 4. Remove vírgulas duplicadas
+    processed = std::regex_replace(processed, std::regex(R"(,\s*,)"), ",");
+    processed = std::regex_replace(processed, std::regex(R"(,\s*})"), " }");  // remove vírgula antes de fechar bloco
+
+    // 5. Corrige vírgula final no último campo de objetos
+    processed = std::regex_replace(processed, std::regex(R"(,\s*\n\s*})"), "\n    }");
+
+    // 6. Corrige vírgulas duplas deixadas por erro de bloco
+    processed = std::regex_replace(processed, std::regex(R"(,\s*,)"), ",");
+
+    std::ofstream out(path);
+    out << processed;
+    out.close();
 }
