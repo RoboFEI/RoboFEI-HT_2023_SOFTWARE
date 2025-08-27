@@ -50,6 +50,17 @@ def generate_launch_description():
         emulate_tty=True
     )
 
+    goal_aim = Node(
+        package="vision_pkg",
+        executable="goal_aim_node",
+        output='screen',
+        parameters=[vision_config, camera_config],
+        arguments=['--ros-args', '--log-level', log_level],
+        emulate_tty=True
+    )
+
+
     ld.add_action(camera)
     ld.add_action(image_viwer)
+    ld.add_action(goal_aim)
     return ld
