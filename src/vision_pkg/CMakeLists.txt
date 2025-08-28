@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(vision_pkg)
 
 # Avisos de compilador
@@ -23,7 +23,5 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME})
 
 # Instala scripts Python
-find_package(ament_cmake_python REQUIRED)
-ament_python_install_package(${PROJECT_NAME})
 
 ament_package()
