@@ -14,7 +14,11 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 
-# Nó goal_aim
+# Dependência para integrar Python
+
+# ========================
+# C++ node
+# ========================
 add_executable(goal_aim_node src/goal_aim/goal_aim_node.cpp)
 ament_target_dependencies(goal_aim_node rclcpp std_msgs sensor_msgs cv_bridge image_transport)
 
@@ -22,6 +26,20 @@ install(TARGETS
   goal_aim_node
   DESTINATION lib/${PROJECT_NAME})
 
-# Instala scripts Python
+# ========================
+# Python package
+# ========================
 
+# Instala scripts definidos no setup.py (ex.: detect.py)
+install(PROGRAMS
+  vision_pkg/detect.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+find_package(ament_cmake_python REQUIRED)
+ament_python_install_package(${PROJECT_NAME})
+
+# ========================
+# Finalização
+# ========================
 ament_package()
