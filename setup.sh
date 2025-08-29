@@ -41,7 +41,12 @@ echo -e "${blue} Instalação do ROS2...${NC}"
         source /opt/ros/humble/setup.bash
         sudo apt install python3-colcon-common-extensions -y
 
+        ## rosdep
+        rosdep install --from-paths src --ignore-src -r -y
+
         # Setup colcon and colcon_cd
+        ## altera p /.bashrc
+        ### usar só uma vez
         echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
         echo "export _colcon_cd_root=/opt/ros/humble/" >> ~/.bashrc
         echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
@@ -110,7 +115,7 @@ echo -e "${blue} setup new rules for usb names${NC}"
 echo -e "${blue} commands setup${NC}"
     if ! grep -q "source $folder_path/robot_plugins/robot_scripts.sh" ~/.bashrc; then
         source $folder_path/robot_plugins/robot_scripts.sh
-        echo "source $folder_path/robot_plugins/robot_scripts.sh" >> ~/.bashrc
+        echo "source $folder_path/robot_plugins/robot_scripts.sh" >> ~/.bashrc	##voltar aqui
     fi
 
 echo -e "${blue} Instaling Softwares${NC}"
