@@ -13,27 +13,27 @@
 
 namespace Robot
 {
-	class Kinematics
-	{
-	private:
-		static Kinematics* m_UniqueInstance;
+    class Kinematics
+    {
+    private:
+        static Kinematics* m_UniqueInstance;
         Kinematics();
 
-	protected:
+    protected:
 
-	public:
-		static constexpr double CAMERA_DISTANCE = 33.2; //mm
-		static constexpr double EYE_TILT_OFFSET_ANGLE = 40.0; //degree
-		static constexpr double LEG_SIDE_OFFSET = 42.761; //mm
-		static constexpr double THIGH_LENGTH = 175.0; //mm
-		static constexpr double CALF_LENGTH = 150; //mm
-		static constexpr double ANKLE_LENGTH = 75.0; //mm
-		static constexpr double LEG_LENGTH = 400; //mm (THIGH_LENGTH + CALF_LENGTH + ANKLE_LENGTH)
+    public:
+        static constexpr double CAMERA_DISTANCE = 33.2; //mm
+        static constexpr double EYE_TILT_OFFSET_ANGLE = 40.0; //degree
+        static constexpr double LEG_SIDE_OFFSET = 74; //mm
+        static constexpr double THIGH_LENGTH = 110.0; //mm
+        static constexpr double CALF_LENGTH = 70; //mm
+        static constexpr double ANKLE_LENGTH = 55.0; //mm
+        static constexpr double LEG_LENGTH = 235; //mm (THIGH_LENGTH + CALF_LENGTH + ANKLE_LENGTH)
 
-		~Kinematics();
+        ~Kinematics();
 
-		static Kinematics* GetInstance()			{ return m_UniqueInstance; }
-	};
+        static Kinematics* GetInstance()            { return m_UniqueInstance; }
+    };
 }
 
 #endif
