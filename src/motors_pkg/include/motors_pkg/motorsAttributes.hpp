@@ -25,7 +25,7 @@ public:
 
 motorsAttributes::motorsAttributes(int robotNumber)
 {
-    if(robotNumber > 3)
+    if(robotNumber > 3 && robotNumber != 5)
     {
         std::cout << "Protocolo 1" << std::endl;
         PROTOCOL_VERSION        = 1;

@@ -163,3 +163,6 @@ echo -e "${blue} Instaling Softwares${NC}"
 
     # Xbox driver
     sudo apt install xboxdrv -y
+
+    # for USB rules
+    sudo usermod -a -G dialout $USER
