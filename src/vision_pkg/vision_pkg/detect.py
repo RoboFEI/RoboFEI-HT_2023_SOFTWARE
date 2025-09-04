@@ -44,8 +44,8 @@ class BallDetection(Node):
         self.declare_parameter("device", "cpu")
         self.device = self.get_parameter("device").get_parameter_value().string_value
         
-        self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best_openvino_model/")
-        self.model = YOLO(self.get_parameter("model").get_parameter_value().string_value) # Load model
+        self.declare_parameter("model", f"/home/robo/RoboFEI-HT_2023_SOFTWARE/src/vision_pkg/weights/best_openvino_model/")
+        self.model = YOLO(self.get_parameter("model").get_parameter_value().string_value, task="detect") # Load model
         self.value_classes = self.get_classes()  # define antes de usar
         self.get_logger().info(f"CLASSES DO MODELO: {self.value_classes}")
 

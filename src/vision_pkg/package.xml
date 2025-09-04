@@ -6,18 +6,8 @@
   <description>TODO: Package description</description>
   <maintainer email="rpj134@gmail.com">thiago-desktop</maintainer>
   <license>TODO: License declaration</license>
-
-  <!-- <exec_depend>rclpy</exec_depend>
-  <exec_depend>vision_msgs</exec_depend>
-  <exec_depend>python3-opencv</exec_depend>
-  <exec_depend>python-numpy</exec_depend>
-  <exec_depend>python-configparser</exec_depend> -->
-
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>ament_python</buildtool_depend>
   
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>rclcpp</exec_depend>
   <exec_depend>vision_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
@@ -29,6 +19,6 @@
   <test_depend>python3-pytest</test_depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>

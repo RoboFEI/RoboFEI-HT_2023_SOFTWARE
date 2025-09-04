@@ -1,6 +1,7 @@
 from setuptools import find_packages, setup
 
 package_name = 'vision_pkg'
+submodules = 'vision_pkg/submodules'
 
 setup(
     name=package_name,
@@ -15,7 +16,7 @@ setup(
     zip_safe=True,
     maintainer='RoboFEI',
     maintainer_email='rpj134@gmail.com',
-    description='This package receives data from a camera and can recognize balls, robots and some field landmarks',
+    description='This package recive data from a camera and can recognize balls, robots and some fields landmarks',
     license='GPL-3.0',
     tests_require=['pytest'],
     entry_points={

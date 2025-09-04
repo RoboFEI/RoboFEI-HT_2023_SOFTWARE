@@ -168,3 +168,6 @@ echo -e "${blue} Instaling Softwares${NC}"
 
     # Xbox driver
     sudo apt install xboxdrv -y
+
+    # tree
+    sudo snap install tree

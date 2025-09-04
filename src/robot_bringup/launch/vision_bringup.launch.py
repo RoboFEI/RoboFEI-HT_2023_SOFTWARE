@@ -51,7 +51,7 @@ def generate_launch_description():
     )
 
     goal_aim = Node(
-        package="vision_pkg",
+        package="vision_pkg_cpp",
         executable="goal_aim_node",
         output='screen',
         parameters=[vision_config, camera_config],
