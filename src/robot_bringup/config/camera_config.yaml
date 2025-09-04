@@ -10,14 +10,14 @@
     image_height: 480
     camera_name: "test_camera"
     camera_info_url: "package://usb_cam/config/camera_info.yaml"
-    brightness: 0  #0
-    contrast: 12    #16
-    saturation: 12  #10
-    sharpness: 12   #7
+    brightness: 128  #0
+    contrast: 128    #16 12
+    saturation: 128  #10 12
+    sharpness: 138   #7 12
     gain: 0
     auto_white_balance: true
-    white_balance: 0
+    white_balance: -1 #  0
     autoexposure: true
-    exposure: 1
+    exposure: 100   #   1
     autofocus: false
     focus: -1
