@@ -10,10 +10,11 @@ class GoalAimNode : public rclcpp::Node {
 public:
   GoalAimNode() : Node("goal_aim_node")
   {
+      RCLCPP_INFO(get_logger(),"Iniciando");
     using std::placeholders::_1;
 
     sub_posts_ = create_subscription<std_msgs::msg::Int32MultiArray>(
-      "/vision/goal_posts_px", 10,
+      "/goalpost_px_position", 10,
       std::bind(&GoalAimNode::onPosts, this, _1));
 
     sub_caminfo_ = create_subscription<sensor_msgs::msg::CameraInfo>(
@@ -40,6 +41,7 @@ public:
 private:
   void onCamInfo(const sensor_msgs::msg::CameraInfo::SharedPtr msg)
   {
+      RCLCPP_INFO(get_logger(),"Iniciando 2");
     fx_ = msg->k[0];
     cx_ = msg->k[2];
     have_caminfo_ = true;
@@ -47,6 +49,7 @@ private:
 
   void onImu(const sensor_msgs::msg::Imu::SharedPtr msg)
   {
+      //RCLCPP_INFO(get_logger(),"Iniciando 3");
     const auto & q = msg->orientation;
     double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
     double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
@@ -54,6 +57,8 @@ private:
 
     if (!yaw_est_) yaw_est_ = yaw;
     yaw_est_ = yaw_lpf_alpha_ * yaw + (1.0 - yaw_lpf_alpha_) * yaw_est_.value();
+      //RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000, "yaw: %.3f", yaw_est_.value());    //a cada 2 segundos
+      //RCLCPP_INFO(get_logger(), "yaw: %.3f", yaw_est_.value());                                   //a cada tick da IMU (20/segundo)
   }
 
   static double bearingFromPx(int u, double fx, double cx)
@@ -63,13 +68,14 @@ private:
 
   void onPosts(const std_msgs::msg::Int32MultiArray::SharedPtr msg)
   {
+      RCLCPP_INFO(get_logger(),"Iniciando 4");
     if (!have_caminfo_) {
-      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000,
+      RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 2000,
                            "Sem CameraInfo ainda; ignorando posts");
       return;
     }
     if (msg->data.size() < 2) {
-      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000,
+      RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 2000,
                            "Esperava [u_left,u_right] em pixels");
       return;
     }
@@ -99,6 +105,7 @@ private:
     pub_mid_bearing_->publish(out);
 
     if (use_imu_for_absolute_ && yaw_est_) {
+      RCLCPP_INFO(get_logger(),"Iniciando 4.1");
       double heading_target = normalizeAngle(yaw_est_.value() + aMid);
       std_msgs::msg::Float32 h;
       h.data = static_cast<float>(heading_target);
