@@ -297,6 +297,8 @@ void Walking::update_param_move()
  m_X_Move_Amplitude = X_MOVE_AMPLITUDE;
  m_X_Swap_Amplitude = X_MOVE_AMPLITUDE * STEP_FB_RATIO;
 
+ m_X_Move_Amplitude_Shift = 0.20 * m_X_Move_Amplitude;
+
  // Right/Left
  m_Y_Move_Amplitude = Y_MOVE_AMPLITUDE / 2;
  if(m_Y_Move_Amplitude > 0)
@@ -305,11 +307,11 @@ void Walking::update_param_move()
  m_Y_Move_Amplitude_Shift = -m_Y_Move_Amplitude;
  m_Y_Swap_Amplitude = Y_SWAP_AMPLITUDE + m_Y_Move_Amplitude_Shift * 0.04;
 
- m_Z_Move_Amplitude = Z_MOVE_AMPLITUDE / 2; // H/2
+ m_Z_Move_Amplitude = Z_MOVE_AMPLITUDE; // H/2
  m_Z_Move_Amplitude_Shift = 0; // sem shift
  m_Z_Swap_Amplitude = Z_SWAP_AMPLITUDE;
  m_Z_Swap_Amplitude_Shift = m_Z_Swap_Amplitude;
- printf("[DEBUG] m_X_Move_Amplitude final = %f\n", m_X_Move_Amplitude);
+ //printf("[DEBUG] m_X_Move_Amplitude final = %f\n", m_X_Move_Amplitude);
 
  // Direction
  if(A_MOVE_AIM_ON == false)
@@ -414,6 +416,25 @@ void Walking::Process()
  int dir[14] = { -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, 1, -1 }; // Robos Novos
  double initAngle[14] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
  int outValue[14];
+
+
+bool L_swing = (m_Time > m_SSP_Time_Start_L && m_Time <= m_SSP_Time_End_L);
+bool R_swing = (m_Time > m_SSP_Time_Start_R && m_Time <= m_SSP_Time_End_R);
+
+if (L_swing) {
+    z_move_l = wsin(m_Time, m_Z_Move_PeriodTime,
+                    m_Z_Move_Phase_Shift + 2*PI/m_Z_Move_PeriodTime * m_SSP_Time_Start_L,
+                    m_Z_Move_Amplitude, m_Z_Move_Amplitude_Shift);
+    z_move_r = 0.0; // apoio
+} else if (R_swing) {
+    z_move_r = wsin(m_Time, m_Z_Move_PeriodTime,
+                    m_Z_Move_Phase_Shift + 2*PI/m_Z_Move_PeriodTime * m_SSP_Time_Start_R,
+                    m_Z_Move_Amplitude, m_Z_Move_Amplitude_Shift);
+    z_move_l = 0.0; // apoio
+} else {
+    z_move_l = 0.0;
+    z_move_r = 0.0; // duplo apoio
+}
 
  // Update walk parameters
  if(m_Time == 0)
@@ -701,25 +722,25 @@ void Walking::Process()
  }
 
 // for(int i=0; i<14; i++)
-// {
+//     {
 // printf("OUTVALUE DEPOIS %d: %d\n", i, outValue[i]);
-// }
+//     }
 
- m_Joint.SetValue(JointData::ID_R_HIP_YAW, outValue[0]);
+	m_Joint.SetValue(JointData::ID_R_HIP_YAW,           outValue[0]);
  //printf("SET VALUE 0 %d\n", outValue[0]);
- m_Joint.SetValue(JointData::ID_R_HIP_ROLL, outValue[1]);
- m_Joint.SetValue(JointData::ID_R_HIP_PITCH, outValue[2]);
- m_Joint.SetValue(JointData::ID_R_KNEE, outValue[3]);
- m_Joint.SetValue(JointData::ID_R_ANKLE_PITCH, outValue[4]);
- m_Joint.SetValue(JointData::ID_R_ANKLE_ROLL, outValue[5]);
- m_Joint.SetValue(JointData::ID_L_HIP_YAW, outValue[6]);
- m_Joint.SetValue(JointData::ID_L_HIP_ROLL, outValue[7]);
- m_Joint.SetValue(JointData::ID_L_HIP_PITCH, outValue[8]);
- m_Joint.SetValue(JointData::ID_L_KNEE, outValue[9]);
- m_Joint.SetValue(JointData::ID_L_ANKLE_PITCH, outValue[10]);
- m_Joint.SetValue(JointData::ID_L_ANKLE_ROLL, outValue[11]);
- m_Joint.SetValue(JointData::ID_R_SHOULDER_PITCH, outValue[12]);
- m_Joint.SetValue(JointData::ID_L_SHOULDER_PITCH, outValue[13]);
+	m_Joint.SetValue(JointData::ID_R_HIP_ROLL,          outValue[1]);
+	m_Joint.SetValue(JointData::ID_R_HIP_PITCH,         outValue[2]);
+	m_Joint.SetValue(JointData::ID_R_KNEE,              outValue[3]);
+	m_Joint.SetValue(JointData::ID_R_ANKLE_PITCH,       outValue[4]);
+	m_Joint.SetValue(JointData::ID_R_ANKLE_ROLL,        outValue[5]);
+	m_Joint.SetValue(JointData::ID_L_HIP_YAW,           outValue[6]);
+	m_Joint.SetValue(JointData::ID_L_HIP_ROLL,          outValue[7]);
+	m_Joint.SetValue(JointData::ID_L_HIP_PITCH,         outValue[8]);
+	m_Joint.SetValue(JointData::ID_L_KNEE,              outValue[9]);
+	m_Joint.SetValue(JointData::ID_L_ANKLE_PITCH,       outValue[10]);
+	m_Joint.SetValue(JointData::ID_L_ANKLE_ROLL,        outValue[11]);
+	m_Joint.SetValue(JointData::ID_R_SHOULDER_PITCH,    outValue[12]);
+	m_Joint.SetValue(JointData::ID_L_SHOULDER_PITCH,    outValue[13]);
  m_Joint.SetAngle(JointData::ID_HEAD_PAN, A_MOVE_AMPLITUDE);
  //printf("WALKING PROCESS SET VALUE %f\n", X_MOVE_AMPLITUDE);
  //printf("BALANCE %f\n", BALANCE_HIP_ROLL_GAIN);
@@ -745,6 +766,5 @@ double Walking::splineBalance(double angle, double vel, double gain)
 #if LOG_BALANCE
  //fprintf(m_balanceLog, "%5.3f %5.3f %5.3f %5.3f\n", angle, vel, offset, cmd.t);
 #endif
-
- return offset;
+return offset;
 } 
