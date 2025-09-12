@@ -12,7 +12,10 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=[
+        'setuptools',
+        'ultralytics'
+        ],
     zip_safe=True,
     maintainer='RoboFEI',
     maintainer_email='rpj134@gmail.com',
