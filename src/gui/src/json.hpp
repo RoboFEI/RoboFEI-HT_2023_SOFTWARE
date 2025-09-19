@@ -51,6 +51,14 @@ class Json
         json j;
 };
 
+// Funções utilitárias para manipulação de steps
+void insertStepAtEnd(json& moveJson, int copyFromSuffix);
+void insertStepInMiddle(json& moveJson, int insertAfterSuffix);
+void createFirstStep(json& moveJson);
+void insertNewStep(json& moveJson, int afterStepNumber);
+void insertNewStepInFile(const std::string& path, const std::string& moveName, int afterStepNumber);
+int countPositionSteps(const json& moveJson);
+
 // Função de pós-processamento
 void postProcessFile(const std::string& path);
  
