@@ -173,9 +173,9 @@ void RobotBehavior::normal_game()           //jogo normal
 
 void RobotBehavior::bala_normal_game()                //estado de jogo normal; jogo rolando 
 {
-    //RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-    //RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
-    //RCLCPP_WARN(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
+    //RCLCPP_FATAL(this->get_logger(), "QUEM SOU EU %d", ROBOT_NUMBER);
+    RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+    RCLCPP_FATAL(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
     //RCLCPP_INFO(this->get_logger(), "Bala Normal Game");
 
     switch (robot.state)
@@ -252,12 +252,21 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
             send_goal(gait);
             robot.state = searching_ball;
             lost_ball_timer.reset();
-	    }
+        }
+        else if(robot.neck_pos.position19 >= 2300){
+            //fazer o sidle left
+            send_goal(sidle_left);
+
+        }
+        else if(robot.neck_pos.position19 <= 1700){
+            //fazer o sidle right
+            send_goal(sidle_right);
+        }
         else send_goal(walk);
 
         //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
 	    break;
-    }
+    }   
 }
 
 void RobotBehavior::kicker_normal_game()                //estado de jogo normal; jogo rolando 
@@ -317,12 +326,12 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         RCLCPP_INFO(this->get_logger(), "ball close");
         if (robot.neck_pos.position19 < 1360)
         {
-            send_goal(walk_right);
+            send_goal(sidle_right);
             RCLCPP_INFO(this->get_logger(), "walking right");
         }
         else if (robot.neck_pos.position19 > 2600)
         {
-            send_goal(walk_left);
+            send_goal(sidle_left);
             RCLCPP_INFO(this->get_logger(), "walking left");
         }
         else if (robot.neck_pos.position20 < 1230)
@@ -686,14 +695,14 @@ void RobotBehavior::player_penalty()
 bool RobotBehavior::robot_align_for_kick_left() //fazer
 {
     if(ball_in_left_foot()) return true;
-    else send_goal(walk_right); 
+    else send_goal(sidle_right); 
     return false;
 }
 
 bool RobotBehavior::robot_align_for_kick_right()
 {
     if(ball_in_right_foot()) return true;
-    else send_goal(walk_left); 
+    else send_goal(sidle_left); 
     return false;
 }
 
@@ -731,8 +740,8 @@ bool RobotBehavior::goalkeeper_align_with_the_ball()
 {
     if(vision_stable())
     {
-        if(neck_to_left()) send_goal(walk_left);
-        else if(neck_to_right()) send_goal(walk_right);
+        if(neck_to_left()) send_goal(sidle_left);
+        else if(neck_to_right()) send_goal(sidle_right);
         else return true;
     }
     return false;
