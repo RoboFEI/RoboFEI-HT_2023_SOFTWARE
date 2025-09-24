@@ -1,10 +1,4 @@
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/float32.hpp>
-#include <std_msgs/msg/int32_multi_array.hpp>
-#include <sensor_msgs/msg/camera_info.hpp>
-#include <sensor_msgs/msg/imu.hpp>
-#include <cmath>
-#include <optional>
+#include "goal_aim_node.hpp"
 
 class GoalAimNode : public rclcpp::Node {
 public:
@@ -12,8 +6,9 @@ public:
   {
       RCLCPP_INFO(get_logger(),"Iniciando");
     using std::placeholders::_1;
+    using Point2d = vision_msgs::msg::Point2D;
 
-    sub_posts_ = create_subscription<std_msgs::msg::Int32MultiArray>(
+    sub_posts_ = create_subscription<Point2D>(
       "/goalpost_px_position", 10,
       std::bind(&GoalAimNode::onPosts, this, _1));
 
@@ -126,9 +121,10 @@ private:
     while (a < -M_PI) a += 2*M_PI;
     return a;
   }
+  
+  // Subs/Pubs 
 
-  // Subs/Pubs
-  rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr sub_posts_;
+  rclcpp::Subscription<vision_msgs::msg::Point2D>::SharedPtr sub_posts_;
   rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr sub_caminfo_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu_;
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_mid_bearing_;
