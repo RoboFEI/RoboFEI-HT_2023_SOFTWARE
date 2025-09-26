@@ -1,145 +1,114 @@
 #include "goal_aim_node.hpp"
+#include <cmath>
 
-class GoalAimNode : public rclcpp::Node {
-public:
-  GoalAimNode() : Node("goal_aim_node")
-  {
-      RCLCPP_INFO(get_logger(),"Iniciando");
-    using std::placeholders::_1;
-    using Point2d = vision_msgs::msg::Point2D;
+GoalAimNode::GoalAimNode() : Node("goal_aim_node")
+{
+  RCLCPP_INFO(get_logger(), "Iniciando GoalAimNode");
+  using std::placeholders::_1;
 
-    sub_posts_ = create_subscription<Point2D>(
-      "/goalpost_px_position", 10,
-      std::bind(&GoalAimNode::onPosts, this, _1));
+  sub_posts_ = create_subscription<std_msgs::msg::Int32MultiArray>(
+    "/goalpost_px_position", 10,
+    std::bind(&GoalAimNode::onPosts, this, _1));
 
-    sub_caminfo_ = create_subscription<sensor_msgs::msg::CameraInfo>(
-      "/camera/camera_info", 10,
-      std::bind(&GoalAimNode::onCamInfo, this, _1));
+  sub_caminfo_ = create_subscription<sensor_msgs::msg::CameraInfo>(
+    "/camera/camera_info", 10,
+    std::bind(&GoalAimNode::onCamInfo, this, _1));
 
-    sub_imu_ = create_subscription<sensor_msgs::msg::Imu>(
-      "/imu/data", 50,
-      std::bind(&GoalAimNode::onImu, this, _1));
+  sub_imu_ = create_subscription<sensor_msgs::msg::Imu>(
+    "/imu/data", 50,
+    std::bind(&GoalAimNode::onImu, this, _1));
 
-    pub_mid_bearing_ = create_publisher<std_msgs::msg::Float32>(
-      "/vision/goal_mid_bearing", 10);
+  pub_mid_bearing_ = create_publisher<std_msgs::msg::Float32>(
+    "/vision/goal_mid_bearing", 10);
 
-    pub_heading_target_ = create_publisher<std_msgs::msg::Float32>(
-      "/control/heading_target", 10);
+  pub_heading_target_ = create_publisher<std_msgs::msg::Float32>(
+    "/control/heading_target", 10);
 
-    declare_parameter<bool>("use_imu_for_absolute", false);
-    declare_parameter<double>("yaw_lpf_alpha", 0.2);
+  declare_parameter<bool>("use_imu_for_absolute", false);
+  declare_parameter<double>("yaw_lpf_alpha", 0.2);
 
-    use_imu_for_absolute_ = get_parameter("use_imu_for_absolute").as_bool();
-    yaw_lpf_alpha_ = get_parameter("yaw_lpf_alpha").as_double();
+  use_imu_for_absolute_ = get_parameter("use_imu_for_absolute").as_bool();
+  yaw_lpf_alpha_ = get_parameter("yaw_lpf_alpha").as_double();
+}
+
+void GoalAimNode::onCamInfo(const sensor_msgs::msg::CameraInfo::SharedPtr msg)
+{
+  fx_ = msg->k[0];
+  cx_ = msg->k[2];
+  have_caminfo_ = true;
+  RCLCPP_INFO(get_logger(), "fx=%f cx=%f", fx_, cx_);
+}
+
+void GoalAimNode::onImu(const sensor_msgs::msg::Imu::SharedPtr msg)
+{
+  if (!have_imuinfo_) {
+      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000,
+                           "Imu ligada pela primeira vez");
+    return;
   }
+  have_imuinfo_ = true;
+  double qx = msg->orientation.x;
+  double qy = msg->orientation.y;
+  double qz = msg->orientation.z;
+  double qw = msg->orientation.w;
 
-private:
-  void onCamInfo(const sensor_msgs::msg::CameraInfo::SharedPtr msg)
-  {
-      RCLCPP_INFO(get_logger(),"Iniciando 2");
-    fx_ = msg->k[0];
-    cx_ = msg->k[2];
-    have_caminfo_ = true;
+  double siny_cosp = 2.0 * (qw * qz + qx * qy);
+  double cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
+  double yaw = std::atan2(siny_cosp, cosy_cosp);
+
+  if (yaw_est_) {
+    yaw_est_ = yaw_lpf_alpha_ * yaw + (1 - yaw_lpf_alpha_) * (*yaw_est_);
+  } else {
+    yaw_est_ = yaw;
   }
+}
 
-  void onImu(const sensor_msgs::msg::Imu::SharedPtr msg)
-  {
-      //RCLCPP_INFO(get_logger(),"Iniciando 3");
-    const auto & q = msg->orientation;
-    double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
-    double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
-    double yaw = std::atan2(siny_cosp, cosy_cosp);
-
-    if (!yaw_est_) yaw_est_ = yaw;
-    yaw_est_ = yaw_lpf_alpha_ * yaw + (1.0 - yaw_lpf_alpha_) * yaw_est_.value();
-      //RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000, "yaw: %.3f", yaw_est_.value());    //a cada 2 segundos
-      //RCLCPP_INFO(get_logger(), "yaw: %.3f", yaw_est_.value());                                   //a cada tick da IMU (20/segundo)
-  }
-
-  static double bearingFromPx(int u, double fx, double cx)
-  {
-    return std::atan2((u - cx) / fx, 1.0);
-  }
-
-  void onPosts(const std_msgs::msg::Int32MultiArray::SharedPtr msg)
-  {
-      RCLCPP_INFO(get_logger(),"Iniciando 4");
-    if (!have_caminfo_) {
+void GoalAimNode::onPosts(const std_msgs::msg::Int32MultiArray::SharedPtr msg)
+{
+  if (!have_caminfo_) {
       RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 2000,
                            "Sem CameraInfo ainda; ignorando posts");
-      return;
-    }
-    if (msg->data.size() < 2) {
+    return;
+  }
+
+  if (msg->data.size() < 2) {
       RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 2000,
                            "Esperava [u_left,u_right] em pixels");
-      return;
-    }
-
-    int u_left = msg->data[0];
-    int u_right = msg->data[1];
-
-    // Se só uma trave foi detectada, usa o último par válido
-    if (u_left <= 0 || u_right <= 0) {
-      if (!last_left_ || !last_right_) {
-        RCLCPP_WARN(get_logger(), "Só uma trave detectada e não há histórico válido.");
-        return;
-      }
-      u_left = last_left_.value();
-      u_right = last_right_.value();
-    } else {
-      last_left_ = u_left;
-      last_right_ = u_right;
-    }
-
-    double aL = bearingFromPx(u_left, fx_, cx_);
-    double aR = bearingFromPx(u_right, fx_, cx_);
-    double aMid = 0.5 * (aL + aR);
-
-    std_msgs::msg::Float32 out;
-    out.data = static_cast<float>(aMid);
-    pub_mid_bearing_->publish(out);
-
-    if (use_imu_for_absolute_ && yaw_est_) {
-      RCLCPP_INFO(get_logger(),"Iniciando 4.1");
-      double heading_target = normalizeAngle(yaw_est_.value() + aMid);
-      std_msgs::msg::Float32 h;
-      h.data = static_cast<float>(heading_target);
-      pub_heading_target_->publish(h);
-
-      // Print no terminal
-      RCLCPP_INFO(get_logger(), "Yaw atual: %.3f rad | Yaw alvo: %.3f rad",
-                  yaw_est_.value(), heading_target);
-    } else {
-      // Print relativo se não usar IMU
-      RCLCPP_INFO(get_logger(), "Bearing relativo ao gol: %.3f rad", aMid);
-    }
+    return;
   }
 
-  static double normalizeAngle(double a)
-  {
-    while (a > M_PI) a -= 2*M_PI;
-    while (a < -M_PI) a += 2*M_PI;
-    return a;
+  int left_px = msg->data[0];
+  int right_px = msg->data[1];
+  last_left_ = left_px;
+  last_right_ = right_px;
+
+  double left_bearing = bearingFromPx(left_px, fx_, cx_);
+  double right_bearing = bearingFromPx(right_px, fx_, cx_);
+  double mid_bearing = (left_bearing + right_bearing) / 2.0;
+
+  auto mid_msg = std_msgs::msg::Float32();
+  mid_msg.data = mid_bearing;
+  pub_mid_bearing_->publish(mid_msg);
+
+  if (yaw_est_) {
+    double target_heading = normalizeAngle((*yaw_est_) + mid_bearing);
+    auto head_msg = std_msgs::msg::Float32();
+    head_msg.data = static_cast<float>(target_heading);
+    pub_heading_target_->publish(head_msg);
   }
-  
-  // Subs/Pubs 
+}
 
-  rclcpp::Subscription<vision_msgs::msg::Point2D>::SharedPtr sub_posts_;
-  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr sub_caminfo_;
-  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu_;
-  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_mid_bearing_;
-  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_heading_target_;
+double GoalAimNode::bearingFromPx(int u, double fx, double cx)
+{
+  return std::atan2((u - cx), fx);
+}
 
-  // Estado
-  bool have_caminfo_{false};
-  double fx_{0.0}, cx_{0.0};
-  std::optional<double> yaw_est_;
-  bool use_imu_for_absolute_{false};
-  double yaw_lpf_alpha_{0.2};
-
-  std::optional<int> last_left_;
-  std::optional<int> last_right_;
-};
+double GoalAimNode::normalizeAngle(double a)
+{
+  while (a > M_PI) a -= 2.0 * M_PI;
+  while (a < -M_PI) a += 2.0 * M_PI;
+  return a;
+}
 
 int main(int argc, char** argv)
 {

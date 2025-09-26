@@ -171,3 +171,9 @@ echo -e "${blue} Instaling Softwares${NC}"
 
     # tree
     sudo snap install tree
+
+    # links2 (pra coneectar o robo no wifi da fei por ssh)
+    ## $ links2
+    ## G
+    ## abrir o navegador do notebook e copiar o URL da pagina de acesso da FEI-INTERNET
+    sudo apt install links2 -y

@@ -1,56 +1,45 @@
-#ifndef LOCALIZATION_NODE_HPP
-#define LOCALIZATION_NODE_HPP
-
-
-#include <cstdio>
-#include <memory>
-#include <string>
-#include <future>
-#include <cmath>
-
-
-#include "custom_interfaces/msg/vision.hpp"
+#ifndef GOAL_AIM_NODE_HPP
+#define GOAL_AIM_NODE_HPP
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float32.hpp>
 #include <std_msgs/msg/int32_multi_array.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/imu.hpp>
-#include <cmath>
 #include <optional>
-#include "std_msgs/msg/bool.hpp" 
-#include "std_msgs/msg/int32.hpp" 
-#include "std_msgs/msg/string.hpp"
-#include "custom_interfaces/msg/vision.hpp"
 
 class GoalAimNode : public rclcpp::Node {
-    public:
-        using ImuAccelMsg = sensor_msgs::msg::Imu;
-        using VisionMsg = custom_interfaces::msg::Vision;
-        using intMsg = std_msgs::msg::Int32;
+public:
+  GoalAimNode();
 
+private:
+  // Callbacks
+  void onCamInfo(const sensor_msgs::msg::CameraInfo::SharedPtr msg);
+  void onImu(const sensor_msgs::msg::Imu::SharedPtr msg);
+  void onPosts(const std_msgs::msg::Int32MultiArray::SharedPtr msg);
 
-        ImuGyroMsg          imu_gyro;
-        Robot               robot;
+  // Funções auxiliares
+  static double bearingFromPx(int u, double fx, double cx);
+  static double normalizeAngle(double a);
 
+  // Subscribers
+  rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr sub_posts_;
+  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr sub_caminfo_;
+  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu_;
 
-        void listener_callback_goalpost_px(const vision_msgs::msg::Point2D::SharedPtr goalpost_px_position); // posição x das traves  
+  // Publishers
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_mid_bearing_;
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_heading_target_;
 
-
-
-    private:
-        rclcpp::Subscription<ImuGyroMsg>::SharedPtr imu_gyro_subscriber_;
-        rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
-        rclcpp::Subscription<VisionMsg>::SharedPtr vision_subscriber_;
-        rclcpp::Subscription<intMsg>::SharedPtr running_move_subscriber_;
-        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr localization_subscriber;
-        rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr goalpost_count; // quantas traves foram detectadas 
-        rclcpp::Subscription<VisionMsg>::SharedPtr goalpost_division_lines; // de acordo com as grades da visao 
-        rclcpp::Subscription<vision_msgs::msg::Point2D>::SharedPtr goalpost_px_position;
-
-
-
+  // Estado interno
+  bool have_caminfo_{false};
+  bool have_imuinfo_{false};
+  double fx_{0.0}, cx_{0.0};
+  std::optional<double> yaw_est_;
+  bool use_imu_for_absolute_{false};
+  double yaw_lpf_alpha_{0.2};
+  std::optional<int> last_left_;
+  std::optional<int> last_right_;
 };
 
-
-#endif 
+#endif
