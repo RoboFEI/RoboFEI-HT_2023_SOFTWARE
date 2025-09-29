@@ -74,6 +74,12 @@ MainWindow::MainWindow(
   QShortcut *sC3 = new QShortcut(QKeySequence("Ctrl+S"), this);
   this->connect(sC3, &QShortcut::activated, this, &MainWindow::on_saveStep_button_clicked);
 
+  QShortcut *sC4 = new QShortcut(QKeySequence("Ctrl+Z"), this);
+  this->connect(sC4, &QShortcut::activated, this, &MainWindow::on_lockAllTorques_button_clicked);
+
+  QShortcut *sC5 = new QShortcut(QKeySequence("Ctrl+X"), this);
+  this->connect(sC5, &QShortcut::activated, this, &MainWindow::on_unlockAllTorques_button_clicked);
+
   for(auto PosLineEdit : allPosLineEdit)
   {
     this->connect(PosLineEdit, &QLineEdit::returnPressed, this, &MainWindow::sendSingleInfo);
@@ -91,6 +97,8 @@ MainWindow::MainWindow(
   checkUnsavedTimer->start(10);
 
   on_loadMoves_button_released();
+  atualStep = 0;
+  updateStepDisplay();
 }
 
 MainWindow::~MainWindow()
@@ -236,6 +244,8 @@ void MainWindow::on_loadMoves_button_released()
   {
     ui_->movesList->addItem(QString::fromStdString(move));
   }
+  atualStep = 0;
+  updateStepDisplay();
 }
 
 void MainWindow::on_pos_button_clicked()
@@ -289,12 +299,14 @@ void MainWindow::setMotionEditorScreen(bool arg)
     ui_->motion_frame->setEnabled(true);
     ui_->statusbar->showMessage(QString("%1 of %2").arg(atualStep).arg(atualMovesList.size()));
     displayStepInfo();
+    updateStepDisplay();
   }
   else
   {
     atualStep = 0;
     ui_->motion_frame->setEnabled(false);
     ui_->statusbar->clearMessage();
+    updateStepDisplay();
   }
 }
 
@@ -318,6 +330,7 @@ void MainWindow::on_nextStep_button_clicked()
   {
     atualStep++;
     displayStepInfo();
+    updateStepDisplay();
   }
 }
 
@@ -327,6 +340,7 @@ void MainWindow::on_prevStep_button_clicked()
   {
     atualStep--;
     displayStepInfo();
+    updateStepDisplay();
   }
 }
 
@@ -366,15 +380,21 @@ void MainWindow::sendJointPos(std::vector<int> jointsPos)
   joint_state_publisher_->publish(jointPos);
 }
 
-// wip: adicionar a parte de salvar do gui para o json.
 void MainWindow::on_saveStep_button_clicked()
 {
   if (atualStep == 0) return;
 
   // 1) Atualiza seu vetor interno
-  lastPositions       = getAllPositions();
-  atualMovesList[atualStep - 1][0] = lastPositions;
-  atualMovesList[atualStep - 1][1] = lastVelocitys;
+  lastPositions = getAllPositions();
+  
+  // Verificação de bounds para atualMovesList
+  if (atualStep - 1 < static_cast<int>(atualMovesList.size())) {
+    atualMovesList[atualStep - 1][0] = lastPositions;
+    atualMovesList[atualStep - 1][1] = lastVelocitys;
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "❌ Erro: step %d fora dos limites do atualMovesList", atualStep);
+    return;
+  }
 
   // 2) Obtém o JSON do movimento
   std::string moveName = ui_->movesList->currentText().toStdString();
@@ -386,18 +406,26 @@ void MainWindow::on_saveStep_button_clicked()
   }
   json &moveJson = motions.getMoveJson(moveName);
 
-  // 3) Mapeia o atualStep (GUI) para o sufixo real no JSON
+  // 3) Conta quantos blocos de posição existem para determinar o máximo
   int totalSuffix = moveJson["number of movements"];
-  int posCount    = 0;
-  int targetI     = -1;
+  int posCount = 0;
+  int targetI = -1;
 
-  // varre todos os sufixos de 1 até totalSuffix
+  // Primeiro: contar todos os blocos de posição para saber o máximo
   for (int i = 1; i <= totalSuffix; ++i) {
     std::string addrKey = "address" + std::to_string(i);
     if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
-      // é um bloco de posição
-      ++posCount;
-      if (posCount == atualStep) {
+      posCount++;
+    }
+  }
+
+  // Segundo: encontrar o sufixo correspondente ao atualStep
+  int currentPosCount = 0;
+  for (int i = 1; i <= totalSuffix; ++i) {
+    std::string addrKey = "address" + std::to_string(i);
+    if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
+      currentPosCount++;
+      if (currentPosCount == atualStep) {
         targetI = i;
         break;
       }
@@ -411,7 +439,7 @@ void MainWindow::on_saveStep_button_clicked()
     return;
   }
 
-  // 4) Obtém o valor do sleep da interface (NOVO)
+  // 4) Obtém o valor do sleep da interface
   bool is_valid;
   QString sleep_text = ui_->sleep_value->text();
   double sleep_value = sleep_text.toDouble(&is_valid);
@@ -422,9 +450,8 @@ void MainWindow::on_saveStep_button_clicked()
 
   // 5) Sobrescreve position e sleep para esse sufixo
   std::string suf = std::to_string(targetI);
-  // address já é 116, não precisa regravar
   moveJson["position" + suf] = lastPositions;
-  moveJson["sleep"    + suf] = sleep_value; // Agora usa o valor da interface
+  moveJson["sleep"    + suf] = sleep_value;
 
   // 6) Grava e pós-processa
   std::string jsonFilePath =
@@ -436,96 +463,99 @@ void MainWindow::on_saveStep_button_clicked()
   postProcessFile(jsonFilePath);
 
   RCLCPP_INFO(this->get_logger(),
-              "✅ Step %d (sufixo %d) salvo com sucesso em %s",
-              atualStep, targetI, moveName.c_str());
+              "✅ Step %d/%d (sufixo %d) salvo com sucesso em %s",
+              atualStep, posCount, targetI, moveName.c_str());
+  
+  // 7) Incrementa o step atual de forma segura
+  if (atualStep < posCount) {
+    atualStep++;
+    RCLCPP_INFO(this->get_logger(), "➡️  Movendo para step %d/%d", atualStep, posCount);
+  } else {
+    RCLCPP_INFO(this->get_logger(), "🛑 Último step (%d/%d) alcançado", atualStep, posCount);
+  }
+  
+  updateStepDisplay();
 }
 
 void MainWindow::on_saveIntoNextStep_button_clicked() {
-    // 1) Obtém o JSON do movimento primeiro para verificar se existe próximo step
+    // 1) Obtém o JSON do movimento
     std::string moveName = ui_->movesList->currentText().toStdString();
     if (!motions.contains(moveName)) {
-        RCLCPP_WARN(this->get_logger(),
-                    "Movimento %s não encontrado no JSON",
-                    moveName.c_str());
+        RCLCPP_WARN(this->get_logger(), "Movimento %s não encontrado no JSON", moveName.c_str());
         return;
     }
     json &moveJson = motions.getMoveJson(moveName);
 
-    // 2) Verifica se existe um próximo step disponível
-    int totalSuffix = moveJson["number of movements"];
+    // 2) Conta apenas os blocos de posição (address == 116)
     int posCount = 0;
-    int targetI = -1;
-    int stepToSave = atualStep + 1; // Tentamos salvar no próximo step
-
-    // Conta quantos blocos de posição existem e encontra o último
-    int lastAvailableStep = 0;
+    std::vector<int> positionIndices; // Armazena os índices reais dos blocos de posição
+    
+    int totalSuffix = moveJson["number of movements"];
     for (int i = 1; i <= totalSuffix; ++i) {
         std::string addrKey = "address" + std::to_string(i);
         if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
-            ++posCount;
-            lastAvailableStep = posCount; // Mantém o último step disponível
+            posCount++;
+            positionIndices.push_back(i); // Guarda o índice real
         }
     }
 
-    // Se não há próximo step, salva no último step disponível
-    if (stepToSave > posCount) {
-        RCLCPP_WARN(this->get_logger(),
-                    "⚠️  Não há próximo step disponível! Salvando no último step %d (máximo: %d)",
-                    lastAvailableStep, posCount);
-        stepToSave = lastAvailableStep;
+    if (posCount == 0) {
+        RCLCPP_WARN(this->get_logger(), "Nenhum bloco de posição encontrado em %s", moveName.c_str());
+        return;
     }
 
-    // 3) Atualiza vetor interno
+    // 3) Determina onde salvar
+    int stepToSave = atualStep + 1;
+    
+    // Se quer salvar além do número de steps disponíveis, vai para o último
+    if (stepToSave > posCount) {
+        RCLCPP_WARN(this->get_logger(), "⚠️  Não há próximo step! Salvando no último step %d", posCount);
+        stepToSave = posCount;
+    }
+
+    // 4) Verifica bounds do atualMovesList
+    if (stepToSave - 1 >= static_cast<int>(atualMovesList.size())) {
+        RCLCPP_ERROR(this->get_logger(), "❌ Erro: step %d fora dos limites do atualMovesList (size: %zu)", 
+                    stepToSave, atualMovesList.size());
+        return;
+    }
+
+    // 5) Atualiza vetor interno
     lastPositions = getAllPositions();
     atualMovesList[stepToSave - 1][0] = lastPositions;
     atualMovesList[stepToSave - 1][1] = lastVelocitys;
 
-    // 4) Mapeia stepToSave para o sufixo real no JSON
-    posCount = 0; // Reseta o contador
-    for (int i = 1; i <= totalSuffix; ++i) {
-        std::string addrKey = "address" + std::to_string(i);
-        if (moveJson.contains(addrKey) && moveJson[addrKey] == 116) {
-            ++posCount;
-            if (posCount == stepToSave) {
-                targetI = i;
-                break;
-            }
-        }
-    }
-
-    if (targetI < 0) {
-        RCLCPP_WARN(this->get_logger(),
-                    "Não encontrei o %dº bloco de posição em %s",
-                    stepToSave, moveName.c_str());
-        return;
-    }
-
-    // 5) Sobrescreve position/sleep
+    // 6) Obtém o índice real no JSON usando nosso mapeamento
+    int targetI = positionIndices[stepToSave - 1]; // -1 porque positionIndices é 0-based
     std::string suf = std::to_string(targetI);
 
+    // 7) Sobrescreve position/sleep
     bool is_valid;
     QString sleep_text = ui_->sleep_value->text();
     double sleep_value = sleep_text.toDouble(&is_valid);
     if (!is_valid) {
-        RCLCPP_INFO(this->get_logger(), "Erro! Valor de sleep inválido");
+        RCLCPP_INFO(this->get_logger(), "Valor de sleep inválido, usando 1.0");
         sleep_value = 1.0;
     }
 
     moveJson["position" + suf] = lastPositions;
     moveJson["sleep" + suf] = sleep_value;
 
-    // 6) Grava e pós-processa
-    std::string jsonFilePath =
-        folder_path +
-        "/src/control/Data/motion" +
-        std::to_string(robot_number_) +
-        ".json";
+    // 8) Grava e pós-processa
+    std::string jsonFilePath = folder_path + "/src/control/Data/motion" + std::to_string(robot_number_) + ".json";
     motions.saveJson(jsonFilePath);
     postProcessFile(jsonFilePath);
-
-    RCLCPP_INFO(this->get_logger(),
-                "✅ Step %d (sufixo %d) salvo com sucesso em %s",
-                stepToSave, targetI, moveName.c_str());
+    if (atualStep < posCount) {
+      atualStep++;
+    }
+    if (atualStep == posCount) {
+        RCLCPP_INFO(this->get_logger(), "Último step (%d) alcançado", posCount);
+    }
+    RCLCPP_INFO(this->get_logger(), "✅ Step %d/%d (sufixo %d) salvo em %s", 
+                stepToSave, posCount, targetI, moveName.c_str());
+    
+    updateStepDisplay();
+    
 }
 
 
@@ -604,13 +634,182 @@ void MainWindow::on_deletStep_button_clicked()
   atualStep = atualStep - 2;
   if(atualStep == -1) atualStep = 0;
   on_nextStep_button_clicked();
+  updateStepDisplay();
 }
+
+void MainWindow::on_newStep_button_clicked() {
+    if (atualStep == 0) return;
+    
+    std::string moveName = ui_->movesList->currentText().toStdString();
+    if (!motions.contains(moveName)) {
+        RCLCPP_WARN(this->get_logger(), "Movimento não encontrado");
+        return;
+    }
+    
+    std::string filePath = folder_path + "/src/control/Data/motion" + 
+                          std::to_string(robot_number_) + ".json";
+    
+    // ✅ CHAMA A FUNÇÃO UNIFICADA QUE TRATA TODOS OS CENÁRIOS
+    insertNewStepInFile(filePath, moveName, atualStep);
+    
+    // Recarrega e atualiza
+    on_loadMoves_button_released();
+    
+    // Atualiza a lista interna
+    if (atualStep < static_cast<int>(atualMovesList.size())) {
+        std::vector<std::vector<int>> newMove = atualMovesList[atualStep - 1];
+        atualMovesList.emplace(atualMovesList.begin() + atualStep, newMove);
+    }
+    
+    atualStep += 1;
+    displayStepInfo();
+    
+    RCLCPP_INFO(this->get_logger(), "Novo step %d criado", atualStep);
+}
+
+void MainWindow::sendAllTorques(bool torque_state)
+{
+    RCLCPP_INFO(this->get_logger(), "Setting all torques to: %d", torque_state);
+    
+    auto torque_info = JointStateMsg();
+    for(int i = 1; i <= 18; i++){
+        torque_info.id.push_back(i);
+        torque_info.info.push_back(torque_state);
+        torque_info.type.push_back(JointStateMsg::TORQUE);
+    }
+    joint_state_publisher_->publish(torque_info);
+}
+
+void MainWindow::update_all_torque_checkboxes(bool checked)
+{
+    for(int i = 1; i <= 18; i++){
+        QCheckBox* checkbox = findChild<QCheckBox*>(QString("torque_id_%1").arg(i));
+        if(checkbox && checkbox != nullptr){
+            checkbox->blockSignals(true);
+            checkbox->setChecked(checked);
+            checkbox->blockSignals(false);
+        }
+    }
+}
+
+void MainWindow::on_lockAllTorques_button_clicked(){
+    try {
+        sendAllTorques(true);
+        update_all_torque_checkboxes(true);
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(this->get_logger(), "Error locking torques: %s", e.what());
+    }
+}
+
+void MainWindow::on_unlockAllTorques_button_clicked(){
+    try {
+        sendAllTorques(false);
+        update_all_torque_checkboxes(false);
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(this->get_logger(), "Error unlocking torques: %s", e.what());
+    }
+}
+
+void MainWindow::updateStepDisplay()
+{
+    if (atualStep == 0 || atualMovesList.empty()) {
+        ui_->atual_pos_label->setText("No move selected");
+        ui_->atual_pos_label->setStyleSheet("QLabel { color: gray; font-style: italic; }");
+    } else {
+        // Formatação mais elaborada
+        QString stepText = QString("Step: <b>%1</b> / %2").arg(atualStep).arg(atualMovesList.size());
+        ui_->atual_pos_label->setText(stepText);
+        
+        // Muda a cor baseado na posição
+        if (atualStep == 1) {
+            ui_->atual_pos_label->setStyleSheet("QLabel { color: blue; font-weight: bold; }");
+        } else if (atualStep == static_cast<int>(atualMovesList.size())) {
+            ui_->atual_pos_label->setStyleSheet("QLabel { color: green; font-weight: bold; }");
+        } else {
+            ui_->atual_pos_label->setStyleSheet("QLabel { color: black; font-weight: bold; }");
+        }
+    }
+    
+    // Atualiza também o status bar se quiser
+    if (atualStep > 0) {
+        ui_->statusbar->showMessage(QString("Current step: %1 of %2").arg(atualStep).arg(atualMovesList.size()));
+    } else {
+        ui_->statusbar->clearMessage();
+    }
+}
+
+
+//Implementar
+
+/*
 
 void MainWindow::on_newStep_button_clicked()
 {
-  if(atualStep == 0) return;
-  std::vector<std::vector<int>> newMove = atualMovesList[atualStep-1];
-  atualMovesList.emplace(atualMovesList.begin()+atualStep-1, newMove);
-  atualStep += 1;
-  displayStepInfo();
+    try {
+        RCLCPP_INFO(this->get_logger(), "Clicado new step button");
+        
+        if (atualStep == 0) {
+            RCLCPP_WARN(this->get_logger(), "Nenhum movimento selecionado");
+            return;
+        }
+        
+        std::string moveName = ui_->movesList->currentText().toStdString();
+        if (moveName.empty() || moveName == "No Move") {
+            RCLCPP_WARN(this->get_logger(), "Movimento inválido");
+            return;
+        }
+        
+        if (!motions.contains(moveName)) {
+            RCLCPP_WARN(this->get_logger(), "Movimento %s não encontrado", moveName.c_str());
+            return;
+        }
+        
+        // Encontrar o sufixo real correspondente ao step atual
+        json &moveJson = motions.getMoveJson(moveName);
+        int totalSuffix = moveJson["number of movements"].get<int>();
+        int currentSuffix = 0;
+        int posCount = 0;
+        
+        for (int i = 1; i <= totalSuffix; ++i) {
+            std::string addrKey = "address" + std::to_string(i);
+            if (moveJson.contains(addrKey) && moveJson[addrKey].get<int>() == 116) {
+                posCount++;
+                if (posCount == atualStep) {
+                    currentSuffix = i;
+                    break;
+                }
+            }
+        }
+        
+        if (currentSuffix == 0) {
+            RCLCPP_ERROR(this->get_logger(), "Não encontrou sufixo para step %d", atualStep);
+            return;
+        }
+        
+        std::string filePath = folder_path + "/src/control/Data/motion" + 
+                              std::to_string(robot_number_) + ".json";
+        
+        RCLCPP_INFO(this->get_logger(), "Inserindo novo step após sufixo %d", currentSuffix);
+        
+        // ✅ CHAMADA LIMPA - a função se encarrega de tudo
+        insertNewStepInFile(filePath, moveName, currentSuffix);
+        
+        // Recarregar e atualizar
+        on_loadMoves_button_released();
+        
+        // Atualizar lista interna
+        if (!atualMovesList.empty() && atualStep >= 1 && atualStep <= static_cast<int>(atualMovesList.size())) {
+            std::vector<std::vector<int>> newMove = atualMovesList[atualStep - 1];
+            atualMovesList.emplace(atualMovesList.begin() + atualStep, newMove);
+            atualStep += 1;
+            displayStepInfo();
+            
+            RCLCPP_INFO(this->get_logger(), "Novo step %d criado com sucesso", atualStep);
+        }
+        
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(this->get_logger(), "Exceção em newStep: %s", e.what());
+    }
 }
+
+*/

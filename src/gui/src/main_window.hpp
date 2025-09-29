@@ -97,6 +97,8 @@ private:
   void displayStepInfo();
   void checkUnsaved();
   void runMove(bool all);
+  void updateStepDisplay();
+  int countPositionSteps(const json& moveJson);
 
 private slots:
   void on_loadMoves_button_released();
@@ -112,5 +114,8 @@ private slots:
   void on_stop_button_clicked();
   void on_deletStep_button_clicked();
   void on_newStep_button_clicked();
-  
+  void on_lockAllTorques_button_clicked();
+  void on_unlockAllTorques_button_clicked();
+  void update_all_torque_checkboxes(bool checked);
+  void sendAllTorques(bool torque_state);
 };

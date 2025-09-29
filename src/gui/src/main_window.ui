@@ -1167,8 +1167,8 @@
         <rect>
          <x>20</x>
          <y>360</y>
-         <width>471</width>
-         <height>111</height>
+         <width>339</width>
+         <height>146</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -1242,16 +1242,34 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="saveIntoNextStep_button">
+           <widget class="QPushButton" name="saveMove_button">
             <property name="text">
-             <string>Save Into Next Step</string>
+             <string>Save Move</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_20">
+          <item>
+           <widget class="QPushButton" name="lockAllTorques_button">
+            <property name="text">
+             <string>Lock All</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="saveMove_button">
+           <widget class="QPushButton" name="unlockAllTorques_button">
             <property name="text">
-             <string>Save Move</string>
+             <string>Unlock All</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="saveIntoNextStep_button">
+            <property name="text">
+             <string>Save Into Next Step</string>
             </property>
            </widget>
           </item>
@@ -1281,6 +1299,32 @@
          <height>30</height>
         </rect>
        </property>
+      </widget>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>530</x>
+         <y>130</y>
+         <width>154</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_19">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Atual_Step:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="atual_pos_label">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
