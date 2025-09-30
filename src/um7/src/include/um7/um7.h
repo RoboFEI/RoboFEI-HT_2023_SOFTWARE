@@ -82,6 +82,12 @@ private:
   void handle_reset_service(
     const std::shared_ptr<custom_interfaces::srv::Reset::Request> req,
     std::shared_ptr<custom_interfaces::srv::Reset::Response> resp);
+  // Valores filtrados do quaternion
+  double filt_w = 0.0, filt_x = 0.0, filt_y = 0.0, filt_z = 0.0;
+
+  // Fator de suavização (0 < alpha <= 1)
+  const double alpha = 0.1;  // ajuste conforme necessário
+
 
   // ROS2 Interfaces
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;

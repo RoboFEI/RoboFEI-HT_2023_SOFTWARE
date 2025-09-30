@@ -1,5 +1,6 @@
 #include "goal_aim_node.hpp"
 #include <cmath>
+#include <std_msgs/msg/float64.hpp>
 
 GoalAimNode::GoalAimNode() : Node("goal_aim_node")
 {
@@ -21,8 +22,11 @@ GoalAimNode::GoalAimNode() : Node("goal_aim_node")
   pub_mid_bearing_ = create_publisher<std_msgs::msg::Float32>(
     "/vision/goal_mid_bearing", 10);
 
-  pub_heading_target_ = create_publisher<std_msgs::msg::Float32>(
-    "/control/heading_target", 10);
+  pub_goal_yaw_ = create_publisher<std_msgs::msg::Float64>(
+    "/goal_yaw", 10);
+
+  pub_yaw_est_ = create_publisher<std_msgs::msg::Float64>(
+    "/yaw_est", 10);  
 
   declare_parameter<bool>("use_imu_for_absolute", false);
   declare_parameter<double>("yaw_lpf_alpha", 0.2);
@@ -41,26 +45,29 @@ void GoalAimNode::onCamInfo(const sensor_msgs::msg::CameraInfo::SharedPtr msg)
 
 void GoalAimNode::onImu(const sensor_msgs::msg::Imu::SharedPtr msg)
 {
-  if (!have_imuinfo_) {
-      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000,
-                           "Imu ligada pela primeira vez");
-    return;
-  }
-  have_imuinfo_ = true;
   double qx = msg->orientation.x;
   double qy = msg->orientation.y;
   double qz = msg->orientation.z;
   double qw = msg->orientation.w;
 
+  // Calcula yaw a partir do quaternion
   double siny_cosp = 2.0 * (qw * qz + qx * qy);
   double cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
   double yaw = std::atan2(siny_cosp, cosy_cosp);
 
+  // Filtro LPF (low-pass) para estabilizar yaw
   if (yaw_est_) {
-    yaw_est_ = yaw_lpf_alpha_ * yaw + (1 - yaw_lpf_alpha_) * (*yaw_est_);
+    yaw_est_ = yaw_lpf_alpha_ * yaw + (1.0 - yaw_lpf_alpha_) * (*yaw_est_);
   } else {
     yaw_est_ = yaw;
   }
+
+  //RCLCPP_WARN(get_logger(), "%f yaw  %f yaw est", yaw, yaw_est_.value_or(0.0));
+
+  // Publica yaw_est como Float64
+  std_msgs::msg::Float64 yaw_msg;
+  yaw_msg.data = yaw_est_.value_or(0.0);
+  pub_yaw_est_->publish(yaw_msg);
 }
 
 void GoalAimNode::onPosts(const std_msgs::msg::Int32MultiArray::SharedPtr msg)
@@ -86,15 +93,18 @@ void GoalAimNode::onPosts(const std_msgs::msg::Int32MultiArray::SharedPtr msg)
   double right_bearing = bearingFromPx(right_px, fx_, cx_);
   double mid_bearing = (left_bearing + right_bearing) / 2.0;
 
-  auto mid_msg = std_msgs::msg::Float32();
+  std_msgs::msg::Float32 mid_msg;
   mid_msg.data = mid_bearing;
   pub_mid_bearing_->publish(mid_msg);
 
   if (yaw_est_) {
-    double target_heading = normalizeAngle((*yaw_est_) + mid_bearing);
-    auto head_msg = std_msgs::msg::Float32();
-    head_msg.data = static_cast<float>(target_heading);
-    pub_heading_target_->publish(head_msg);
+    // Target heading: yaw absoluto do robô + direção para o meio do gol
+    double goal_yaw = normalizeAngle((*yaw_est_) + mid_bearing);
+
+    // Publica como Float64
+    std_msgs::msg::Float64 goal_msg;
+    goal_msg.data = goal_yaw;
+    pub_goal_yaw_->publish(goal_msg);
   }
 }
 
@@ -107,6 +117,7 @@ double GoalAimNode::normalizeAngle(double a)
 {
   while (a > M_PI) a -= 2.0 * M_PI;
   while (a < -M_PI) a += 2.0 * M_PI;
+  std::cout << "angulo normalizado: " << a << std::endl;
   return a;
 }
 

@@ -3,10 +3,12 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float32.hpp>
+#include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/int32_multi_array.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <optional>
+#include <iostream> 
 
 class GoalAimNode : public rclcpp::Node {
 public:
@@ -29,11 +31,11 @@ private:
 
   // Publishers
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_mid_bearing_;
-  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pub_heading_target_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_goal_yaw_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_yaw_est_;
 
   // Estado interno
   bool have_caminfo_{false};
-  bool have_imuinfo_{false};
   double fx_{0.0}, cx_{0.0};
   std::optional<double> yaw_est_;
   bool use_imu_for_absolute_{false};

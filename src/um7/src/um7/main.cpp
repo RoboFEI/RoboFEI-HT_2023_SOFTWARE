@@ -207,10 +207,23 @@ void Driver::publish(um7::Registers& r)
       case OutputAxisOptions::ROBOT_FRAME:
       {
         // body-fixed frame
-        imu_msg_.orientation.w = -r.quat.get_scaled(0);
-        imu_msg_.orientation.x = -r.quat.get_scaled(1);
-        imu_msg_.orientation.y =  r.quat.get_scaled(2);
-        imu_msg_.orientation.z =  r.quat.get_scaled(3);
+        // Ler valores crus do quaternion
+        double raw_w = r.quat.get_scaled(0);
+        double raw_x = r.quat.get_scaled(1);
+        double raw_y = r.quat.get_scaled(2);
+        double raw_z = r.quat.get_scaled(3);
+
+        // Aplicar filtro exponencial
+        filt_w = alpha * raw_w + (1.0 - alpha) * filt_w;
+        filt_x = alpha * raw_x + (1.0 - alpha) * filt_x;
+        filt_y = alpha * raw_y + (1.0 - alpha) * filt_y;
+        filt_z = alpha * raw_z + (1.0 - alpha) * filt_z;
+
+        // Preencher a mensagem com os valores suavizados
+        imu_msg_.orientation.w = filt_w;
+        imu_msg_.orientation.x = filt_x;
+        imu_msg_.orientation.y = filt_y;
+        imu_msg_.orientation.z = filt_z;
 
         // body-fixed frame
         imu_msg_.angular_velocity.x =  r.gyro.get_scaled(0);
