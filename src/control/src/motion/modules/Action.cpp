@@ -236,14 +236,14 @@ bool Action::LoadPage(int index, PAGE *pPage)
 {
 	long position = (long)(sizeof(PAGE)*index);
 
-    if( fseek( m_ActionFile, position, SEEK_SET ) != 0 )
-        return false;
+    if( fseek( m_ActionFile, position, SEEK_SET ) != 0 ){
+        return false;}
 
-    if( fread( pPage, 1, sizeof(PAGE), m_ActionFile ) != sizeof(PAGE) )
-        return false;
+    if( fread( pPage, 1, sizeof(PAGE), m_ActionFile ) != sizeof(PAGE) ){
+        return false;}
 
-    if( VerifyChecksum( pPage ) == false )
-        ResetPage( pPage );
+    if( VerifyChecksum( pPage ) == false ){
+        ResetPage( pPage );}
 
     return true;
 }
@@ -252,14 +252,14 @@ bool Action::SavePage(int index, PAGE *pPage)
 {
 	long position = (long)(sizeof(PAGE)*index);
 
-	if( VerifyChecksum(pPage) == false )
-        SetChecksum(pPage);
+	if( VerifyChecksum(pPage) == false ){
+        SetChecksum(pPage);}
 
-    if( fseek( m_ActionFile, position, SEEK_SET ) != 0 )
-        return false;
+    if( fseek( m_ActionFile, position, SEEK_SET ) != 0 ){
+        return false;}
 
-    if( fwrite( pPage, 1, sizeof(PAGE), m_ActionFile ) != sizeof(PAGE) )
-        return false;
+    if( fwrite( pPage, 1, sizeof(PAGE), m_ActionFile ) != sizeof(PAGE) ){
+        return false;}
     
 	return true;
 }

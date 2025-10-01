@@ -183,6 +183,9 @@ void NeckNode::main_callback()
     //RCLCPP_INFO(this->get_logger(), "Searching the ball");
     this->search_ball();
     break;
+    
+  default:
+    break;
   }
 
   if(lost_ball_timer.delayNR(500) && this->robot_state == State::follow_ball)

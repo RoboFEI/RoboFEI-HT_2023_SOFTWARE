@@ -119,7 +119,7 @@ void JoyRobotNode::goal_response_callback(const GoalHandleControl::SharedPtr &go
   if (!goal_handle) {
     RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
   } else {
-    // RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+    RCLCPP_DEBUG(this->get_logger(), "Goal accepted by server, waiting for result");
   }
 }
 
@@ -127,7 +127,7 @@ void JoyRobotNode::feedback_callback(
   GoalHandleControl::SharedPtr,
   const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
 {
-  // RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
+  RCLCPP_DEBUG(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
 }
 
 void JoyRobotNode::result_callback(const GoalHandleControl::WrappedResult & result)

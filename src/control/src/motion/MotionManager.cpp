@@ -70,6 +70,8 @@ void MotionManager::topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> 
 {
   float IMU_GYRO_X = -imu_msg_->angular_velocity.x / 10;
   float IMU_GYRO_Y = -imu_msg_->angular_velocity.y / 10;
+  (void)IMU_GYRO_X;
+  (void)IMU_GYRO_Y;
   // valores não armazenados ainda — precisa de membro? avaliar uso
 }
 void MotionManager::GetIniParameter()
@@ -181,7 +183,7 @@ void MotionManager::topic_callback_walk(const std::shared_ptr<custom_interfaces:
 }
 bool MotionManager::Initialize(bool fadeIn)
 {
-  int value, error;
+  [[maybe_unused]] int value, error;
 
 	usleep(10000);
   m_Enabled = false;
@@ -189,10 +191,10 @@ bool MotionManager::Initialize(bool fadeIn)
 
   for (int id = JointData::ID_MIN; id <= JointData::ID_MAX - 2; id++) //diminui tirando a cabeça
   {
-    if (DEBUG_PRINT)
-      fprintf(stderr, "ID:%d initializing...", id);
-      MotionStatus::m_CurrentJoints.SetValue(id, position[id]);
-      std::cout << position[id] << std::endl;
+    if (DEBUG_PRINT){
+      fprintf(stderr, "ID:%d initializing...", id);}
+    MotionStatus::m_CurrentJoints.SetValue(id, position[id]);
+    std::cout << position[id] << std::endl;
   }
 
   m_fadeIn = fadeIn;
@@ -207,7 +209,7 @@ bool MotionManager::Initialize(bool fadeIn)
 bool MotionManager::Reinitialize()
 {
   m_ProcessEnable = false;
-  int value, error;
+  [[maybe_unused]] int value, error;
   for (int id = JointData::ID_MIN; id <= JointData::ID_MAX - 2; id++)
   {
     if (DEBUG_PRINT)
@@ -246,11 +248,11 @@ void MotionManager::StartLogging()
   }
 
   m_LogFileStream.open(szFile, std::ios::out);
-  for (int id = JointData::ID_MIN; id <= JointData::ID_MAX - 2; id++)
-    m_LogFileStream << "nID_" << id << "_GP,nID_" << id << "_PP,";
-    m_LogFileStream << "GyroFB,GyroRL,AccelFB,AccelRL,L_FSR_X,L_FSR_Y,R_FSR_X,R_FSR_Y," << "\x0d\x0a";
+  for (int id = JointData::ID_MIN; id <= JointData::ID_MAX - 2; id++){
+    m_LogFileStream << "nID_" << id << "_GP,nID_" << id << "_PP,";}
+  m_LogFileStream << "GyroFB,GyroRL,AccelFB,AccelRL,L_FSR_X,L_FSR_Y,R_FSR_X,R_FSR_Y," << "\x0d\x0a";
 
-    m_IsLogging = true;
+  m_IsLogging = true;
 }
 
 void MotionManager::LoadINISettings(minIni *ini)
@@ -340,6 +342,8 @@ void MotionManager::Process()
 
             int param[JointData::NUMBER_OF_JOINTS * MX28::PARAM_BYTES];
             int joint_num = 0;
+            (void)param;
+            (void)joint_num;
             int pos[19];
 
             for (int id = JointData::ID_MIN; id <= JointData::ID_MAX - 2; id++) 
@@ -390,7 +394,7 @@ void MotionManager::SetJointDisable(int index)
   if (m_Modules.size() != 0)
   {
     for (auto &module : m_Modules)
-    {
+    { (void)module;
       for(std::list<MotionModule*>::iterator i = m_Modules.begin(); i != m_Modules.end(); i++)
       (*i)->m_Joint.SetEnable(index, false);
     }

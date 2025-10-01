@@ -87,7 +87,7 @@ void Driver::configure_sensor(std::shared_ptr<um7::Comms> sensor)
   r.communication.set(0, comm_reg);
   if (!sensor->sendWaitAck(r.comrate2))
   {
-    throw std::runtime_error("Unable to set CREG_COM_SETTINGS.");
+    throw std::runtime_error("Unable to set CREG_COM_SETTINGS."); //Unable to set CREG_COM_SETTINGS.
   }
 
   // set the broadcast rate of the device

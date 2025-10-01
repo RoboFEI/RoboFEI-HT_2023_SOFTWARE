@@ -20,6 +20,7 @@ void AngleEstimator::predict(double gyro_dpitch, double gyro_droll, double gyro_
 {
 	m_pitch += gyro_dpitch;
 	m_roll  += gyro_droll;
+	(void)gyro_dyaw;
 }
 
 void AngleEstimator::update(double x, double y, double z)
