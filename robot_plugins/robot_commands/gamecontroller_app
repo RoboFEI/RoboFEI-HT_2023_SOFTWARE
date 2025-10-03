@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd ~/GameController
+export GDK_BACKEND=x11
+export WINIT_UNIX_BACKEND=x11
+export WEBKIT_DISABLE_DMABUF_RENDERER=1
+
+./target/release/game_controller_app

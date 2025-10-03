@@ -77,6 +77,11 @@ DecisionNode::DecisionNode() : Node("decision_node")
       "goalpost_count", 
       rclcpp::QoS(10),
       std::bind(&DecisionNode::listener_callback_goalpost_count, this, _1)
+    ); 
+
+    sub_yaw_est_ = this->create_subscription<std_msgs::msg::Float64>(
+      "/yaw_est", 10,
+      std::bind(&DecisionNode::onYawEst, this, std::placeholders::_1)
     );
     
     neck_position_publisher_ = this->create_publisher<JointStateMsg>("set_joint_topic", 10);
@@ -301,6 +306,13 @@ void DecisionNode::send_goal(const Move &order)
   {
     robot.goalpost_count = *goalpost_count;
   }
+
+  void DecisionNode::onYawEst(const std_msgs::msg::Float64::SharedPtr msg)
+  {
+    yaw_est_value_ = msg->data;
+    //RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
+  }
+
 
   void DecisionNode::set_neck_position()
   {

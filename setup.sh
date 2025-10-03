@@ -172,8 +172,36 @@ echo -e "${blue} Instaling Softwares${NC}"
     # tree
     sudo snap install tree
 
-    # links2 (pra coneectar o robo no wifi da fei por ssh)
+    # links2 (pra conectar o robo no wifi da fei por ssh)
     ## $ links2
     ## G
     ## abrir o navegador do notebook e copiar o URL da pagina de acesso da FEI-INTERNET
     sudo apt install links2 -y
+
+    #GameController dependencies (FEI-Internet bloqueia o proxy, precisa baixar por outra rede) (só pros notebooks)
+    # sudo apt install npm 
+    # sudo apt  install cargo   # version 1.75.0+dfsg0ubuntu1~bpo0-0ubuntu0.22.04 
+    # sudo snap install rustup --classic
+    # rustup update stable
+    # export PATH="$HOME/.cargo/bin:$PATH"
+    # echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+    # source "$HOME/.bashrc"
+    # sudo apt install libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
+    # sudo apt install libwebkit2gtk-4.1-dev
+    # sudo apt install build-essential clang
+    # curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    # sudo apt install -y nodejs
+
+
+    #GameController installation (só pros notebooks)
+    # git clone https://github.com/RoboCup-Humanoid-TC/GameController.git
+    # cd GameController/frontend
+    # npm ci
+    # npm audit fix
+    # npm run build
+
+    # cd GameController
+    # cargo build -r
+
+    # cargo run -r
+    # cargo run -- -h

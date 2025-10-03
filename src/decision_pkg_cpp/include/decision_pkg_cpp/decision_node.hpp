@@ -27,6 +27,7 @@
 #include "std_msgs/msg/bool.hpp"
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "sensor_msgs/msg/imu.hpp"
+#include <std_msgs/msg/float64.hpp>
 
 using namespace std::placeholders;
 
@@ -107,6 +108,10 @@ class DecisionNode : public rclcpp::Node
 
         int robot_number;
         std_msgs::msg::Bool unlock_msg; //para decidir se vai voltar ao searching_ball
+        
+        void onYawEst(const std_msgs::msg::Float64::SharedPtr msg);
+
+        double yaw_est_value_ = 0.0; 
 
         DecisionNode();
         virtual ~DecisionNode();
@@ -126,6 +131,7 @@ class DecisionNode : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr goalpost_count; // quantas traves foram detectadas 
         rclcpp::Subscription<VisionMsg>::SharedPtr goalpost_division_lines; // de acordo com as grades da visao 
         rclcpp::Subscription<vision_msgs::msg::Point2D>::SharedPtr goalpost_px_position;
+        rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr sub_yaw_est_;
         rclcpp::Publisher<JointStateMsg>::SharedPtr neck_position_publisher_;
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr neck_control_lock_pub_; // para publicar posições pro pescoço
         rclcpp_action::Client<ControlActionMsg>::SharedPtr action_client_;
