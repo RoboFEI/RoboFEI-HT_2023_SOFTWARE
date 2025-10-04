@@ -16,3 +16,4 @@ alias vision="~/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot_commands/vision"
 
 alias wifi='sudo nmcli device wifi'
 alias gamecontroller_app="~/RoboFEI-HT_2023_SOFTWARE/robot_plugins/robot_commands/gamecontroller_app"
+alias selfdestruct_now='sudo shutdown now'

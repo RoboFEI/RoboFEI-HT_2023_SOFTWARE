@@ -6,7 +6,7 @@
 #include "decision_pkg_cpp/utils.h"
 #include "decision_pkg_cpp/AssyncTimer.hpp"
 
-#define ROBOT_NUMBER 2
+#define ROBOT_NUMBER 3
 
 using namespace std::chrono_literals;
 
@@ -50,12 +50,15 @@ class RobotBehavior : public DecisionNode
         void player_penalty();
         void goalkeeper_penalty(); // fazer
 
+        bool have_yaw_est();
+
         RobotBehavior();
         virtual ~RobotBehavior();
 
     private:
 
         AssyncTimer lost_ball_timer;
+        AssyncTimer lost_goal_timer;
         AssyncTimer look_right_timer;
         AssyncTimer check_goalpost_timer;
         bool is_penalized();

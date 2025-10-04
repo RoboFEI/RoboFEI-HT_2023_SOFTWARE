@@ -2,7 +2,7 @@
 
 #include "decision_pkg_cpp/robot_behavior.hpp"
 #include "decision_node.cpp"
-#include<unistd.h> // apenas para delay, apagar
+#include <unistd.h> // apenas para delay, apagar
 
 #define MAX_LOST_BALL_TIME 9000 //10 seconds
 
@@ -98,7 +98,7 @@ void RobotBehavior::normal_game()           //jogo normal
 
         if (!yaw_fixed) // atualizar ponto zero da IMU
         {
-            yaw_reference_ = robot.imu_yaw_rad;
+            yaw_reference_ = yaw_est_value_;
             yaw_reference_set_ = true;
             yaw_fixed = true;
 
@@ -174,13 +174,16 @@ void RobotBehavior::normal_game()           //jogo normal
         if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
         {
             //std_msgs::msg::Bool localization_active = robot.localization_msg; // topico que manda true/false para localização
+            RCLCPP_FATAL(this->get_logger(), " chutoncio %d", ROBOT_NUMBER);
 
-            if(yaw_est_value_ == 0.0){ 
+            if(yaw_est_value_ != 0.0){ 
+            RCLCPP_FATAL(this->get_logger(), " NUMERO UM %d", ROBOT_NUMBER);
                 if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game();
                 else if (is_kicker(ROBOT_NUMBER)) kicker_normal_game();
                 else if(is_bala(ROBOT_NUMBER)) bala_normal_game();
             }
             else{
+            RCLCPP_FATAL(this->get_logger(), " NUMERO DOIS %d", ROBOT_NUMBER);
                 if (is_kicker(ROBOT_NUMBER)) kicker_localization_game();
                 else if (is_bala(ROBOT_NUMBER)) bala_localization_game();
             }
@@ -501,18 +504,17 @@ void RobotBehavior::kicker_localization_game()                //estado de jogo n
 
 void RobotBehavior::bala_localization_game()                //estado de jogo normal; jogo rolando 
 {
-    //RCLCPP_INFO(this->get_logger(), "BALA LOCALIZATION GAME");
+    RCLCPP_WARN(this->get_logger(), "BALA LOCALIZATION GAME");
+    RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
     switch (robot.state)
     {
     case searching_ball:
-        this->free_neck();
         //RCLCPP_DEBUG(this->get_logger(), "Seaching ball");
-        if(ball_is_locked())
-            {   //RCLCPP_ERROR(this->get_logger(), "ball locked");
-                if(robot.ball_position == center) robot.state = ball_approach;      //anda ate a bola
-                else robot.state = aligning_with_the_ball;
+        if(have_yaw_est())
+            {   
+                robot.state = ball_approach;      
             }
-        else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) send_goal(turn_left);        //alinha o corpo com a bola
+        else if(lost_goal_timer.delayNR(MAX_LOST_BALL_TIME)) send_goal(turn_right);       
         break;
     
     case aligning_with_the_ball:
@@ -727,6 +729,13 @@ void RobotBehavior::player_penalty()
         }
 	    break;
     }
+}
+
+bool RobotBehavior::have_yaw_est()
+{
+    if(yaw_est_value_ != 0.0) return true;
+    else return false;
+
 }
 
 bool RobotBehavior::robot_align_for_kick_left() //fazer

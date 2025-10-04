@@ -310,7 +310,7 @@ void DecisionNode::send_goal(const Move &order)
   void DecisionNode::onYawEst(const std_msgs::msg::Float64::SharedPtr msg)
   {
     yaw_est_value_ = msg->data;
-    //RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
+    RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
   }
 
 
