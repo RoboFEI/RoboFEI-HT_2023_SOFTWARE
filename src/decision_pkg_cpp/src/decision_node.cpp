@@ -310,7 +310,7 @@ void DecisionNode::send_goal(const Move &order)
   void DecisionNode::onYawEst(const std_msgs::msg::Float64::SharedPtr msg)
   {
     yaw_est_value_ = msg->data;
-    RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
+    //RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
   }
 
 
@@ -433,7 +433,7 @@ void DecisionNode::feedback_callback(
   GoalHandleControl::SharedPtr,
   const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
 {
-  RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
+  //RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
 }
 
 void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & result)

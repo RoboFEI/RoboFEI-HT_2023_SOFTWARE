@@ -93,6 +93,7 @@ void RobotBehavior::normal_game()           //jogo normal
     
     case GameControllerMsg::GAMESTATE_READY:
     {
+            RCLCPP_FATAL(this->get_logger(), " to no ready %d", GameControllerMsg::GAMESTATE_READY);
         int neck = robot.neck_pos.position19;
         (void)neck;
         static bool yaw_fixed = false;  // variável estática local para garantir que IMU atualiza 1 vez so
@@ -102,12 +103,15 @@ void RobotBehavior::normal_game()           //jogo normal
             yaw_reference_ = yaw_est_value_;
             yaw_reference_set_ = true;
             yaw_fixed = true;
+            
+            int lim_left = yaw_reference_-M_PI/2;
+            int lim_right = yaw_reference_+M_PI/2;
 
         }
         //RCLCPP_INFO(this->get_logger(), "🎯 READY | Etapa: %d | Neck: %d", ready_etapa, neck);    
         
         
-        RCLCPP_INFO(this->get_logger(), "%d", opposite_side);
+        //RCLCPP_INFO(this->get_logger(), "%d", opposite_side);
         
 
     }
@@ -115,23 +119,25 @@ void RobotBehavior::normal_game()           //jogo normal
         
     case GameControllerMsg::GAMESTATE_SET: // feito
         send_goal(stand_still);
+            RCLCPP_FATAL(this->get_logger(), " to no set %d", GameControllerMsg::GAMESTATE_SET);
         yaw_reference_set_ = false;
         break;
     
     case GameControllerMsg::GAMESTATE_PLAYING:  // começo do jogo
+            //RCLCPP_FATAL(this->get_logger(), " to no playing %d", GameControllerMsg::GAMESTATE_PLAYING);
         if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
         {
             //std_msgs::msg::Bool localization_active = robot.localization_msg; // topico que manda true/false para localização
             //RCLCPP_FATAL(this->get_logger(), " chutoncio %d", ROBOT_NUMBER);
 
-            if(yaw_est_value_ != 0.0){ 
+            if(yaw_est_value_ == 0.0){ 
             RCLCPP_FATAL(this->get_logger(), " NUMERO UM %d", ROBOT_NUMBER);
                 if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game();
                 else if (is_kicker(ROBOT_NUMBER)) kicker_normal_game();
                 else if(is_bala(ROBOT_NUMBER)) bala_normal_game();
             }
             else{
-            RCLCPP_FATAL(this->get_logger(), " NUMERO DOIS %d", ROBOT_NUMBER);
+            //RCLCPP_FATAL(this->get_logger(), " NUMERO DOIS %d", ROBOT_NUMBER);
                 if (is_kicker(ROBOT_NUMBER)) kicker_localization_game();
                 else if (is_bala(ROBOT_NUMBER)) bala_localization_game();
             }
@@ -348,7 +354,9 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
 void RobotBehavior::kicker_localization_game()                //estado de jogo normal; jogo rolando 
 {
     RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 2000, "yaw_est usado na decisão: %f", yaw_est_value_);
-
+    //RCLCPP_INFO(this->get_logger(), "kicker");
+            //yaw_reference_ = yaw_est_value_;
+    //if((yaw_est_value_+M_PI/2))
 
     switch (robot.state)
     {
@@ -357,10 +365,10 @@ void RobotBehavior::kicker_localization_game()                //estado de jogo n
         //RCLCPP_DEBUG(this->get_logger(), "Seaching ball");
         if(ball_is_locked())
             {   //RCLCPP_ERROR(this->get_logger(), "ball locked");
-                if(robot.ball_position == center) robot.state = ball_approach;      //anda ate a bola
+                if(robot.ball_position == center) robot.state = ball_approach;     
                 else robot.state = aligning_with_the_ball;
             }
-        else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) send_goal(turn_left);        //alinha o corpo com a bola
+        else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) send_goal(turn_left);   
         break;
     
     case aligning_with_the_ball:
