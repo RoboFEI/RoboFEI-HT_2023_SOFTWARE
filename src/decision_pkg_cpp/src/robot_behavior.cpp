@@ -387,7 +387,7 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
             send_goal(walk_left);
             RCLCPP_INFO(this->get_logger(), "walking left");
         }
-        else if (robot.neck_pos.position20 < 1230)
+        else if (robot.neck_pos.position20 < 1400)
         {
             robot.state = kick_ball;
         }
@@ -401,7 +401,7 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         //RCLCPP_INFO(this->get_logger(), "kick");
         if(robot.movement != 3 && robot.movement != 4) 
         {
-            if (robot.neck_pos.position19 >= 2000) 
+            if (robot.neck_pos.position19 >= 2048) 
                 {   
                     RCLCPP_INFO(this->get_logger(), "kick_left");
                     send_goal(left_kick);
