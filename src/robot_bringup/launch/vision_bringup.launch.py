@@ -28,17 +28,17 @@ def generate_launch_description():
         'camera_config.yaml'
     )
 
-    camera = Node(
-        package="usb_cam",
-        executable="usb_cam_node_exe",
-        output = 'screen',
-        parameters = [camera_config],
-        arguments=['--ros-args', '--log-level', 'info'],
-        respawn=True,
-        respawn_delay=0.5,
-        emulate_tty=True
-    )
-
+#    camera = Node(
+#        package="usb_cam",
+#        executable="usb_cam_node_exe",
+#        output = 'screen',
+#        parameters = [camera_config],
+#        arguments=['--ros-args', '--log-level', 'info'],
+#        respawn=True,
+#        respawn_delay=0.5,
+#        emulate_tty=True
+#    )
+#
     image_viwer = Node(
         package="vision_pkg",
         executable="detect",
@@ -50,6 +50,6 @@ def generate_launch_description():
         emulate_tty=True
     )
 
-    ld.add_action(camera)
+    #ld.add_action(camera)
     ld.add_action(image_viwer)
     return ld
