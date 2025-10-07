@@ -81,7 +81,6 @@ void RobotBehavior::normal_game()           //jogo normal
     switch (gc_info.game_state)
     {
     case GameControllerMsg::GAMESTATE_INITAL: // conferido
-            RCLCPP_FATAL(this->get_logger(), " to no initial %d", GameControllerMsg::GAMESTATE_INITAL);
 
         if(robot.neck_pos.position19 < 2048){ // definir lado do campo 1 - right 0 - left
             opposite_side = 1;
@@ -94,7 +93,7 @@ void RobotBehavior::normal_game()           //jogo normal
     case GameControllerMsg::GAMESTATE_READY:
     {
         int neck = robot.neck_pos.position19;
-        (void)neck;
+        
         static bool yaw_fixed = false;  // variável estática local para garantir que IMU atualiza 1 vez so
 
         if (!yaw_fixed) // atualizar ponto zero da IMU
@@ -108,10 +107,63 @@ void RobotBehavior::normal_game()           //jogo normal
         
         
         RCLCPP_INFO(this->get_logger(), "%d", opposite_side);
-        
+        switch (ready_etapa)
+        {
+        case ETAPA_WALK:
+            if (opposite_side == 0)
+            {
+                if (neck >= 1700)
+                {
+                    send_goal(walk);
+                    //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
+                }
+                else
+                {
+                    send_goal(stand_still);
+                    ready_etapa = ETAPA_TURN;
+                    //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
+                }
+            }
+            else  if(opposite_side == 1)
+            {
+                if (neck >= 1500)
+                {
+                    send_goal(walk);
+                    //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
+                }
+                else
+                {
+                    send_goal(stand_still);
+                    ready_etapa = ETAPA_TURN;
+                    //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
+                }   
+            }
+                
+            
+            break;
 
-    }
+        case ETAPA_TURN:
+            if (neck > 2068 || neck < 2028)
+            {
+                if (neck > 2068) send_goal(turn_left);
+                else send_goal(turn_right);
+                //RCLCPP_INFO(this->get_logger(), "↩️ Virando até alinhar com 2048");
+            }
+            else
+            {
+                ready_etapa = ETAPA_PARAR;
+                //RCLCPP_INFO(this->get_logger(), "✅ Alinhou com a bola, indo para PARAR");
+            }
+            break;
+
+        case ETAPA_PARAR:
+            send_goal(stand_still);
+            //RCLCPP_INFO(this->get_logger(), "🛑 Parado (etapa final)");
+            break;
+        }
+
         break;
+    }
         
     case GameControllerMsg::GAMESTATE_SET: // feito
         send_goal(stand_still);
@@ -122,7 +174,7 @@ void RobotBehavior::normal_game()           //jogo normal
         if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
         {
             //std_msgs::msg::Bool localization_active = robot.localization_msg; // topico que manda true/false para localização
-            //RCLCPP_FATAL(this->get_logger(), " chutoncio %d", ROBOT_NUMBER);
+            RCLCPP_FATAL(this->get_logger(), " chutoncio %d", ROBOT_NUMBER);
 
             if(yaw_est_value_ != 0.0){ 
             RCLCPP_FATAL(this->get_logger(), " NUMERO UM %d", ROBOT_NUMBER);
@@ -147,7 +199,7 @@ void RobotBehavior::normal_game()           //jogo normal
 void RobotBehavior::bala_normal_game()                //estado de jogo normal; jogo rolando 
 {
 
-    //RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
+    RCLCPP_INFO(this->get_logger(), "Recebido yaw_est: %f", yaw_est_value_);
     //RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
     //RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
     //RCLCPP_WARN(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
@@ -248,7 +300,7 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         //RCLCPP_ERROR(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
 
         if(ball_is_locked())
-            {   //RCLCPP_INFO(this->get_logger(), "ball locked");
+            {   RCLCPP_INFO(this->get_logger(), "ball locked");
                 if(robot.ball_position == center) robot.state = ball_approach;      //anda ate a bola
                 else robot.state = aligning_with_the_ball;
             }
@@ -294,12 +346,12 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         if (robot.neck_pos.position19 < 1360)
         {
             send_goal(walk_right);
-            //RCLCPP_INFO(this->get_logger(), "walking right");
+            RCLCPP_INFO(this->get_logger(), "walking right");
         }
         else if (robot.neck_pos.position19 > 2600)
         {
             send_goal(walk_left);
-            //RCLCPP_INFO(this->get_logger(), "walking left");
+            RCLCPP_INFO(this->get_logger(), "walking left");
         }
         else if (robot.neck_pos.position20 < 1230)
         {
@@ -345,9 +397,52 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void RobotBehavior::kicker_localization_game()                //estado de jogo normal; jogo rolando 
 {
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 2000, "yaw_est usado na decisão: %f", yaw_est_value_);
+    RCLCPP_INFO(this->get_logger(), "yaw_est usado na decisão: %f", yaw_est_value_);
 
 
     switch (robot.state)
@@ -449,6 +544,48 @@ void RobotBehavior::kicker_localization_game()                //estado de jogo n
     }
      
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void RobotBehavior::bala_localization_game()                //estado de jogo normal; jogo rolando 
 {
