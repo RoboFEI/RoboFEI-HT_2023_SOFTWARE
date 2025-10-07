@@ -287,6 +287,46 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void RobotBehavior::kicker_normal_game()                //estado de jogo normal; jogo rolando 
 {
     //RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
@@ -369,19 +409,15 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         {
             if (robot.neck_pos.position19 >= 2000) 
                 {   
-                    RCLCPP_INFO(this->get_logger(), "kick_left");
                     send_goal(left_kick);
                     robot.state = searching_ball;
                     
-                // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
                 }
                 else
                 {   
 
-                    RCLCPP_INFO(this->get_logger(), "kick_right");
                     send_goal(right_kick);
                     robot.state = searching_ball;
-                // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
             } 
         }
         else if(robot.finished_move)

@@ -434,6 +434,7 @@ void DecisionNode::feedback_callback(
   const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
 {
   //RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
+  (void)feedback;
 }
 
 void DecisionNode::result_callback(const GoalHandleControl::WrappedResult & result)
