@@ -18,7 +18,10 @@ enum State
     aligning_with_the_ball = 2,
     ball_approach = 3,
     ball_close = 4,
-    kick_ball = 5
+    kick_ball = 5,
+    aligning_with_goalmiddle = 6,
+    walking_left = 7,
+    walking_right = 8
 };
 
 enum FallStatus
@@ -43,6 +46,8 @@ enum Move
     turn_right          = 5,
     turn_left           = 6,
     goodbye             = 7,
+    goalkeeper_fall_left = 11,
+    goalkeeper_fall_right = 12,
     squat               = 13,
     walk                = 14,
     gait                = 15,
@@ -50,7 +55,7 @@ enum Move
     stand_up_front      = 17,
     stand_up_side       = 18,
     walk_left           = 20,
-    walk_right          = 24,
+    walk_right          = 21,
     turn_ball_left      = 9,
     turn_ball_right      = 10
 };

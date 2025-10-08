@@ -54,9 +54,9 @@ NeckNode::NeckNode()
   neck_left_limit = this->declare_parameter("neck_left_limit", 3050);
   neck_right_limit = this->declare_parameter("neck_right_limit", 1350);
   robotNumber = this->declare_parameter("robot_number", 2);
-  if(robotNumber > 2)
+  if(robotNumber == 4)
   {
-        neck.pan  = 512;
+    neck.pan  = 512;
     neck.tilt = 512;  
   }
 

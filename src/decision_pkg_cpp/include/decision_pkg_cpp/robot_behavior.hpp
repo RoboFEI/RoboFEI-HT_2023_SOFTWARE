@@ -5,8 +5,9 @@
 #include "decision_pkg_cpp/attributes.h"
 #include "decision_pkg_cpp/utils.h"
 #include "decision_pkg_cpp/AssyncTimer.hpp"
+#include <atomic>
 
-#define ROBOT_NUMBER 2
+#define ROBOT_NUMBER 1
 
 using namespace std::chrono_literals;
 
@@ -29,6 +30,7 @@ class RobotBehavior : public DecisionNode
         bool goalpost_is_locked(); 
         bool vision_stable();
         bool ball_in_camera_center();
+        bool ball_in_camera_far();
         bool ball_in_robot_limits();
         bool ball_in_left_limit();
         bool ball_in_right_limit();
@@ -60,10 +62,9 @@ class RobotBehavior : public DecisionNode
         AssyncTimer check_goalpost_timer;
         bool is_penalized();
         void get_up();
+        std::atomic<bool> squat_sent{false};
 
         rclcpp::TimerBase::SharedPtr robot_behavior_;
-
-        
 };
 
 #endif // ROBOT_BEHAVIOR_H

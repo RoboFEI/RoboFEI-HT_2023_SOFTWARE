@@ -1,7 +1,7 @@
 # Robot 5 ROBOTTER 5
 /**:
   ros__parameters:
-    neck_up_limit   : 2048
+    neck_up_limit   : 2000
     neck_down_limit : 1200
     neck_left_limit : 2650
     neck_right_limit: 1350
@@ -9,7 +9,7 @@
 
 /neck_node:
   ros__parameters:
-    neck_activate: false
+    neck_activate: true
 
     x_p_gain: 0.20
     y_p_gain: 0.15
