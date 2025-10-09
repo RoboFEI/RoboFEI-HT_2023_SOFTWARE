@@ -54,7 +54,7 @@ NeckNode::NeckNode()
   neck_left_limit = this->declare_parameter("neck_left_limit", 3050);
   neck_right_limit = this->declare_parameter("neck_right_limit", 1350);
   robotNumber = this->declare_parameter("robot_number", 2);
-  if(robotNumber == 4)
+  if(robotNumber > 2)
   {
     neck.pan  = 512;
     neck.tilt = 512;  
@@ -151,14 +151,14 @@ void NeckNode::search_ball()
           search_ball_pos = {search_ball_limits[2],1800};
           if(this->search_ball_state > (search_ball_samples[0]+search_ball_samples[1])) this->search_ball_pos[0] -= (((search_ball_limits[2]*2)-4096)/(search_ball_samples[2]))*(search_ball_state-(search_ball_samples[0]+search_ball_samples[1]));
         }
-      if(robotNumber > 3) 
+      if(robotNumber == 4)
         {
           this->search_ball_pos[0] = (search_ball_pos[0])*(0.25);
           this->search_ball_pos[1] = (search_ball_pos[1])*(0.25);
         }
       new_neck_position.id.push_back(19);
       new_neck_position.id.push_back(20);
-          new_neck_position.info.push_back(this->search_ball_pos[0]);
+      new_neck_position.info.push_back(this->search_ball_pos[0]);
       new_neck_position.info.push_back(this->search_ball_pos[1]);
 
       new_neck_position.type.push_back(JointStateMsg::POSITION);

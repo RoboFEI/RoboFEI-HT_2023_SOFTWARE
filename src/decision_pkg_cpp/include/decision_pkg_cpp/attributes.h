@@ -21,7 +21,8 @@ enum State
     kick_ball = 5,
     aligning_with_goalmiddle = 6,
     walking_left = 7,
-    walking_right = 8
+    walking_right = 8,
+    defending_penalty = 9
 };
 
 enum FallStatus

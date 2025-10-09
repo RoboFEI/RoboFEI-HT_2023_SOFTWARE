@@ -121,17 +121,21 @@ DecisionNode::~DecisionNode()
 
 void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_info)
 {
+
+  RCLCPP_INFO(this->get_logger(),"xana2"); 
     if (this->gc_info.secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && this->gc_info.game_state == GameControllerMsg::GAMESTATE_SET)
     {
+        RCLCPP_INFO(this->get_logger(),"xana1"); 
       if(gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && gc_info->game_state == GameControllerMsg::GAMESTATE_PLAYING)
       {
-        side_penalty = rand()%2;
+        //side_penalty = rand( )%2;
+        RCLCPP_INFO(this->get_logger(),"xana"); 
       }
     }
     this->gc_info = *gc_info;
-    // RCLCPP_INFO(this->get_logger(), "Recive GC Info");
-    // RCLCPP_INFO(this->get_logger(), "Game State: %d", this->gc_info.game_state);
-    // RCLCPP_INFO(this->get_logger(), "Secondary Game State: %d", this->gc_info.secondary_state);
+    RCLCPP_INFO(this->get_logger(), "Recive GC Info");
+    RCLCPP_INFO(this->get_logger(), "Game State: %d", this->gc_info.game_state);
+    RCLCPP_INFO(this->get_logger(), "Secondary Game State: %d", this->gc_info.secondary_state);
 }
 
 void DecisionNode::listener_callback_imu_rpy(const geometry_msgs::msg::Vector3Stamped::SharedPtr rpy)
@@ -213,7 +217,7 @@ void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_in
 void DecisionNode::listener_calback_running_move(const intMsg::SharedPtr atualMove)
 {
   this->robot.movement = static_cast<Move>(atualMove->data);
-}    
+} 
 
 void DecisionNode::send_goal(const Move &order)
 {
