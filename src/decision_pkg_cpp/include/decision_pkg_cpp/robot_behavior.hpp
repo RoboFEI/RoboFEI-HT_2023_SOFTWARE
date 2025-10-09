@@ -62,7 +62,9 @@ class RobotBehavior : public DecisionNode
         AssyncTimer look_right_timer;
         AssyncTimer check_goalpost_timer;
         bool is_penalized();
-        void get_up();
+        void get_up();    
+        double lim_left;
+        double lim_right;
 
         rclcpp::TimerBase::SharedPtr robot_behavior_;
 

@@ -18,8 +18,7 @@ enum State
     aligning_with_the_ball = 2,
     ball_approach = 3,
     ball_close = 4,
-    kick_ball = 5,
-    turn = 6
+    kick_ball = 5
 };
 
 enum FallStatus
