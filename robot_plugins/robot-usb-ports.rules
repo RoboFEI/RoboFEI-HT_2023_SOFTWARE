@@ -4,6 +4,7 @@ SUBSYSTEMS=="usb", KERNELS=="1-5.2", SYMLINK+="motors"
 SUBSYSTEMS=="usb", KERNELS=="1-5.1", SYMLINK+="imu"
 SUBSYSTEMS=="usb", KERNELS=="3-8.2", SYMLINK+="motors"
 SUBSYSTEMS=="usb", KERNELS=="3-8.1", SYMLINK+="imu"
+SUBSYSTEMS=="usb", KERNELS=="3-7", SYMLINK+="imu_ard"
 
 
 # Camera Rules

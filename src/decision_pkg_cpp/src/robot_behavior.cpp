@@ -174,8 +174,8 @@ void RobotBehavior::normal_game()           //jogo normal
 void RobotBehavior::bala_normal_game()                //estado de jogo normal; jogo rolando 
 {
     //RCLCPP_FATAL(this->get_logger(), "QUEM SOU EU %d", ROBOT_NUMBER);
-    RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
-    RCLCPP_FATAL(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
+   // RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+    //RCLCPP_FATAL(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
     //RCLCPP_INFO(this->get_logger(), "Bala Normal Game");
 
     switch (robot.state)

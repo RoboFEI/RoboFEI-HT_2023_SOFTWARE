@@ -21,6 +21,7 @@
 // #include "custom_interfaces/msg/neck_position.hpp"
 #include "custom_interfaces/msg/joint_state.hpp"
 #include "custom_interfaces/msg/vision.hpp"
+#include "custom_interfaces/msg/robot_state.hpp"
 #include "custom_interfaces/action/control.hpp"
 
 #include "std_msgs/msg/int32.hpp"
@@ -38,6 +39,7 @@ class DecisionNode : public rclcpp::Node
         using JointStateMsg = custom_interfaces::msg::JointState;
         using ImuGyroMsg = geometry_msgs::msg::Vector3Stamped;
         using ImuAccelMsg = sensor_msgs::msg::Imu;
+        using IMU6050 = custom_interfaces::msg::RobotState;
         using VisionMsg = custom_interfaces::msg::Vision;
         using intMsg = std_msgs::msg::Int32;
 
@@ -56,9 +58,11 @@ class DecisionNode : public rclcpp::Node
         void listener_callback_neck_pos(const JointStateMsg::SharedPtr neck_pos); 
         void listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro); // giroscopio da UM7
         void listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel);
+        void listener_callback_imu_6050(const IMU6050::SharedPtr imu_6050);
         void robot_detect_fallen(const float &robot_accel_x,
                                  const float &robot_accel_y,
                                  const float &robot_accel_z); 
+        void robot_detect_fallen_6050(const bool fall_front, const bool fall_back);
         void listener_callback_vision(const VisionMsg::SharedPtr vision_info); 
         void listener_calback_running_move(const intMsg::SharedPtr atualMove);  
         void listener_callback_localization_status(const std_msgs::msg::Bool localization_msg); // topico q manda se a localização ta ativa
@@ -120,6 +124,7 @@ class DecisionNode : public rclcpp::Node
         rclcpp::Subscription<JointStateMsg>::SharedPtr neck_position_subscriber_;
         rclcpp::Subscription<ImuGyroMsg>::SharedPtr imu_gyro_subscriber_;
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
+        rclcpp::Subscription<IMU6050>::SharedPtr imu_6050_subscriber;
         rclcpp::Subscription<VisionMsg>::SharedPtr vision_subscriber_;
         rclcpp::Subscription<intMsg>::SharedPtr running_move_subscriber_;
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr localization_subscriber;
