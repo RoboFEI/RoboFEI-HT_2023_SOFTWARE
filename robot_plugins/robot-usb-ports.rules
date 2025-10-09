@@ -21,7 +21,7 @@ KERNEL=="ttyUSB*", ATTRS{serial}=="A403F7R1", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", ATTRS{serial}=="AI05A3SZ", SYMLINK+="motors", MODE="0777"
 
 # Placa nova
-KERNEL=="ttyUSB*", KERNELS=="3-8.3", SYMLINK+="motors", MODE="0777"
+KERNEL=="ttyUSB*", KERNELS=="3-8.0", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", KERNELS=="1-5.2", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", KERNELS=="1-6.1", SYMLINK+="motors", MODE="0777"
 KERNEL=="ttyUSB*", KERNELS=="1-5.3", SYMLINK+="motors", MODE="0777"

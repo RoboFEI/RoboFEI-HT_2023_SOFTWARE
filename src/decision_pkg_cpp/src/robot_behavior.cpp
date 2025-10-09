@@ -104,8 +104,8 @@ void RobotBehavior::normal_game()           //jogo normal
             yaw_reference_set_ = true;
             yaw_fixed = true;
             
-            lim_left = yaw_reference_-M_PI/2;
-            lim_right = yaw_reference_+M_PI/2;
+            lim_left  = normalize_angle(yaw_reference_ - M_PI/2);
+            lim_right = normalize_angle(yaw_reference_ + M_PI/2);
 
         }
         //RCLCPP_INFO(this->get_logger(), "🎯 READY | Etapa: %d | Neck: %d", ready_etapa, neck);    
@@ -353,9 +353,18 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
 
 void RobotBehavior::kicker_localization_game()                //estado de jogo normal; jogo rolando 
 {   
-    double deltaY = yaw_reference_ - yaw_est_value_;
-    if (deltaY > M_PI) deltaY -= 2*M_PI;
-    if (deltaY < -M_PI) deltaY += 2*M_PI;
+    
+    double deltaY = normalize_angle(yaw_est_value_ - yaw_reference_);
+
+    // limites em radianos
+    const double LIMITE_GIRO = M_PI / 2;  // 90°
+    const double LIMITE_CHUTE = M_PI / 6; // 30°
+
+    // logs de debug
+    RCLCPP_INFO(this->get_logger(), "yaw_est=%.3f | ref=%.3f | ΔY=%.3f rad (%.1f°)", yaw_est_value_, yaw_reference_, deltaY, deltaY * 180.0 / M_PI);
+    
+
+    //double deltaY = normalize_angle(yaw_est_value_ - yaw_reference_);
     //RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 2000, "yaw_est usado na decisão: %f", yaw_est_value_);
     RCLCPP_INFO(this->get_logger(), "yaw_est value: %f   yaw_reference: %f   delyaY: %f", yaw_est_value_, yaw_reference_, deltaY);
             //yaw_reference_ = yaw_est_value_;
@@ -493,17 +502,23 @@ void RobotBehavior::kicker_localization_game()                //estado de jogo n
             break;
 
         case ball_close:
-            if(deltaY >0.4){
-                send_goal(turn_ball_left);
+            // se estiver fora da faixa larga (±90°) → gira para alinhar
+            if (fabs(deltaY) > LIMITE_GIRO) {
+                if (deltaY > 0)
+                    send_goal(turn_ball_left);
+                else
+                    send_goal(turn_ball_right);
             }
-            else if(deltaY < -0.4){
-                send_goal(turn_ball_right);
-            } 
+
+            // se estiver dentro da faixa estreita (±30°) → chuta
+            else if (fabs(deltaY) <= LIMITE_CHUTE) {
+                robot.state = kick_ball;
+            }
             
-            else if (robot.neck_pos.position20 < 1230)  
-                {
-                    robot.state = kick_ball;
-                }
+            else if (robot.neck_pos.position20 > 1350)  
+            {
+                robot.state = ball_approach;
+            }
             
             else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
             else if (robot.neck_pos.position20 > 1400) robot.state = aligning_with_the_ball;
@@ -763,6 +778,12 @@ void RobotBehavior::player_penalty()
         }
 	    break;
     }
+}
+
+double RobotBehavior::normalize_angle(double angle) {
+    while (angle > M_PI)  angle -= 2.0 * M_PI;
+    while (angle < -M_PI) angle += 2.0 * M_PI;
+    return angle;
 }
 
 bool RobotBehavior::have_yaw_est()

@@ -5,6 +5,7 @@
 #include "decision_pkg_cpp/attributes.h"
 #include "decision_pkg_cpp/utils.h"
 #include "decision_pkg_cpp/AssyncTimer.hpp"
+#include <cmath>
 
 #define ROBOT_NUMBER 2
 
@@ -54,6 +55,7 @@ class RobotBehavior : public DecisionNode
 
         RobotBehavior();
         virtual ~RobotBehavior();
+        double normalize_angle(double angle);
 
     private:
 
