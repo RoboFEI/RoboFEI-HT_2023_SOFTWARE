@@ -1,7 +1,7 @@
 # Placa nova
-SUBSYSTEMS=="usb", KERNELS=="3-8.2", SYMLINK+="motors"
+SUBSYSTEMS=="usb", KERNELS=="3-8.2", SYMLINK+="motors", MODE="0777"
 SUBSYSTEMS=="usb", KERNELS=="3-8.1", SYMLINK+="imu"
-SUBSYSTEMS=="usb", KERNELS=="3-9.2", SYMLINK+="motors"
+SUBSYSTEMS=="usb", KERNELS=="3-9.2", SYMLINK+="motors", MODE="0777"
 SUBSYSTEMS=="usb", KERNELS=="3-8.1", SYMLINK+="imu"
 
 # Camera Rules

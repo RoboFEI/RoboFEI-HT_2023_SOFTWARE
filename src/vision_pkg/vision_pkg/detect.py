@@ -195,8 +195,8 @@ class BallDetection(Node):
                     self.get_logger().debug("Não está publicando no servidor udp")
 
             # Show
-            cv2.imshow('Ball', frame)
-            cv2.waitKey(1)
+            #cv2.imshow('Ball', frame)
+            #cv2.waitKey(1)
 
             # If you want to also publish the original frame as sensor_msgs/Image, uncomment:
             # try:
