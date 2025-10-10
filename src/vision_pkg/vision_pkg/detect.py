@@ -89,7 +89,7 @@ class BallDetection(Node):
         self.declare_parameter("show_divisions", True) # Show division lines and center of ball in output image
         self.show_divisions = self.get_parameter("show_divisions").get_parameter_value().bool_value
 
-        self.declare_parameter("get_image", False) #
+        self.declare_parameter("get_image", False)
         self.get_image = self.get_parameter("get_image").get_parameter_value().bool_value
         
         self.declare_parameter("fps_save", 2) 

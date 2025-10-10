@@ -25,6 +25,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 include_directories(${CURSES_INCLUDE_DIR})
 

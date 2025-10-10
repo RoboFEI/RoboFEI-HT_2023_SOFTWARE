@@ -4,7 +4,7 @@
   <name>vision_pkg</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="rpj134@gmail.com">thiago-desktop</maintainer>
+  <maintainer email="rpj134@gmail.com">Thiago M.</maintainer>
   <license>TODO: License declaration</license>
   
   <exec_depend>rclpy</exec_depend>

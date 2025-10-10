@@ -46,7 +46,7 @@ echo -e "${blue} Instalação do ROS2...${NC}"
 
         # Setup colcon and colcon_cd
         ## altera p /.bashrc
-        ### usar só uma vez
+        ### usar só uma vez -- colocar grep depois
         echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
         echo "export _colcon_cd_root=/opt/ros/humble/" >> ~/.bashrc
         echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
@@ -177,6 +177,9 @@ echo -e "${blue} Instaling Softwares${NC}"
     ## G
     ## abrir o navegador do notebook e copiar o URL da pagina de acesso da FEI-INTERNET
     sudo apt install links2 -y
+
+    # for USB rules
+    sudo usermod -a -G dialout $USER
 
     #GameController dependencies (FEI-Internet bloqueia o proxy, precisa baixar por outra rede) (só pros notebooks)
     # sudo apt install npm 

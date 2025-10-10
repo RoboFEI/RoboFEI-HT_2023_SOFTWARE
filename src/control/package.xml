@@ -21,6 +21,8 @@
   <depend>Curses</depend>
   <depend>custom_interfaces</depend>
 
+  <build_depend>nlohmann-json3-dev</build_depend>
+  <exec_depend>nlohmann-json3-dev</exec_depend>
 
   <exec_depend>rosidl_default_runtime</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
