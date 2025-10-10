@@ -121,15 +121,11 @@ DecisionNode::~DecisionNode()
 
 void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_info)
 {
-
-  RCLCPP_INFO(this->get_logger(),"xana2"); 
     if (this->gc_info.secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && this->gc_info.game_state == GameControllerMsg::GAMESTATE_SET)
     {
-        RCLCPP_INFO(this->get_logger(),"xana1"); 
       if(gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && gc_info->game_state == GameControllerMsg::GAMESTATE_PLAYING)
       {
         //side_penalty = rand( )%2;
-        RCLCPP_INFO(this->get_logger(),"xana"); 
       }
     }
     this->gc_info = *gc_info;
