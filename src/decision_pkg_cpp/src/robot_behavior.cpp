@@ -4,7 +4,7 @@
 #include "decision_node.cpp"
 #include<unistd.h> // apenas para delay, apagar
 
-#define MAX_LOST_BALL_TIME 9000 //10 seconds
+#define MAX_LOST_BALL_TIME 7000 //10 seconds
 
 // defining the opposite side --> 1 - right --> 0 - left
 int opposite_side;
@@ -330,7 +330,10 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
             //fazer o walk right
             send_goal(walk_right);
         }
-        else send_goal(walk);
+        else if(ball_is_locked()){
+            send_goal(walk);
+        }
+        
 
         //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
 	    break;
