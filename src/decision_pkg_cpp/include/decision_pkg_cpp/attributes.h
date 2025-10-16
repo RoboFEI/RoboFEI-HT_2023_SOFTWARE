@@ -39,7 +39,7 @@ enum Move
     right_kick_to_right = 31,
     //right_kick_to_left  = 32,
     left_kick_to_left   = 34, 
-    //lefk_kick_to_right  = 33,
+    left_kick_penalty  = 35,
     turn_right          = 5,
     turn_left           = 6,
     goodbye             = 7,

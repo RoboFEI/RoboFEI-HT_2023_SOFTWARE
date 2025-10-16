@@ -383,11 +383,13 @@ void DecisionNode::send_goal(const Move &order)
 {
     auto msg = JointStateMsg();
 
-    float pan = 2000;  // centralizado
-    float tilt = 1350; // olhando para baixo (ajuste fino aqui)
+    int pan = 2000;  // centralizado
+    int tilt = 1350; // olhando para baixo (ajuste fino aqui)
 
     msg.id = {19, 20};
     msg.info = {pan, tilt};
+    (void)pan;
+    (void)tilt;
     msg.type = {JointStateMsg::POSITION, JointStateMsg::POSITION};
 
     neck_position_publisher_->publish(msg);
@@ -420,7 +422,7 @@ void DecisionNode::goal_response_callback(const GoalHandleControl::SharedPtr &go
 void DecisionNode::feedback_callback(
   GoalHandleControl::SharedPtr,
   const std::shared_ptr<const ControlActionMsg::Feedback> feedback)
-{
+{(void)feedback;
   // RCLCPP_INFO(this->get_logger(), "Movements Remain: %d", feedback->movements_remaining);
 }
 
