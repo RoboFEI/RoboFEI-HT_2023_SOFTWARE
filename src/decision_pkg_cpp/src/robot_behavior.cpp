@@ -305,7 +305,7 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
             robot.state = kick_ball;
         }
         else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
-        else if (robot.neck_pos.position20 > 1500) robot.state = aligning_with_the_ball;
+        else if(!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
         //else if(robot_align_for_kick_left()) robot.state = kick_ball;
         break;
 
@@ -317,19 +317,17 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
             robot.state = searching_ball;
             lost_ball_timer.reset();
 	    } 
-        if (robot.neck_pos.position20 >= 1500)
+        if (robot.neck_pos.position20 >= 1475)
         {
-            robot.state = ball_close;
+            robot.state = aligning_with_the_ball;
         }
         else if(robot.neck_pos.position19 >= 2300){
-            if (robot.neck_pos.position20 >= 1500) send_goal(turn_left);
-            else send_goal(walk_left);
+            send_goal(walk_left);
         }
         else if(robot.neck_pos.position19 <= 1700){
-            if (robot.neck_pos.position20 >= 1500) send_goal(turn_right);
-            else send_goal(walk_right);
+            send_goal(walk_right);
         }
-        else if((robot.neck_pos.position19 > 1800) && (robot.neck_pos.position19 < 2200)){
+        else/* if((robot.neck_pos.position19 > 1996) && (robot.neck_pos.position19 < 2200))*/{
             send_goal(walk);
         }
         //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
