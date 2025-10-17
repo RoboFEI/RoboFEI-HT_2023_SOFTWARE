@@ -317,7 +317,7 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
             robot.state = searching_ball;
             lost_ball_timer.reset();
 	    } 
-        if (robot.neck_pos.position20 >= 1475)
+        if (robot.neck_pos.position20 >= 1575)
         {
             robot.state = aligning_with_the_ball;
         }
