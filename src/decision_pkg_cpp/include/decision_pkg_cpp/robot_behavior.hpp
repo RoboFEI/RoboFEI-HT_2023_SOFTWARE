@@ -7,7 +7,7 @@
 #include "decision_pkg_cpp/AssyncTimer.hpp"
 #include <cmath>
 
-#define ROBOT_NUMBER 2
+#define ROBOT_NUMBER 3
 
 using namespace std::chrono_literals;
 
