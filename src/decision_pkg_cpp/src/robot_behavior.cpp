@@ -61,11 +61,12 @@ void RobotBehavior::penalty()           //penalizado
         break;
     
     case GameControllerMsg::GAMESTATE_PLAYING: 
-        if(gc_info.has_kick_off)
-        {
+        if(gc_info.has_kick_off &&  !is_goalkeeper(ROBOT_NUMBER))
+        {                       
             player_penalty();
-        }
-        // else goalkeeper_penalty();
+        }else{
+            goalkeeper_penalty();
+        }        
         break;
    
     case GameControllerMsg::GAMESTATE_FINISHED: 
@@ -86,7 +87,7 @@ void RobotBehavior::normal_game()           //jogo normal
     
     case GameControllerMsg::GAMESTATE_READY:
     {
-        int neck = robot.neck_pos.position19;
+        /*int neck = robot.neck_pos.position19;
         
         static bool yaw_fixed = false;  // variável estática local para garantir que IMU atualiza 1 vez so
 
@@ -139,7 +140,8 @@ void RobotBehavior::normal_game()           //jogo normal
             //RCLCPP_INFO(this->get_logger(), "🛑 Parado (etapa final)");
             break;
         }
-
+            */
+            send_goal(stand_still);
         break;
     }
         
@@ -555,7 +557,6 @@ void RobotBehavior::bala_localization_game()                //estado de jogo nor
         break;
 
     
-
     case kick_ball:
         //RCLCPP_ERROR(this->get_logger(), "kick");
         if ((!robot.camera_ball_position.detected) || (robot.ball_position != center))
@@ -576,88 +577,166 @@ void RobotBehavior::goalkeeper_normal_game()
 {   
     //RCLCPP_FATAL(this->get_logger(), "ROBOT_STATE:  %d", robot.state);
 
-    switch (robot.state)
+//     switch (robot.state)
+//     {
+//         case searching_ball:
+//             send_goal(stand_still);
+//             if(ball_is_locked()){
+//                 robot.state = aligning_with_the_ball;
+//             }
+//             break;
+
+//         case aligning_with_the_ball:
+//             if(!robot.camera_ball_position.detected){
+//                 robot.state = searching_ball;
+//             }
+//             if(robot.neck_pos.position19 >= 2150){
+//                 robot.state = walking_left;
+//             }
+//             else if(robot.neck_pos.position19 <= 1950){
+//                 robot.state = walking_right;
+//             }
+//             else{
+//                 lost_ball_timer.reset();
+//                 squat_sent.store(false);
+//                 robot.state = ball_approach;
+//             }
+//             break;
+
+//         case walking_left:
+//             send_goal(walk_left);
+//             if(robot.neck_pos.position19 > 2040 && robot.neck_pos.position19 < 2060){
+//                 lost_ball_timer.reset();
+//                 squat_sent.store(false);
+//                 robot.state = ball_approach;
+//             }
+//             break;
+
+//         case walking_right:
+//             send_goal(walk_right);
+//             if(robot.neck_pos.position19 > 2040 && robot.neck_pos.position19 < 2060){
+//                 lost_ball_timer.reset();
+//                 squat_sent.store(false);
+//                 robot.state = ball_approach;
+//             }
+//             break;
+
+//         case ball_approach:
+//             /* RCLCPP_INFO(this->get_logger(),
+//                 "ENTER goalkeeper_normal_game: this=%p, &squat_sent=%p, squat_sent(before)=%s",
+//                 (void*)this, (void*)&squat_sent, squat_sent.load() ? "true":"false");
+//  */
+//             squat_sent.store(false);
+
+// /*             RCLCPP_INFO(this->get_logger(),
+//                 "AFTER force squat_sent=false: &squat_sent=%p, squat_sent(after)=%s",
+//                 (void*)&squat_sent, squat_sent.load() ? "true":"false");
+//  */
+//             if(!ball_is_locked()){robot.state = searching_ball;}
+
+
+//             if(!this->squat_sent){
+//                 if(robot.neck_pos.position19 >= 2150 || robot.neck_pos.position19 <= 1950){
+//                     robot.state = aligning_with_the_ball;
+//                 }else{
+//    /*                  RCLCPP_WARN(this->get_logger(), "Começou a sentada"); */
+//                     send_goal(squat);
+//                     lost_ball_timer.reset();
+//                     squat_sent.store(true);         
+//                 }
+//             }else{
+//                 if(lost_ball_timer.delayNR(10000)){
+//                     //RCLCPP_WARN(this->get_logger(), "Acabou a sentada");
+//                     if(robot.neck_pos.position19 >= 2150 || robot.neck_pos.position19 <= 1950){
+//                         //RCLCPP_WARN(this->get_logger(), "ENTROU NO !ALIGNING");
+//                         robot.state = searching_ball;
+//                         squat_sent.store(false);
+//                     }else{
+//                         //RCLCPP_WARN(this->get_logger(), "Acabou a sentada");
+//                         lost_ball_timer.reset();
+//                     }                
+//                 }
+//             }
+//             break;
+//         }    
+    switch(robot.state)
     {
         case searching_ball:
-            send_goal(stand_still);
-            if(ball_is_locked()){
-                robot.state = aligning_with_the_ball;
+            send_goal(squat);
+            //RCLCPP_FATAL(this->get_logger(), "SEARCHING BALL");
+            if(ball_is_locked() && robot.neck_pos.position20 <= 1802){                ;
+                robot.state = defending_penalty;        
             }
             break;
 
-        case aligning_with_the_ball:
-            if(!robot.camera_ball_position.detected){
-                robot.state = searching_ball;
+        case defending_penalty:
+            //send_goal(squat);
+            //RCLCPP_FATAL(this->get_logger(), "DEFENDING_PENALTY");
+            if(robot.neck_pos.position19 >= 2400){
+                //RCLCPP_FATAL(this->get_logger(), "ESQUERDA");
+                send_goal(goalkeeper_fall_left);
             }
-            if(robot.neck_pos.position19 >= 2150){
-                robot.state = walking_left;
+            //2026 22 <- 2048 -> 22 2070
+            else if ((robot.neck_pos.position19 <= 1816)){
+                //RCLCPP_FATAL(this->get_logger(), "DIREITA");
+                send_goal(goalkeeper_fall_right);
             }
-            else if(robot.neck_pos.position19 <= 1950){
-                robot.state = walking_right;
+            else if (robot.neck_pos.position19 >= 2015 && (robot.neck_pos.position19 <= 2100)){
+                //RCLCPP_FATAL(this->get_logger(), "MEIO");
+                send_goal(squat);
             }
-            else{
-                lost_ball_timer.reset();
-                squat_sent.store(false);
-                robot.state = ball_approach;
-            }
-            break;
-
-        case walking_left:
-            send_goal(walk_left);
-            if(robot.neck_pos.position19 > 2040 && robot.neck_pos.position19 < 2060){
-                lost_ball_timer.reset();
-                squat_sent.store(false);
-                robot.state = ball_approach;
-            }
-            break;
-
-        case walking_right:
-            send_goal(walk_right);
-            if(robot.neck_pos.position19 > 2040 && robot.neck_pos.position19 < 2060){
-                lost_ball_timer.reset();
-                squat_sent.store(false);
-                robot.state = ball_approach;
-            }
-            break;
-
-        case ball_approach:
-            /* RCLCPP_INFO(this->get_logger(),
-                "ENTER goalkeeper_normal_game: this=%p, &squat_sent=%p, squat_sent(before)=%s",
-                (void*)this, (void*)&squat_sent, squat_sent.load() ? "true":"false");
- */
-            squat_sent.store(false);
-
-/*             RCLCPP_INFO(this->get_logger(),
-                "AFTER force squat_sent=false: &squat_sent=%p, squat_sent(after)=%s",
-                (void*)&squat_sent, squat_sent.load() ? "true":"false");
- */
             if(!ball_is_locked()){robot.state = searching_ball;}
+            break;
+
+            default:
+                robot.state = searching_ball;
+                break;      
+    }          
+        
+}
 
 
-            if(!this->squat_sent){
-                if(robot.neck_pos.position19 >= 2150 || robot.neck_pos.position19 <= 1950){
-                    robot.state = aligning_with_the_ball;
-                }else{
-   /*                  RCLCPP_WARN(this->get_logger(), "Começou a sentada"); */
-                    send_goal(squat);
-                    lost_ball_timer.reset();
-                    squat_sent.store(true);         
-                }
-            }else{
-                if(lost_ball_timer.delayNR(10000)){
-                    //RCLCPP_WARN(this->get_logger(), "Acabou a sentada");
-                    if(robot.neck_pos.position19 >= 2150 || robot.neck_pos.position19 <= 1950){
-                        //RCLCPP_WARN(this->get_logger(), "ENTROU NO !ALIGNING");
-                        robot.state = searching_ball;
-                        squat_sent.store(false);
-                    }else{
-                        //RCLCPP_WARN(this->get_logger(), "Acabou a sentada");
-                        lost_ball_timer.reset();
-                    }                
-                }
+
+void RobotBehavior::goalkeeper_penalty()
+{
+    RCLCPP_FATAL(this->get_logger(), "ROBOT_STATE:  %d", robot.state);
+    RCLCPP_FATAL(this->get_logger(), "VALOR DO 19:  %d   VALOR DO 20: %d", robot.neck_pos.position19, robot.neck_pos.position20 );
+    
+
+    switch(robot.state){
+
+        case searching_ball:
+            send_goal(squat);
+            RCLCPP_FATAL(this->get_logger(), "SEARCHING BALL");
+            if(ball_is_locked() && robot.neck_pos.position20 <= 1930){                ;
+                robot.state = defending_penalty;        
             }
             break;
+
+        case defending_penalty:
+            //send_goal(squat);
+            RCLCPP_FATAL(this->get_logger(), "DEFENDING_PENALTY");
+            if(robot.neck_pos.position19 >= 2100){
+                //RCLCPP_FATAL(this->get_logger(), "ESQUERDA");
+                send_goal(goalkeeper_fall_left);
+            }
+            //2026 22 <- 2048 -> 22 2070
+            else if ((robot.neck_pos.position19 <= 2015)){
+                //RCLCPP_FATAL(this->get_logger(), "DIREITA");
+                send_goal(goalkeeper_fall_right);
+            }
+            else if (robot.neck_pos.position19 >= 2015 && (robot.neck_pos.position19 <= 2100)){
+                //RCLCPP_FATAL(this->get_logger(), "MEIO");
+                send_goal(squat);
+            }
+            if(!ball_is_locked()){robot.state = searching_ball;}
+            break;
+
+            default:
+                robot.state = searching_ball;
+                break;                
         }
+
 }
 
 void RobotBehavior::player_penalty()

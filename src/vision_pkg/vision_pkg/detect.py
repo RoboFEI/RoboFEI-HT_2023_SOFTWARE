@@ -3,14 +3,12 @@ from rclpy.node import Node
 from std_msgs.msg import Int32 
 from collections import deque
 
-
 import cv2
 from ultralytics import YOLO
 import os
 import numpy as np
 from math import hypot
 import time
-import datetime
 from cv_bridge import CvBridge
 import torch
 
@@ -30,29 +28,21 @@ class BallDetection(Node):
 
         super().__init__("image_node")
 
-        #PARAMS
-        #==============================================================================================================#
-        # __   _____  _     ___  
-        # \ \ / / _ \| |   / _ \ 
-        #  \ V / | | | |  | | | |
-        #   | || |_| | |__| |_| |
-        #   |_| \___/|_____\___/ 
+        # CAMERA / OPENCV
+        self.declare_parameter("camera_device", 0)
+        self.camera_device = self.get_parameter("camera_device").get_parameter_value().integer_value
 
+        self.declare_parameter("camera_fps", 30)
+        self.camera_fps = self.get_parameter("camera_fps").get_parameter_value().integer_value
 
+        # PARAMS (kept from original)
         self.declare_parameter("device", "cpu")
         self.device = self.get_parameter("device").get_parameter_value().string_value
-        
+
         self.declare_parameter("model", f"{os.path.dirname(os.path.realpath(__file__))}/weights/best_openvino_model/")
         self.model = YOLO(self.get_parameter("model").get_parameter_value().string_value) # Load model
         self.value_classes = self.get_classes()  # define antes de usar
         self.get_logger().info(f"CLASSES DO MODELO: {self.value_classes}")
-
-
-        #   ____                               
-        #  / ___|__ _ _ __ ___   ___ _ __ __ _ 
-        # | |   / _ | '_  _ \ / _ \ '__/ _ |
-        # | |__| (_| | | | | | |  __/ | | (_| |
-        #  \____\__,_|_| |_| |_|\___|_|  \__,_|
 
         self.declare_parameter("img_qlty", 100) 
         self.img_qlty = self.get_parameter("img_qlty").get_parameter_value().integer_value
@@ -63,12 +53,6 @@ class BallDetection(Node):
         self.declare_parameter("image_height", 720)
         self.img_height = self.get_parameter("image_height").get_parameter_value().integer_value
 
-        #  ____
-        # / ___|  ___ _ ____   _____ _ __ 
-        # \___ \ / _ \ '__\ \ / / _ \ '__|
-        #  ___) |  __/ |   \ V /  __/ |    
-        # |____/ \___|_|    \_/ \___|_|   
-
         self.declare_parameter("enable_udp", True)
         self.enable_udp = self.get_parameter("enable_udp").get_parameter_value().bool_value
 
@@ -78,62 +62,42 @@ class BallDetection(Node):
         self.declare_parameter("server_port", 5050)
         self.server_port = self.get_parameter("server_port").get_parameter_value().integer_value
 
-        #   ___  _   _                   
-        #  / _ \| |_| |__   ___ _ __ ___ 
-        # | | | | __| '_ \ / _ \ '__/ __|
-        # | |_| | |_| | | |  __/ |  \__ \
-        #  \___/ \__|_| |_|\___|_|  |___/
-
         self.declare_parameter("show_divisions", True) # Show division lines and center of ball in output image
         self.show_divisions = self.get_parameter("show_divisions").get_parameter_value().bool_value
 
-        self.declare_parameter("get_image", False) #
+        self.declare_parameter("get_image", False)
         self.get_image = self.get_parameter("get_image").get_parameter_value().bool_value
         
         self.declare_parameter("fps_save", 2) 
         fps_save = self.get_parameter("fps_save").get_parameter_value().integer_value
-        #==============================================================================================================#
-        
 
+        # derived dims
         self.original_dim = np.array([self.img_width, self.img_height])
         self.redued_dim = self.original_dim * self.img_qlty / 100
         self.value_classes = self.get_classes()
         
         self.bridge = CvBridge()
-        self.raw_image_sub_ = self.create_subscription(Image, "/image_raw", self.image_callback, 1)
-        self.raw_image_sub_
 
+        # Publishers (same as original)
         self.ball_position_publisher_ = self.create_publisher(Vision, '/ball_position', 2)
-        self.ball_position_publisher_
-
         self.goalpost_position_publisher_ = self.create_publisher(Vision, '/goalpost_position', 10)
-        self.goalpost_position_publisher_
-        
         self.goalpost_px_position_publisher_ = self.create_publisher(Point2D, '/goalpost_px_position', 2)
-        self.goalpost_px_position_publisher_
-
         self.ball_px_position_publisher_ = self.create_publisher(Point2D, '/ball_px_position', 2)
-        self.ball_px_position_publisher_
-
         self.goalpost_center_publisher_ = self.create_publisher(Point2D, '/goalpost_center_px', 2)
-        self.goalpost_center_publisher_
-
         self.goalpost_count_publisher_ = self.create_publisher(Int32, '/goalpost_count', 2)
-        self.goalpost_count_publisher_
 
+        # state vars
         self.cont_real_ball_detections = 0
         self.cont_real_goalpost_detections = 0
 
         self.kick_ready_streak = 0
         self.kick_fail_tolerance = 0
 
-
         self.cont_frames_kick_ready = 0
         self.last_ball_positions = deque(maxlen=5)  # Para suavizar posição da bola
         self.last_goalpost_positions = deque(maxlen=5) 
 
-
-        #recive data from config.ini using the ClassConfig submodule
+        # load config
         self.config = classConfig()
 
         self.results = None
@@ -153,57 +117,96 @@ class BallDetection(Node):
         if self.get_image: 
             self.imageGetter = ImageGetter('vision_log', fps_save)
 
+        # OpenCV VideoCapture
+        self.cap = cv2.VideoCapture("/dev/camera", cv2.CAP_ANY)
+        if not self.cap.isOpened():
+            self.get_logger().error(f"Não foi possível abrir a câmera device={self.camera_device}")
+        else:
+            # try to set resolution if desired
+            try:
+                self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.img_width)
+                self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.img_height)
+                # fps attempt
+                self.cap.set(cv2.CAP_PROP_FPS, float(self.camera_fps))
+            except Exception:
+                pass
+
+        # Timer to read frames with requested fps
+        timer_period = 1.0 / max(1.0, float(self.camera_fps))
+        self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def __del__(self):
+        # close UDP client if any
         if hasattr(self, "enable_udp") and self.enable_udp:
             try:
                 self.client.close_socket()
             except:
                 pass
-
+        # release camera
+        try:
+            if hasattr(self, "cap") and self.cap is not None:
+                self.cap.release()
+        except:
+            pass
+        cv2.destroyAllWindows()
 
     def get_classes(self): #function for list all classes and the respective number in a dictionary
         classes = self.model.names
         value_classes = {value: key for key, value in classes.items()}
         return value_classes   
-    
 
-    def image_callback(self, msg):
+    def timer_callback(self):
+        # Read frame from OpenCV
+        if not hasattr(self, "cap") or self.cap is None or not self.cap.isOpened():
+            return
+
+        ret, frame = self.cap.read()
+        if not ret or frame is None:
+            # camera read failure
+            self.get_logger().warn("Falha ao ler frame da câmera.")
+            return
+
+        # emulate receiving a sensor_msgs/Image if other parts expect it: we process the cv image directly
         try:
-            self.img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
-
             if self.get_image:
-                self.imageGetter.save(self.img)
+                self.imageGetter.save(frame)
 
-            self.results = self.predict_image(resize_image(self.img, self.img_qlty)) # predict image 
+            # predict & process
+            self.results = self.predict_image(resize_image(frame, self.img_qlty))  # predict image
 
             if self.show_divisions:
-                self.img = draw_lines(self.img, self.config)  #Draw camera divisions
+                frame = draw_lines(frame, self.config)  # Draw camera divisions
 
-            self.img = self.ball_detection(self.img, self.results)
-            self.img = self.goalpost_detection(self.img, self.results)
+            frame = self.ball_detection(frame, self.results)
+            frame = self.goalpost_detection(frame, self.results)
 
             try:
-                if self.filtered_ball_position.size != 0:
+                # The original code checks filtered_ball_position.size != 0 — keep similar behavior.
+                if hasattr(self.filtered_ball_position, 'size') and self.filtered_ball_position.size != 0:
                     goalposts = getattr(self, 'goalpost_px_positions_for_decision', [])
                     self.decide_kick(self.filtered_ball_position, goalposts)
-
-            except:
+            except Exception:
                 pass
-            
+
             if self.enable_udp:
                 try:
-                    self.client.send_image(self.img)
-                except:
-                    pass
+                    self.client.send_image(frame)
+                except Exception:
                     self.get_logger().debug("Não está publicando no servidor udp")
 
-            #cv2.imshow('Ball', self.img) # Show image
-            #cv2.waitKey(1)
-        except:
-            
-            pass
+            # Show
+            # cv2.imshow('Ball', frame)
+            # cv2.waitKey(1)
 
+            # If you want to also publish the original frame as sensor_msgs/Image, uncomment:
+            # try:
+            #     ros_img = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            #     # publish to some topic if desired
+            # except Exception as e:
+            #     self.get_logger().error(f"Erro convertendo frame para Image msg: {e}")
+
+        except Exception as e:
+            self.get_logger().error(f"Erro no timer_callback: {str(e)}")
 
     def predict_image(self, img):
         results = self.model(img, device=self.device, conf=0.5, max_det=3, verbose=False)        
@@ -221,13 +224,11 @@ class BallDetection(Node):
                 self.goalpost_position_publisher_.publish(goalpost_area)
                 self.goalpost_px_positions_for_decision = []  # ISSO É OBRIGATÓRIO
 
-                #self.get_logger().warn("❌ Nenhuma trave detectada — limpando para decisão.")
                 goalpost_count_msg = Int32()
-                goalpost_count_msg.data = len(goalpost_px_positions)
+                goalpost_count_msg.data = 0
                 self.goalpost_count_publisher_.publish(goalpost_count_msg)
                 return img_cp
 
-            
             # Publica cada trave detectada
             for goalpost_px_pos in goalpost_px_positions:
                 goalpost_px_pos_msg = Point2D()
@@ -238,13 +239,12 @@ class BallDetection(Node):
                 new_goalpost_pos_area = self.get_goalpost_pos_area(goalpost_px_pos)
                 self.goalpost_pos_area_filter(new_goalpost_pos_area, 1)
 
-                goalpost_count_msg = Int32()
-                goalpost_count_msg.data = len(goalpost_px_positions)
-                self.goalpost_count_publisher_.publish(goalpost_count_msg)
-
+            goalpost_count_msg = Int32()
+            goalpost_count_msg.data = len(goalpost_px_positions)
+            self.goalpost_count_publisher_.publish(goalpost_count_msg)
 
             # calcula o centro do gol se detectou pelo menos 2 traves
-            if len(goalpost_px_positions) >= 0:
+            if len(goalpost_px_positions) >= 2:
                 # Ordena traves pela posição x (esquerda para direita)
                 goalpost_px_positions.sort(key=lambda pos: pos[0])
 
@@ -271,7 +271,6 @@ class BallDetection(Node):
 
         return img_cp
 
-    
     def ball_detection(self, img, results):
         img_cp = img.copy()
 
@@ -280,17 +279,21 @@ class BallDetection(Node):
         new_ball_pos_area = Vision()
         ball_px_pos_msg = Point2D()
 
-        if ball_px_pos.size != 0: #if ball was finded
-            ball_px_pos_msg.x = ball_px_pos[0]
-            ball_px_pos_msg.y = ball_px_pos[1]
-            self.ball_px_position_publisher_.publish(ball_px_pos_msg)
-            new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
+        # note: findBall may return numpy array or Point2D-like; original code used .size
+        try:
+            if hasattr(ball_px_pos, 'size') and ball_px_pos.size != 0: #if ball was finded
+                ball_px_pos_msg.x = float(ball_px_pos[0])
+                ball_px_pos_msg.y = float(ball_px_pos[1])
+                self.ball_px_position_publisher_.publish(ball_px_pos_msg)
+                new_ball_pos_area = self.get_ball_pos_area(ball_px_pos)
 
-            self.filtered_ball_position = ball_px_pos  # salva a posição filtrada da bola
+                self.filtered_ball_position = ball_px_pos  # salva a posição filtrada da bola
+        except Exception:
+            # fallback: if findBall returns None or similar
+            pass
         
         self.ball_pos_area_filter(new_ball_pos_area, 1)
         return img_cp
-
 
     def ball_px_position_filter(self, not_filtered_ball_pos, opt):
         
@@ -301,7 +304,6 @@ class BallDetection(Node):
         
         self.ball_px_position_publisher_.publish(ball_px_pos)
         return ball_px_pos
-
 
     def ball_pos_area_filter(self, not_filtered_ball_pos, opt):
         if opt == 0:
@@ -317,7 +319,6 @@ class BallDetection(Node):
             if self.cont_real_ball_detections > 2:
                 self.ball_position_publisher_.publish(self.ball_pos_area)
 
-    
     def goalpost_pos_area_filter(self, not_filtered_goalpost_pos, opt):
         if opt == 0:
             self.goalpost_pos_area = not_filtered_goalpost_pos
@@ -332,13 +333,11 @@ class BallDetection(Node):
             if self.cont_real_goalpost_detections > 2:
                 self.goalpost_position_publisher_.publish(self.goalpost_pos_area)
 
-
-
     def get_ball_pos_area(self, ball_px_pos):
         ball_pos = Vision()
         ball_pos.detected = True
 
-        # identify the ball position in Y axis
+        # identify the ball position in X axis
         if (ball_px_pos[0] <= self.config.x_left):     #ball to the left
             ball_pos.left = True
             self.get_logger().debug("Bola à Esquerda")
@@ -351,7 +350,6 @@ class BallDetection(Node):
             ball_pos.right = True
             self.get_logger().debug("Bola à Direita")
         
-
         # identify the ball position in Y axis
         if (ball_px_pos[1] > self.config.y_chute):     #ball near
             ball_pos.close = True
@@ -393,7 +391,7 @@ class BallDetection(Node):
             goalpost_pos.center = True
             self.get_logger().debug("Trave Centralizada")
 
-        # Distância vertical (y = mais alto = mais baixo na tela)
+        # Distância vertical (y = mais alto = mais longe na tela)
         if y < self.config.y_longe:  # mais alto → mais longe
             goalpost_pos.far = True
             self.get_logger().debug("Trave Longe")
@@ -406,8 +404,6 @@ class BallDetection(Node):
 
         return goalpost_pos
     
-            
-
     def ball_delta_position_threshold(self, new_position, threshold):
         dp = position()
         dp.x = abs(new_position.x - self.ball_pos.x)
@@ -415,6 +411,8 @@ class BallDetection(Node):
 
         return hypot(dp.x, dp.y) < threshold
 
+    # If you used decide_kick somewhere else in your project, keep it. Otherwise
+    # add your decide_kick implementation here or import it.
 
 def main(args=None):
     rclpy.init(args=args)
@@ -427,11 +425,15 @@ def main(args=None):
         print(f"[ERRO] {e}")
     finally:
         if node is not None:
-            node.destroy_node()
-        cv2.destroyAllWindows()
+            try:
+                node.destroy_node()
+            except Exception:
+                pass
+        try:
+            cv2.destroyAllWindows()
+        except Exception:
+            pass
         rclpy.try_shutdown()
-
- 
 
 if __name__ == '__main__':
     main()

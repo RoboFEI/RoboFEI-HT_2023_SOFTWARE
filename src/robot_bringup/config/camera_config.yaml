@@ -20,4 +20,4 @@
     autoexposure: true
     exposure: 100
     autofocus: false
-    focus: -1
+    focus: 0

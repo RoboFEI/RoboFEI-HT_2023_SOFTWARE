@@ -42,6 +42,12 @@ DecisionNode::DecisionNode() : Node("decision_node")
         std::bind(&DecisionNode::listener_callback_imu_accel, this, _1)
     );
 
+    imu_6050_subscriber = this->create_subscription<IMU6050>(
+        "robot_state",
+        rclcpp::QoS(10),
+        std::bind(&DecisionNode::listener_callback_imu_6050, this, _1)
+    );
+
     vision_subscriber_ = this->create_subscription<VisionMsg>(
       "/ball_position",
       rclcpp::QoS(10),
@@ -156,6 +162,7 @@ void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gy
     // RCLCPP_INFO(this->get_logger(), "Yaw: %f\n", this->imu_gyro.vector.z);
 }
 
+// imu mais antiga
 void DecisionNode::listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_accel)
 {
   robot_detect_fallen(imu_accel->linear_acceleration.x,
@@ -189,6 +196,33 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
   }
   // RCLCPP_INFO(this->get_logger(), "Robot Fall State: %d", robot.fall);
 }
+
+
+// imu de arduino 6050
+void DecisionNode::listener_callback_imu_6050(const IMU6050::SharedPtr imu_6050)
+{
+  robot_detect_fallen_6050(imu_6050->fallen_forward, imu_6050->fallen_backwards);
+}
+
+
+void DecisionNode::robot_detect_fallen_6050(const bool fall_front, const bool fall_back)
+{
+  RCLCPP_INFO_STREAM(this->get_logger(),
+                     "Caido de frente " << (fall_front ? "1" : "0")
+                     << " \nCaido de costas " << (fall_back ? "1" : "0"));
+  if (fall_front) {
+    //RCLCPP_INFO(this->get_logger(), "CAIU DE FRENTE");
+    this->robot.fall = FallenFront;
+  }
+  else if (fall_back){
+    //RCLCPP_INFO(this->get_logger(), "CAIU DE COSTAS");
+    this->robot.fall = FallenBack; 
+  } 
+  else this->robot.fall = NotFallen;
+}
+
+
+
 
 void DecisionNode::listener_callback_vision(const VisionMsg::SharedPtr vision_info)
 {

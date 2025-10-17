@@ -51,7 +51,7 @@ Walking::Walking()
 
  X_MOVE_AMPLITUDE = -2;
  Y_MOVE_AMPLITUDE = 0;
- A_MOVE_AMPLITUDE = 0;
+ A_MOVE_AMPLITUDE = 0; 
  A_MOVE_AIM_ON = false;
  BALANCE_ENABLE = false;
  LOWER_VELADJ_LIMIT = -8;
@@ -273,7 +273,7 @@ void Walking::update_param_time()
  m_Y_Swap_PeriodTime = m_PeriodTime;
  m_Y_Move_PeriodTime = m_PeriodTime * m_SSP_Ratio;
  m_Z_Swap_PeriodTime = m_PeriodTime / 2;
- m_Z_Move_PeriodTime = m_PeriodTime * m_SSP_Ratio * 2;
+ m_Z_Move_PeriodTime = m_PeriodTime * m_SSP_Ratio * 2; 
  m_A_Move_PeriodTime = m_PeriodTime * m_SSP_Ratio;
 
  m_SSP_Time = m_PeriodTime * m_SSP_Ratio;
@@ -591,8 +591,6 @@ if (L_swing) {
         z_move_r = 0.0;
     }
 
-   
-
  a_move_l = 0;
  b_move_l = 0;
  a_move_r = 0;
@@ -702,7 +700,8 @@ if (L_swing) {
  outValue[9] -= dir[9] * fbGyroErr * BALANCE_KNEE_GAIN; // L_KNEE
  
  outValue[4] -= dir[4] * fbGyroErr * BALANCE_ANKLE_PITCH_GAIN; // R_ANKLE_PITCH
- outValue[10] -= dir[10] * fbGyroErr * BALANCE_ANKLE_PITCH_GAIN; // L_ANKLE_PITCH
+
+ outValue[10] -= dir[10] * fbGyroErr * BALANCE_ANKLE_PITCH_GAIN; // L_ANKLE_PITCH 
  
  outValue[5] -= dir[5] * rlGyroErr * BALANCE_ANKLE_ROLL_GAIN; // R_ANKLE_ROLL
  outValue[11] -= dir[11] * rlGyroErr * BALANCE_ANKLE_ROLL_GAIN; // L_ANKLE_ROLL
@@ -726,21 +725,21 @@ if (L_swing) {
 // printf("OUTVALUE DEPOIS %d: %d\n", i, outValue[i]);
 // }
 
- m_Joint.SetValue(JointData::ID_R_HIP_YAW, outValue[0]);
+	m_Joint.SetValue(JointData::ID_R_HIP_YAW,           outValue[0]);
  //printf("SET VALUE 0 %d\n", outValue[0]);
- m_Joint.SetValue(JointData::ID_R_HIP_ROLL, outValue[1]);
- m_Joint.SetValue(JointData::ID_R_HIP_PITCH, outValue[2]);
- m_Joint.SetValue(JointData::ID_R_KNEE, outValue[3]);
- m_Joint.SetValue(JointData::ID_R_ANKLE_PITCH, outValue[4]);
- m_Joint.SetValue(JointData::ID_R_ANKLE_ROLL, outValue[5]);
- m_Joint.SetValue(JointData::ID_L_HIP_YAW, outValue[6]);
- m_Joint.SetValue(JointData::ID_L_HIP_ROLL, outValue[7]);
- m_Joint.SetValue(JointData::ID_L_HIP_PITCH, outValue[8]);
- m_Joint.SetValue(JointData::ID_L_KNEE, outValue[9]);
- m_Joint.SetValue(JointData::ID_L_ANKLE_PITCH, outValue[10]);
- m_Joint.SetValue(JointData::ID_L_ANKLE_ROLL, outValue[11]);
- m_Joint.SetValue(JointData::ID_R_SHOULDER_PITCH, outValue[12]);
- m_Joint.SetValue(JointData::ID_L_SHOULDER_PITCH, outValue[13]);
+	m_Joint.SetValue(JointData::ID_R_HIP_ROLL,          outValue[1]);
+	m_Joint.SetValue(JointData::ID_R_HIP_PITCH,         outValue[2]);
+	m_Joint.SetValue(JointData::ID_R_KNEE,              outValue[3]);
+	m_Joint.SetValue(JointData::ID_R_ANKLE_PITCH,       outValue[4]);
+	m_Joint.SetValue(JointData::ID_R_ANKLE_ROLL,        outValue[5]);
+	m_Joint.SetValue(JointData::ID_L_HIP_YAW,           outValue[6]);
+	m_Joint.SetValue(JointData::ID_L_HIP_ROLL,          outValue[7]);
+	m_Joint.SetValue(JointData::ID_L_HIP_PITCH,         outValue[8]);
+	m_Joint.SetValue(JointData::ID_L_KNEE,              outValue[9]);
+	m_Joint.SetValue(JointData::ID_L_ANKLE_PITCH,       outValue[10]);
+	m_Joint.SetValue(JointData::ID_L_ANKLE_ROLL,        outValue[11]);
+	m_Joint.SetValue(JointData::ID_R_SHOULDER_PITCH,    outValue[12]);
+	m_Joint.SetValue(JointData::ID_L_SHOULDER_PITCH,    outValue[13]);
  m_Joint.SetAngle(JointData::ID_HEAD_PAN, A_MOVE_AMPLITUDE);
  //printf("WALKING PROCESS SET VALUE %f\n", X_MOVE_AMPLITUDE);
  //printf("BALANCE %f\n", BALANCE_HIP_ROLL_GAIN);
