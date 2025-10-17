@@ -91,7 +91,7 @@ void RobotBehavior::normal_game()           //jogo normal
         }else{
             opposite_side = 0;
         }
-        //send_goal(stand_still);
+        send_goal(stand_still);
         break;
     
     case GameControllerMsg::GAMESTATE_READY:
@@ -121,7 +121,7 @@ void RobotBehavior::normal_game()           //jogo normal
         break;
         
     case GameControllerMsg::GAMESTATE_SET: // feito
-        //send_goal(stand_still);
+        send_goal(stand_still);
             //RCLCPP_FATAL(this->get_logger(), " to no set %d", GameControllerMsg::GAMESTATE_SET);
         yaw_reference_set_ = false;
         break;
@@ -132,8 +132,8 @@ void RobotBehavior::normal_game()           //jogo normal
         {
             //std_msgs::msg::Bool localization_active = robot.localization_msg; // topico que manda true/false para localização
             //RCLCPP_FATAL(this->get_logger(), " chutoncio %d", ROBOT_NUMBER);
-
-            if(yaw_est_value_ == 0.0){ 
+            bool nu_uh = false;
+            if(nu_uh){ 
                 RCLCPP_FATAL(this->get_logger(), " NUMERO UM %d, yaw %f", ROBOT_NUMBER, yaw_est_value_);
                 if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game();
                 else if (is_kicker(ROBOT_NUMBER)) kicker_normal_game();
@@ -367,13 +367,16 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
 
 void RobotBehavior::bala_localization_game()                     //estado de jogo normal; jogo rolando 
 {   
-            RCLCPP_DEBUG(this->get_logger(), "bala localization game");
+    RCLCPP_DEBUG(this->get_logger(), "bala localization game");
+    double yaw_norm = normalize_angle(yaw_est_value_);
+    double deltaY = normalize_angle(yaw_norm - yaw_reference_);
     
-    double deltaY = normalize_angle(yaw_est_value_ - yaw_reference_);
 
     // limites em radianos
-    const double LIMITE_GIRO = M_PI / 2;  // 90°
+    const double LIMITE_GIRO = M_PI / 6;  // 90° 60
     const double LIMITE_CHUTE = M_PI / 6; // 30°
+    const double LIM_FAIXA = M_PI / 8.0; // mesma faixa de antes (~22.5°)
+    bool dentro_dos_limites = fabs(deltaY) <= LIM_FAIXA;
 
     // logs de debug
     //RCLCPP_INFO(this->get_logger(), "yaw_est=%.3f | ref=%.3f | ΔY=%.3f rad (%.1f°)", yaw_est_value_, yaw_reference_, deltaY, deltaY * 180.0 / M_PI);
@@ -383,7 +386,7 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
     //RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 2000, "yaw_est usado na decisão: %f", yaw_est_value_);
     //RCLCPP_INFO(this->get_logger(), "yaw_est value: %f   yaw_reference: %f   delyaY: %f", yaw_est_value_, yaw_reference_, deltaY);
             //yaw_reference_ = yaw_est_value_;
-    if(!((yaw_est_value_ < lim_left) || (yaw_est_value_ > lim_right))){
+    if(dentro_dos_limites){
         RCLCPP_WARN(this->get_logger(), "dentro dos limites %f", deltaY);
       
         switch (robot.state)
@@ -427,7 +430,7 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
         case ball_close:
         RCLCPP_INFO(this->get_logger(), "close dentro");
             
-            if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
+            if(!robot.camera_ball_position.detected) robot.state = searching_ball;
             else if (!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
             else if (robot.neck_pos.position19 < 1500)
                 {
@@ -447,7 +450,7 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
             break;
 
         case kick_ball:
-            //RCLCPP_ERROR(this->get_logger(), "kick");
+            RCLCPP_ERROR(this->get_logger(), "kick dentro");
             if ((!robot.camera_ball_position.detected) || (robot.ball_position != center))
             {
                 send_goal(gait);
@@ -549,14 +552,17 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
             }
             
             break;
-            case kick_ball:
-            //RCLCPP_ERROR(this->get_logger(), "kick");
-            if ((!robot.camera_ball_position.detected) || (robot.ball_position != center))
+        case kick_ball:
+            RCLCPP_ERROR(this->get_logger(), "kick fora");
+            if ((!robot.camera_ball_position.detected))
             {
                 send_goal(gait);
                 //robot.state = searching_ball;
                 lost_ball_timer.reset();
             } 
+            else if(fabs(deltaY) >= (LIMITE_CHUTE+0.1)) {
+                robot.state = ball_close;
+            }
             else if(robot.neck_pos.position19 >= 2300){
                 //fazer o walk left
                 send_goal(walk_left);
