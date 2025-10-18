@@ -405,10 +405,10 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
     
         case aligning_with_the_ball:
             RCLCPP_INFO(this->get_logger(), "align dentro");
-            if(robot_align_with_the_ball()) robot.state = ball_approach;
-            else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+            if(!robot.camera_ball_position.detected) robot.state = searching_ball;
             else if(robot.neck_pos.position19 > 2150) send_goal(turn_left);
             else if(robot.neck_pos.position19 < 1900) send_goal(turn_right);
+            else robot.state = ball_approach;
             break;
 
         case ball_approach:
@@ -419,9 +419,10 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
             else if(!robot.camera_ball_position.detected)
                 robot.state = searching_ball;
                 
-            else if(!robot_align_with_the_ball()) 
+            else if((robot.neck_pos.position19 < 1900) || (robot.neck_pos.position19 >2150)) 
+            {
                 robot.state = aligning_with_the_ball;
-                
+            }    
             else
                 send_goal(walk);
                 
@@ -431,7 +432,10 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
         RCLCPP_INFO(this->get_logger(), "close dentro");
             
             if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-            else if (!robot_align_with_the_ball()) robot.state = aligning_with_the_ball;
+            else if(robot.neck_pos.position20 > 1500)
+                {
+                robot.state = aligning_with_the_ball;
+                }
             else if (robot.neck_pos.position19 < 1500)
                 {
                     send_goal(turn_right);
@@ -531,7 +535,7 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
             RCLCPP_INFO(this->get_logger(), "close fora");
    
             if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-            else if (robot.neck_pos.position20 > 1500) robot.state = aligning_with_the_ball;
+            else if (robot.neck_pos.position20 > 1350) robot.state = aligning_with_the_ball;
          
             // se estiver fora da faixa larga (±90°) → gira para alinhar
             else if (fabs(deltaY) > LIMITE_GIRO) {
@@ -544,11 +548,6 @@ void RobotBehavior::bala_localization_game()                     //estado de jog
             // se estiver dentro da faixa estreita (±30°) → chuta
             else if (fabs(deltaY) <= LIMITE_CHUTE) {
                 robot.state = kick_ball;
-            }
-            
-            else if (robot.neck_pos.position20 > 1350)  
-            {
-                robot.state = ball_approach;
             }
             
             break;
