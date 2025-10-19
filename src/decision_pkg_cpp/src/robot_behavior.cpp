@@ -67,7 +67,7 @@ void RobotBehavior::penalty()           //penalizado
         {
             //player_penalty();
             RCLCPP_INFO(this->get_logger(), "CHUTANDO");
-            send_goal(left_kick_penalty);
+            send_goal(left_kick);
         }
         // else goalkeeper_penalty();
         break;
@@ -317,7 +317,7 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
             robot.state = searching_ball;
             lost_ball_timer.reset();
 	    } 
-        if (robot.neck_pos.position20 >= 1575)
+        if (robot.neck_pos.position20 >= 1555)
         {
             robot.state = aligning_with_the_ball;
         }
@@ -759,7 +759,7 @@ void RobotBehavior::player_penalty()
             // if (robot.neck_pos.position19 >= 2048) 
             //     {   
                     RCLCPP_INFO(this->get_logger(), "kick_left");
-                    send_goal(left_kick_penalty);
+                    send_goal(left_kick);
                     robot.state = searching_ball;
                     
                 // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);

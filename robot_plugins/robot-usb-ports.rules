@@ -2,7 +2,7 @@
 SUBSYSTEMS=="usb", KERNELS=="3-8.2", SYMLINK+="motors", MODE="0777"
 SUBSYSTEMS=="usb", KERNELS=="3-8.1", SYMLINK+="imu", MODE="0777"
 SUBSYSTEMS=="usb", KERNELS=="3-9.2", SYMLINK+="motors", MODE="0777"
-SUBSYSTEMS=="usb", KERNELS=="3-8.1", SYMLINK+="imu", MODE="0777"
+SUBSYSTEMS=="usb", KERNELS=="3-9.1", SYMLINK+="imu", MODE="0777"
 
 # Camera Rules
 KERNEL=="video*", ATTRS{product}=="HD Pro Webcam C920",ATTR{index}=="0", SYMLINK+="camera", MODE="0777"
