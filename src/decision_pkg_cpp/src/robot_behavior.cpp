@@ -664,7 +664,7 @@ void RobotBehavior::goalkeeper_normal_game()
         case searching_ball:
             send_goal(squat);
             //RCLCPP_FATAL(this->get_logger(), "SEARCHING BALL");
-            if(ball_is_locked() && robot.neck_pos.position20 <= 1802){                ;
+            if(ball_is_locked()){                
                 robot.state = defending_penalty;        
             }
             break;
