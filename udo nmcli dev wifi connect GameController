@@ -1,0 +1,74 @@
+IN-USE  BSSID              SSID            MODE   CHAN  RATE        SIGNAL  BARS  SECURITY    
+[32m [0m       [32m20:9C:B4:11:D6:66[0m  [32mFEI-IOT[0m         [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m100[0m     [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:62[0m  [32mFEI-WIFI[0m        [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m100[0m     [32m▂▄▆█[0m  [32mWPA2 802.1X[0m 
+[32m [0m       [32m20:9C:B4:11:D6:63[0m  [32mArgos[0m           [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m100[0m     [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:67[0m  [32mFEI-K404[0m        [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m100[0m     [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:64[0m  [32mFEI-GUEST[0m       [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m100[0m     [32m▂▄▆█[0m  [32m--[0m          
+[32m [0m       [32m20:9C:B4:11:D6:65[0m  [32mFEI-INTERNET[0m    [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m100[0m     [32m▂▄▆█[0m  [32m--[0m          
+[32m [0m       [32m20:9C:B4:11:D6:70[0m  [32m--[0m              [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m85[0m      [32m▂▄▆█[0m  [32mWPA2[0m        
+[32m [0m       [32m20:9C:B4:11:D6:6A[0m  [32mFEI-T115[0m        [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:69[0m  [32mFEI-T114[0m        [32mInfra[0m  [32m13[0m    [32m260 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:72[0m  [32mFEI-WIFI[0m        [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA2 802.1X[0m 
+[32m [0m       [32m20:9C:B4:11:D6:73[0m  [32mArgos[0m           [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:76[0m  [32mFEI-IOT[0m         [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:74[0m  [32mFEI-GUEST[0m       [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32m--[0m          
+[32m [0m       [32m20:9C:B4:11:D6:77[0m  [32mFEI-K404[0m        [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:78[0m  [32mFEI-T113[0m        [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:79[0m  [32mFEI-T114[0m        [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:7A[0m  [32mFEI-T115[0m        [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[32m [0m       [32m20:9C:B4:11:D6:7B[0m  [32mFEI-ROBOFEI[0m     [32mInfra[0m  [32m60[0m    [32m540 Mbit/s[0m  [32m82[0m      [32m▂▄▆█[0m  [32mWPA1 WPA2[0m   
+[33m [0m       [33m20:9C:B4:11:D6:6B[0m  [33mFEI-ROBOFEI[0m     [33mInfra[0m  [33m13[0m    [33m260 Mbit/s[0m  [33m80[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[32m*[0m       [33m20:9C:B4:11:D6:75[0m  [33mFEI-INTERNET[0m    [33mInfra[0m  [33m60[0m    [33m540 Mbit/s[0m  [33m70[0m      [33m▂▄▆_[0m  [33m--[0m          
+[33m [0m       [33mB0:B8:67:61:02:62[0m  [33mFEI-WIFI[0m        [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m69[0m      [33m▂▄▆_[0m  [33mWPA2 802.1X[0m 
+[33m [0m       [33mB0:B8:67:61:02:63[0m  [33mArgos[0m           [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m67[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:68[0m  [33mFEI-T113[0m        [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m67[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:6B[0m  [33mFEI-ROBOFEI[0m     [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m67[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:66[0m  [33mFEI-IOT[0m         [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m67[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:6A[0m  [33mFEI-T115[0m        [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m65[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:64[0m  [33mFEI-GUEST[0m       [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m65[0m      [33m▂▄▆_[0m  [33m--[0m          
+[33m [0m       [33mB0:B8:67:61:02:65[0m  [33mFEI-INTERNET[0m    [33mInfra[0m  [33m5[0m     [33m260 Mbit/s[0m  [33m64[0m      [33m▂▄▆_[0m  [33m--[0m          
+[33m [0m       [33mB0:B8:67:61:02:73[0m  [33mArgos[0m           [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m60[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:7B[0m  [33mFEI-ROBOFEI[0m     [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m60[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:72[0m  [33mFEI-WIFI[0m        [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m59[0m      [33m▂▄▆_[0m  [33mWPA2 802.1X[0m 
+[33m [0m       [33mB0:B8:67:61:02:76[0m  [33mFEI-IOT[0m         [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m59[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:77[0m  [33mFEI-K404[0m        [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m59[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:78[0m  [33mFEI-T113[0m        [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m59[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:79[0m  [33mFEI-T114[0m        [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m59[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:7A[0m  [33mFEI-T115[0m        [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m59[0m      [33m▂▄▆_[0m  [33mWPA1 WPA2[0m   
+[33m [0m       [33mB0:B8:67:61:02:74[0m  [33mFEI-GUEST[0m       [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m59[0m      [33m▂▄▆_[0m  [33m--[0m          
+[33m [0m       [33mB0:B8:67:61:02:70[0m  [33m--[0m              [33mInfra[0m  [33m116[0m   [33m540 Mbit/s[0m  [33m57[0m      [33m▂▄▆_[0m  [33mWPA2[0m        
+[35m [0m       [35mB0:B8:67:61:02:67[0m  [35mFEI-K404[0m        [35mInfra[0m  [35m5[0m     [35m260 Mbit/s[0m  [35m52[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35mB0:B8:67:61:02:69[0m  [35mFEI-T114[0m        [35mInfra[0m  [35m5[0m     [35m260 Mbit/s[0m  [35m52[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35mB0:B8:67:61:02:75[0m  [35mFEI-INTERNET[0m    [35mInfra[0m  [35m116[0m   [35m540 Mbit/s[0m  [35m52[0m      [35m▂▄__[0m  [35m--[0m          
+[35m [0m       [35m20:9C:B4:12:12:44[0m  [35mFEI-GUEST[0m       [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m47[0m      [35m▂▄__[0m  [35m--[0m          
+[35m [0m       [35m20:9C:B4:12:12:42[0m  [35mFEI-WIFI[0m        [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m44[0m      [35m▂▄__[0m  [35mWPA2 802.1X[0m 
+[35m [0m       [35m20:9C:B4:12:12:45[0m  [35mFEI-INTERNET[0m    [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m44[0m      [35m▂▄__[0m  [35m--[0m          
+[35m [0m       [35m20:9C:B4:12:12:4B[0m  [35mFEI-ROBOFEI[0m     [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m42[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:12:12:43[0m  [35mArgos[0m           [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m42[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:12:12:48[0m  [35mFEI-T113[0m        [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m40[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:12:12:46[0m  [35mFEI-IOT[0m         [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m37[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:11:BB:1A[0m  [35mFEI-T115[0m        [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m35[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:11:BB:1B[0m  [35mFEI-ROBOFEI[0m     [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m35[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:12:12:47[0m  [35mFEI-K404[0m        [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m34[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:12:12:4A[0m  [35mFEI-T115[0m        [35mInfra[0m  [35m1[0m     [35m260 Mbit/s[0m  [35m34[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:11:BB:10[0m  [35m--[0m              [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m34[0m      [35m▂▄__[0m  [35mWPA2[0m        
+[35m [0m       [35m20:9C:B4:11:BB:12[0m  [35mFEI-WIFI[0m        [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m34[0m      [35m▂▄__[0m  [35mWPA2 802.1X[0m 
+[35m [0m       [35m20:9C:B4:11:BB:16[0m  [35mFEI-IOT[0m         [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m34[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:11:BB:13[0m  [35mArgos[0m           [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m32[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:11:BB:19[0m  [35mFEI-T114[0m        [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m32[0m      [35m▂▄__[0m  [35mWPA1 WPA2[0m   
+[35m [0m       [35m20:9C:B4:11:BB:14[0m  [35mFEI-GUEST[0m       [35mInfra[0m  [35m40[0m    [35m540 Mbit/s[0m  [35m32[0m      [35m▂▄__[0m  [35m--[0m          
+[36m [0m       [36m20:9C:B4:11:BB:17[0m  [36mFEI-K404[0m        [36mInfra[0m  [36m40[0m    [36m540 Mbit/s[0m  [36m30[0m      [36m▂___[0m  [36mWPA1 WPA2[0m   
+[36m [0m       [36m20:9C:B4:12:12:49[0m  [36mFEI-T114[0m        [36mInfra[0m  [36m1[0m     [36m260 Mbit/s[0m  [36m29[0m      [36m▂___[0m  [36mWPA1 WPA2[0m   
+[36m [0m       [36mB0:B8:67:61:25:95[0m  [36mFEI-INTERNET[0m    [36mInfra[0m  [36m161[0m   [36m540 Mbit/s[0m  [36m29[0m      [36m▂___[0m  [36m--[0m          
+[36m [0m       [36mB0:B8:67:58:04:42[0m  [36mFEI-WIFI[0m        [36mInfra[0m  [36m7[0m     [36m260 Mbit/s[0m  [36m27[0m      [36m▂___[0m  [36mWPA2 802.1X[0m 
+[36m [0m       [36mB0:B8:67:61:25:83[0m  [36mArgos[0m           [36mInfra[0m  [36m9[0m     [36m260 Mbit/s[0m  [36m27[0m      [36m▂___[0m  [36mWPA1 WPA2[0m   
+[36m [0m       [36m20:9C:B4:11:BB:15[0m  [36mFEI-INTERNET[0m    [36mInfra[0m  [36m40[0m    [36m540 Mbit/s[0m  [36m27[0m      [36m▂___[0m  [36m--[0m          
+[36m [0m       [36mE8:45:8B:70:D3:50[0m  [36mKIEL 2025[0m       [36mInfra[0m  [36m6[0m     [36m260 Mbit/s[0m  [36m25[0m      [36m▂___[0m  [36mWPA2[0m        
+[36m [0m       [36m76:6F:88:12:AD:FE[0m  [36mRodrigo[0m         [36mInfra[0m  [36m7[0m     [36m130 Mbit/s[0m  [36m25[0m      [36m▂___[0m  [36mWPA2[0m        
+[36m [0m       [36mB0:B8:67:61:25:87[0m  [36mFEI-K404[0m        [36mInfra[0m  [36m9[0m     [36m260 Mbit/s[0m  [36m24[0m      [36m▂___[0m  [36mWPA1 WPA2[0m   
+[36m [0m       [36mF0:61:C0:44:EE:75[0m  [36mFEI-INTERNET[0m    [36mInfra[0m  [36m116[0m   [36m540 Mbit/s[0m  [36m24[0m      [36m▂___[0m  [36m--[0m          
+[36m [0m       [36mB0:B8:67:61:25:92[0m  [36mFEI-WIFI[0m        [36mInfra[0m  [36m161[0m   [36m540 Mbit/s[0m  [36m24[0m      [36m▂___[0m  [36mWPA2 802.1X[0m 
+[36m [0m       [36m20:9C:B4:11:D6:68[0m  [36mFEI-T113[0m        [36mInfra[0m  [36m13[0m    [36m260 Mbit/s[0m  [36m22[0m      [36m▂___[0m  [36mWPA1 WPA2[0m   
+[36m [0m       [36mB0:B8:67:61:25:90[0m  [36m--[0m              [36mInfra[0m  [36m161[0m   [36m540 Mbit/s[0m  [36m22[0m      [36m▂___[0m  [36mWPA2[0m        
+[36m [0m       [36m74:3A:EF:9B:9B:D7[0m  [36mCLARO_2G9B9BD2[0m  [36mInfra[0m  [36m1[0m     [36m260 Mbit/s[0m  [36m20[0m      [36m▂___[0m  [36mWPA2[0m        
+[36m [0m       [36m3C:A7:AE:DF:A0:DA[0m  [36mThiago[0m          [36mInfra[0m  [36m1[0m     [36m130 Mbit/s[0m  [36m17[0m      [36m▂___[0m  [36mWPA2[0m        

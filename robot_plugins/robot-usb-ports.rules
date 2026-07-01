@@ -6,3 +6,4 @@ SUBSYSTEMS=="usb", KERNELS=="3-9.1", SYMLINK+="imu", MODE="0777"
 
 # Camera Rules
 KERNEL=="video*", ATTRS{product}=="HD Pro Webcam C920",ATTR{index}=="0", SYMLINK+="camera", MODE="0777"
+#KERNEL=="video*", ATTRS{product}=="USB 2.0 Camera",ATTR{index}=="0", SYMLINK+="camera", MODE="0777"

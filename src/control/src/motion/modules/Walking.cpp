@@ -53,7 +53,7 @@ Walking::Walking()
  Y_MOVE_AMPLITUDE = 0;
  A_MOVE_AMPLITUDE = 0; 
  A_MOVE_AIM_ON = false;
- BALANCE_ENABLE = false;
+ BALANCE_ENABLE = true;
  LOWER_VELADJ_LIMIT = -8;
  UPPER_VELADJ_LIMIT = 3;
  speedAdj = 0;
@@ -692,8 +692,8 @@ if (L_swing) {
 
  double rlGyroErr = MotionStatus::RL_GYRO;
  double fbGyroErr = MotionStatus::FB_GYRO;
- //printf("IMU %f\n", fbGyroErr);
- //printf("IMU 2 %f\n", rlGyroErr);
+ printf("IMU : %f\n", fbGyroErr);
+ printf("IMU 2: %f\n", rlGyroErr);
 #ifdef MX28_1024
  outValue[1] += dir[1] * rlGyroErr * BALANCE_HIP_ROLL_GAIN; // R_HIP_ROLL
  outValue[7] += dir[7] * rlGyroErr * BALANCE_HIP_ROLL_GAIN; // L_HIP_ROLL

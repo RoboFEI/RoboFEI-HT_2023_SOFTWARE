@@ -70,7 +70,7 @@
  
 		 FILE* m_voltageLog;
  
-		 void topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_) const;
+		 void topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_);
 		 void topic_callback_walk(const std::shared_ptr<custom_interfaces::msg::Walk> walk_msg_) const;
 		 void topic_callback_positions(const std::shared_ptr<JointStateMsg> position_msg_) const;
 		 unsigned int m_torqueAdaptionCounter;

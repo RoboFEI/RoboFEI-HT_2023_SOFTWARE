@@ -321,7 +321,7 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
         {
             robot.state = aligning_with_the_ball;
         }
-        else if(robot.neck_pos.position19 >= 2300){
+        else if(robot.neck_pos.position19 >= 2100){ //2300
             send_goal(walk_left);
         }
         else if(robot.neck_pos.position19 <= 1700){
@@ -338,9 +338,9 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
 void RobotBehavior::kicker_normal_game()                //estado de jogo normal; jogo rolando 
 {
     //RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-    //RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+    RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
     //RCLCPP_WARN(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
-    //RCLCPP_INFO(this->get_logger(), "Kicker Normal Game");
+    RCLCPP_INFO(this->get_logger(), "Kicker Normal Game");
     switch (robot.state)
     {
     case searching_ball:
@@ -348,7 +348,7 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         //RCLCPP_ERROR(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
 
         if(ball_is_locked())
-            {   RCLCPP_INFO(this->get_logger(), "ball locked");
+            {   //RCLCPP_INFO(this->get_logger(), "ball locked");
                 if(robot.ball_position == center) robot.state = ball_approach;      //anda ate a bola
                 else robot.state = aligning_with_the_ball;
             }
@@ -361,16 +361,16 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         if(robot_align_with_the_ball()) robot.state = ball_approach;
         //else if(ball_is_locked()) robot.state = ball_approach;
         else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-        else if(robot.neck_pos.position19 > 2100) send_goal(turn_left);
-        else if(robot.neck_pos.position19 < 1900) send_goal(turn_right);
+        else if(robot.neck_pos.position19 > 2300) send_goal(turn_left);
+        else if(robot.neck_pos.position19 < 1700) send_goal(turn_right);
         break;
 
     case ball_approach:
         //RCLCPP_ERROR(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
         //RCLCPP_INFO(this->get_logger(), "ball_approach");
-        if((robot.neck_pos.position20 < 1350)& (ball_is_locked())) 
+        if((robot.neck_pos.position20 < 1225)& (ball_is_locked())) 
             {
-            robot.state = ball_close;
+            robot.state = kick_ball;
             }         //perdeu a bola
         else if(!robot.camera_ball_position.detected) 
             {
@@ -387,38 +387,38 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
         break;
 
 
-    case ball_close:
-        //RCLCPP_INFO(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
-        //RCLCPP_INFO(this->get_logger(), "ball close");
+    // case ball_close:
+    //     //RCLCPP_INFO(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
+    //     RCLCPP_INFO(this->get_logger(), "ball close");
 
-        if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
-        else if (robot.neck_pos.position20 > 1400) robot.state = aligning_with_the_ball;
+    //     if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
+    //     else if (robot.neck_pos.position20 < 1300) robot.state = aligning_with_the_ball;
         
-        if (robot.neck_pos.position19 < 1600)
-        {
-            send_goal(walk_right);
-            RCLCPP_INFO(this->get_logger(), "walking right");
-        }
-        else if (robot.neck_pos.position19 > 2360)
-        {
-            send_goal(walk_left);
-            RCLCPP_INFO(this->get_logger(), "walking left");
-        }
-        else
-        {
-            robot.state = kick_ball;
-        }
-        //else if(robot_align_for_kick_left()) robot.state = kick_ball;
-        break;
+    //     if (robot.neck_pos.position19 < 1600)
+    //     {
+    //         send_goal(walk_right);
+    //         RCLCPP_INFO(this->get_logger(), "walking right");
+    //     }
+    //     else if (robot.neck_pos.position19 > 2360)
+    //         {
+    //         send_goal(walk_left);
+    //         RCLCPP_INFO(this->get_logger(), "walking left");
+    //     }
+    //     else
+    //     {
+    //         robot.state = kick_ball;
+    //     }
+    //     //else if(robot_align_for_kick_left()) robot.state = kick_ball;
+    //     break;
 
     case kick_ball:
         //RCLCPP_INFO(this->get_logger(), "kick");
         if(robot.movement != 3 && robot.movement != 4) 
         {
-            if (robot.neck_pos.position19 >= 2048) 
-                {   
-                    RCLCPP_INFO(this->get_logger(), "kick_left");
-                    send_goal(left_kick);
+            if (robot.neck_pos.position19 <= 2100) 
+                {  
+                    RCLCPP_INFO(this->get_logger(), "kick_right");
+                    send_goal(right_kick);
                     robot.state = searching_ball;
                     
                 // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
@@ -426,8 +426,8 @@ void RobotBehavior::kicker_normal_game()                //estado de jogo normal;
                 else
                 {   
 
-                    RCLCPP_INFO(this->get_logger(), "kick_right");
-                    send_goal(right_kick);
+                    RCLCPP_INFO(this->get_logger(), "kick_left");
+                    send_goal(left_kick);
                     robot.state = searching_ball;
                 // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
             } 

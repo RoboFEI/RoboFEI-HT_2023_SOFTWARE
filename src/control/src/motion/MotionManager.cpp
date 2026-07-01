@@ -66,10 +66,13 @@ void MotionManager::update_loop()
   }
 }
 
-void MotionManager::topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_) const
+void MotionManager::topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_)
 {
-  float IMU_GYRO_X = -imu_msg_->angular_velocity.x / 10;
-  float IMU_GYRO_Y = -imu_msg_->angular_velocity.y / 10;
+  //vincius13
+
+
+  this->IMU_GYRO_X = imu_msg_->angular_velocity.x ;
+  this->IMU_GYRO_Y = imu_msg_->angular_velocity.y ;
   // valores não armazenados ainda — precisa de membro? avaliar uso
 }
 void MotionManager::GetIniParameter()
@@ -323,8 +326,8 @@ void MotionManager::Process()
 
         if (m_CalibrationStatus == 1 && this->GetEnable()) {
             const double GYRO_ALPHA = 0.1;
-            int gyroValFB = (int) (IMU_GYRO_Y);
-            int gyroValRL = (int) (IMU_GYRO_X);
+            float gyroValFB = this->IMU_GYRO_Y;
+            float gyroValRL = this->IMU_GYRO_X;
 
             MotionStatus::FB_GYRO = (1.0 - GYRO_ALPHA) * MotionStatus::FB_GYRO + GYRO_ALPHA * gyroValFB;
             MotionStatus::RL_GYRO = (1.0 - GYRO_ALPHA) * MotionStatus::RL_GYRO + GYRO_ALPHA * gyroValRL;

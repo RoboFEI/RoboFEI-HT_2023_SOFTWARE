@@ -6,7 +6,7 @@
 #include "decision_pkg_cpp/utils.h"
 #include "decision_pkg_cpp/AssyncTimer.hpp"
 
-#define ROBOT_NUMBER 3
+#define ROBOT_NUMBER 2
 
 using namespace std::chrono_literals;
 
@@ -40,7 +40,6 @@ class RobotBehavior : public DecisionNode
         bool robot_align_for_kick_right();
         bool robot_align_for_kick_left();
         bool centered_neck();
-        bool full_centered_neck();
         void detect_ball_position();
         bool neck_to_left();
         bool neck_to_right();
@@ -49,10 +48,10 @@ class RobotBehavior : public DecisionNode
         void penalty();
         void player_penalty();
         void goalkeeper_penalty(); // fazer
-
+        bool full_centered_neck();
         RobotBehavior();
         virtual ~RobotBehavior();
-
+        
     private:
 
         AssyncTimer lost_ball_timer;
