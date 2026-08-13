@@ -83,3 +83,116 @@ def findGoalpost(img, results, classesValues):
     img_cp, goalpost_positions = drawGoalpostBox(img_cp, results, goalpost_indices)
     
     return img_cp, goalpost_positions
+
+# Added:
+
+def drawLBox(img, results, l_indices):
+    """Desenha caixas para landmarks L"""
+    img_cp = img.copy()
+    l_positions = []
+    
+    for idx in l_indices:
+        l_box_xywh = results.boxes[idx].xywhn.numpy()
+        array_box_xywh = np.reshape(l_box_xywh, -1)
+        
+        center_x = int(array_box_xywh[0] * img.shape[1])
+        center_y = int(array_box_xywh[1] * img.shape[0])
+        width = int(array_box_xywh[2] * img.shape[1])
+        height = int(array_box_xywh[3] * img.shape[0])
+        
+        x1 = int(center_x - width / 2)
+        y1 = int(center_y - height / 2)
+        x2 = int(center_x + width / 2)
+        y2 = int(center_y + height / 2)
+        
+        # Desenha retângulo VERDE para L
+        cv2.rectangle(img_cp, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.circle(img_cp, (center_x, center_y), 5, (0, 255, 0), -1)
+        
+        l_positions.append(np.array([center_x, center_y], dtype=float))
+    
+    return img_cp, l_positions
+
+def drawTBox(img, results, t_indices):
+    """Desenha caixas para landmarks T - COR ROXA"""
+    img_cp = img.copy()
+    t_positions = []
+    
+    for idx in t_indices:
+        t_box_xywh = results.boxes[idx].xywhn.numpy()
+        array_box_xywh = np.reshape(t_box_xywh, -1)
+        
+        center_x = int(array_box_xywh[0] * img.shape[1])
+        center_y = int(array_box_xywh[1] * img.shape[0])
+        width = int(array_box_xywh[2] * img.shape[1])
+        height = int(array_box_xywh[3] * img.shape[0])
+        
+        x1 = int(center_x - width / 2)
+        y1 = int(center_y - height / 2)
+        x2 = int(center_x + width / 2)
+        y2 = int(center_y + height / 2)
+        
+        # ROXO (255, 0, 255)
+        cv2.rectangle(img_cp, (x1, y1), (x2, y2), (255, 0, 255), 2)
+        cv2.circle(img_cp, (center_x, center_y), 5, (255, 0, 255), -1)
+        
+        t_positions.append(np.array([center_x, center_y], dtype=float))
+    
+    return img_cp, t_positions
+
+def drawXBox(img, results, x_indices):
+    """Desenha caixas para landmarks X - COR LARANJA"""
+    img_cp = img.copy()
+    x_positions = []
+    
+    for idx in x_indices:
+        x_box_xywh = results.boxes[idx].xywhn.numpy()
+        array_box_xywh = np.reshape(x_box_xywh, -1)
+        
+        center_x = int(array_box_xywh[0] * img.shape[1])
+        center_y = int(array_box_xywh[1] * img.shape[0])
+        width = int(array_box_xywh[2] * img.shape[1])
+        height = int(array_box_xywh[3] * img.shape[0])
+        
+        x1 = int(center_x - width / 2)
+        y1 = int(center_y - height / 2)
+        x2 = int(center_x + width / 2)
+        y2 = int(center_y + height / 2)
+        
+        # LARANJA (0, 165, 255)
+        cv2.rectangle(img_cp, (x1, y1), (x2, y2), (0, 165, 255), 2)
+        cv2.circle(img_cp, (center_x, center_y), 5, (0, 165, 255), -1)
+        
+        x_positions.append(np.array([center_x, center_y], dtype=float))
+    
+    return img_cp, x_positions
+
+def findL(img, results, classesValues):
+    img_cp = img.copy()
+    try:
+        l_indices = np.where(results.boxes.cls == classesValues['L'])[0]
+    except:
+        l_indices = []
+    
+    img_cp, l_positions = drawLBox(img_cp, results, l_indices)
+    return img_cp, l_positions
+
+def findT(img, results, classesValues):
+    img_cp = img.copy()
+    try:
+        t_indices = np.where(results.boxes.cls == classesValues['T'])[0]
+    except:
+        t_indices = []
+    
+    img_cp, t_positions = drawTBox(img_cp, results, t_indices)
+    return img_cp, t_positions
+
+def findX(img, results, classesValues):
+    img_cp = img.copy()
+    try:
+        x_indices = np.where(results.boxes.cls == classesValues['X'])[0]
+    except:
+        x_indices = []
+    
+    img_cp, x_positions = drawXBox(img_cp, results, x_indices)
+    return img_cp, x_positions

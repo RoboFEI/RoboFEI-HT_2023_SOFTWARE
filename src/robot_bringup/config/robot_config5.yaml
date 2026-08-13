@@ -9,7 +9,7 @@
 
 /neck_node:
   ros__parameters:
-    neck_activate: true
+    neck_activate: true 
 
     x_p_gain: 0.20
     y_p_gain: 0.15

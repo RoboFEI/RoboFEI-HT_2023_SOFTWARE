@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "Action.h"
 #include "Walking.h"
+#include "std_msgs/msg/int32_multi_array.hpp"
 
 using namespace Robot;
 using namespace std::chrono_literals;
@@ -31,8 +32,8 @@ MotionManager::MotionManager()
   
 {
   // subscribers e publishers
-  subscription_imu = this->create_subscription<sensor_msgs::msg::Imu>(
-      "imu/data", 10, std::bind(&MotionManager::topic_callback, this, _1));
+  subscription_imu = this->create_subscription<std_msgs::msg::Int32MultiArray>(
+      "imu", 10, std::bind(&MotionManager::topic_callback, this, _1));
 
   subscription_walk = this->create_subscription<custom_interfaces::msg::Walk>(
       "walking", 10, std::bind(&MotionManager::topic_callback_walk, this, _1));
@@ -66,11 +67,14 @@ void MotionManager::update_loop()
   }
 }
 
-void MotionManager::topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_) const
+void MotionManager::topic_callback(const std::shared_ptr<std_msgs::msg::Int32MultiArray> imu_msg_)
 {
-  float IMU_GYRO_X = -imu_msg_->angular_velocity.x / 10;
-  float IMU_GYRO_Y = -imu_msg_->angular_velocity.y / 10;
-  // valores não armazenados ainda — precisa de membro? avaliar uso
+
+this->IMU_GYRO_X = (-imu_msg_->data[3] - 512)/100;//metade de 1024; a leitura a imu de arduino para pegar numeros negativos começa cerca de 512
+this->IMU_GYRO_Y = (-imu_msg_->data[4] - 512)/100; //divindo por 100 para suavizar a leitura
+
+
+//printf("IMU(valor alterado):%f,%f \n IMU(valor original): %d, %d\n", this->IMU_GYRO_X,this->IMU_GYRO_Y,-imu_msg_->data[3],-imu_msg_->data[4]);  
 }
 void MotionManager::GetIniParameter()
 {
@@ -323,11 +327,13 @@ void MotionManager::Process()
 
         if (m_CalibrationStatus == 1 && this->GetEnable()) {
             const double GYRO_ALPHA = 0.1;
-            int gyroValFB = (int) (IMU_GYRO_Y);
-            int gyroValRL = (int) (IMU_GYRO_X);
+            int gyroValFB = this->IMU_GYRO_Y;
+            int gyroValRL = this->IMU_GYRO_X;
+          
 
-            MotionStatus::FB_GYRO = (1.0 - GYRO_ALPHA) * MotionStatus::FB_GYRO + GYRO_ALPHA * gyroValFB;
-            MotionStatus::RL_GYRO = (1.0 - GYRO_ALPHA) * MotionStatus::RL_GYRO + GYRO_ALPHA * gyroValRL;
+           MotionStatus::FB_GYRO = (1.0 - GYRO_ALPHA) * MotionStatus::FB_GYRO + GYRO_ALPHA * gyroValFB;
+           MotionStatus::RL_GYRO = (1.0 - GYRO_ALPHA) * MotionStatus::RL_GYRO + GYRO_ALPHA * gyroValRL;
+           
 
             for (int id = JointData::ID_MIN; id <= JointData::ID_MAX - 2; id++) {
                 if (Walking::GetInstance()->m_Joint.GetEnable(id)) {

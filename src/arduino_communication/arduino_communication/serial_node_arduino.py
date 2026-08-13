@@ -43,6 +43,7 @@ class Ros2Serial(Node):
 
         self.robot_state = self.create_publisher(RobotState, '/robot_state', qos_profile)
         self.imu = self.create_publisher(Int32MultiArray, '/imu', qos_profile)
+        
 
         self.publish_thread = threading.Thread(target=self.publish_messages, daemon=True)
         self.publish_thread.start()
@@ -90,7 +91,8 @@ class Ros2Serial(Node):
         except Exception:
             # evitar crash se `valor` não for indexável do jeito esperado
             self.get_logger().warn("robotState recebeu 'valor' inesperado")
-
+        
+    
         self.robot_state.publish(robot)
 
     def imuSensor(self, valor):

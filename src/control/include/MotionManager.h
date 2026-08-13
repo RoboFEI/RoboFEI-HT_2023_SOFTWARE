@@ -27,6 +27,7 @@
  #include "custom_interfaces/msg/walk.hpp"
  #include "custom_interfaces/msg/neck_position.hpp"
  #include "std_msgs/msg/bool.hpp"
+ #include "std_msgs/msg/int32_multi_array.hpp"
  
  #define OFFSET_SECTION "Offset"
  #define INVALID_VALUE   -1024.0
@@ -44,7 +45,6 @@
 		 int m_FBGyroCenter;
 		 int m_RLGyroCenter;
 		 int m_CalibrationStatus;
- 
 		 bool m_IsRunning;
 		 bool m_IsThreadRunning;
 		 bool m_IsLogging;
@@ -52,7 +52,7 @@
 		 float IMU_GYRO_Y;
 		 int robot_number_;
  
-		 rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr subscription_imu;
+		 rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr subscription_imu;
 		 rclcpp::Subscription<custom_interfaces::msg::Walk>::SharedPtr subscription_walk;
 		 rclcpp::Publisher<JointStateMsg>::SharedPtr pubisher_body_joints_;
 		 rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_fase_zero; 
@@ -70,7 +70,7 @@
  
 		 FILE* m_voltageLog;
  
-		 void topic_callback(const std::shared_ptr<sensor_msgs::msg::Imu> imu_msg_) const;
+		 void topic_callback(const std::shared_ptr<std_msgs::msg::Int32MultiArray> imu_msg_);
 		 void topic_callback_walk(const std::shared_ptr<custom_interfaces::msg::Walk> walk_msg_) const;
 		 void topic_callback_positions(const std::shared_ptr<JointStateMsg> position_msg_) const;
 		 unsigned int m_torqueAdaptionCounter;

@@ -8,7 +8,7 @@
 #include <atomic>
 
 
-#define ROBOT_NUMBER 1
+#define ROBOT_NUMBER 3
 
 
 using namespace std::chrono_literals;
