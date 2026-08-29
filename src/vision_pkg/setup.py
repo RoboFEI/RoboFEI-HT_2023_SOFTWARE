@@ -1,4 +1,6 @@
 from setuptools import find_packages, setup
+from glob import glob # Adicionada
+import os # Adicionada 
 
 package_name = 'vision_pkg'
 submodules = 'vision_pkg/submodules'
@@ -11,11 +13,17 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        #  ADD: Inclui apenas arquivos .pt da pasta weights
+        (os.path.join('lib', 'python3.10', 'site-packages', package_name, 'weights'),
+            glob('vision_pkg/weights/*.pt')),
+        # ADD: Inclui o config.ini do submodules
+        (os.path.join('lib', 'python3.10', 'site-packages', package_name, 'submodules'),
+            ['vision_pkg/submodules/config.ini']),
     ],
     install_requires=[
-        'setuptools',
+        'sself.l_posetuptools',
         'ultralytics'
-        ],
+    ],
     zip_safe=True,
     maintainer='RoboFEI',
     maintainer_email='rpj134@gmail.com',
