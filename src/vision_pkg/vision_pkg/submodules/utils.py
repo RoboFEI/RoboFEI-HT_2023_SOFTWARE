@@ -6,17 +6,25 @@ from .image import drawBallBox
 
 def draw_lines(img, config):
 
-    # Draw horizontal divisions
-    cv2.line(img, (config.x_left, 0), (config.x_left, img.shape[0]), (0, 0, 255), 1)
-    cv2.line(img, (config.x_center, 0), (config.x_center, img.shape[0]), (0, 0, 255), 1)
-    cv2.line(img, (config.x_right, 0), (config.x_right, img.shape[0]), (0, 0, 255), 1)
+    # Tamanho da imagem
+    height, width = img.shape[:2]
 
-    # Draw vertical divisions
-    cv2.line(img, (0, config.y_chute), (img.shape[1], config.y_chute), (0, 0, 255), 1)
-    cv2.line(img, (0, config.y_longe), (img.shape[1], config.y_longe), (0, 0, 255), 1)
+    x_left = width // 3
+    x_right = (width * 2) // 3
+
+    cv2.line(img, (x_left, 0), (x_left, height), (0, 0, 255), 1)
+    cv2.line(img, (x_right, 0), (x_right, height), (0, 0, 255), 1)
+
+    y_top = height // 3
+    y_bottom = (height * 2) // 3
+
+    cv2.line(img, (0, y_top), (width, y_top), (0, 0, 255), 1)
+    cv2.line(img, (0, y_bottom), (width, y_bottom), (0, 0, 255), 1)
 
     return img
-       
+
+
+
 @dataclass
 class position:
     x: int = 0

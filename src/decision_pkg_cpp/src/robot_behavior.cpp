@@ -3,12 +3,17 @@
 #include "decision_pkg_cpp/robot_behavior.hpp"
 #include "decision_node.cpp"
 #include<unistd.h> // apenas para delay, apagar
+#include "std_msgs/msg/int32.hpp"
+#include "custom_interfaces/msg/vision.hpp"
 
 #define MAX_LOST_BALL_TIME 7000 //10 seconds
 
 // defining the opposite side --> 1 - right --> 0 - left
 int opposite_side;
 bool aligned_goalpost = false; // alinhado com a trave
+int follow_goal_index = 3;
+int follow_ball_index = 2;
+bool is_align_with_goal = false;
 
 RobotBehavior::RobotBehavior()
 {
@@ -24,25 +29,29 @@ RobotBehavior::~RobotBehavior()     //checkpoint
 void RobotBehavior::players_behavior()
 {
     
-    if (is_penalized())  RCLCPP_INFO(this->get_logger(), "Penalizado");  //robo penalizado
-    else
-    {
-        if(robot_fallen(robot)) get_up();
-	    else
-        {
-            switch (gc_info.secondary_state)
-            {
-            case GameControllerMsg::STATE_NORMAL:
-                normal_game();
-                break;
-            
-            case GameControllerMsg::STATE_PENALTYSHOOT:
-                //RCLCPP_INFO(this->get_logger(), "ENTROU NO PENALTYSHOOT");
-                penalty();
-                break;
+    if (is_penalized()) {
 
-            default:
-                break;
+        // Feito
+
+    }
+    else {
+
+        if(robot_fallen(robot)) get_up();
+        else {
+            switch(gc_info.game_phase){
+
+                case GameControllerMsg::GAME_PHASE_NORMAL:
+                    //RCLCPP_INFO(this->get_logger(), "GameController: GamePhase NORMAL");
+                    normal_game();
+                    break;
+
+                case GameControllerMsg::GAME_PHASE_PENALTY_SHOOT_OUT:
+                    //RCLCPP_INFO(this->get_logger(), "GameController: GamePhase PENALTY SHOOTOUT");
+                    penalty();
+                    break;
+
+                default:
+                    break;
             }
         }
     }
@@ -51,28 +60,32 @@ void RobotBehavior::players_behavior()
 
 void RobotBehavior::penalty()           //penalizado
 {
-    RCLCPP_INFO(this->get_logger(), "entrou no penalty");
-    switch (gc_info.game_state)
+    //RCLCPP_INFO(this->get_logger(), "Entrou no PENALTY SHOOTOUT");
+    switch (gc_info.state)
     {
-    case GameControllerMsg::GAMESTATE_INITAL: 
+    case GameControllerMsg::STATE_INITIAL:
+        //RCLCPP_INFO(this->get_logger(), "GameController: State INITIAL");
         send_goal(stand_still);
         break;
         
-    case GameControllerMsg::GAMESTATE_SET: 
+    case GameControllerMsg::STATE_SET: 
+        //RCLCPP_INFO(this->get_logger(), "GameController: State SET");
         send_goal(stand_still);
         break;
     
-    case GameControllerMsg::GAMESTATE_PLAYING: 
+    case GameControllerMsg::STATE_PLAYING: 
+        //RCLCPP_INFO(this->get_logger(), "GameController: State PLAYING");
         if(gc_info.has_kick_off)
         {
             //player_penalty();
-            RCLCPP_INFO(this->get_logger(), "CHUTANDO");
+            //RCLCPP_INFO(this->get_logger(), "CHUTANDO");
             send_goal(left_kick);
         }
         // else goalkeeper_penalty();
         break;
    
-    case GameControllerMsg::GAMESTATE_FINISHED: 
+    case GameControllerMsg::STATE_FINISHED: 
+        //RCLCPP_INFO(this->get_logger(), "GameController: State FINISHED");
         send_goal(stand_still);
         break;
     }
@@ -82,160 +95,66 @@ void RobotBehavior::penalty()           //penalizado
 void RobotBehavior::normal_game()           //jogo normal
 {
 
-    // RCLCPP_DEBUG(this->get_logger(), "Normal Game: %d", gc_info.game_state);
-    switch (gc_info.game_state)
+    //RCLCPP_DEBUG(this->get_logger(), "Normal Game, state: %d", gc_info.state);
+    switch (gc_info.state)
     {
-    case GameControllerMsg::GAMESTATE_INITAL: // conferido
 
+    case GameControllerMsg::STATE_INITIAL:
+    {
         if(robot.neck_pos.position19 < 2048){ // definir lado do campo 1 - right 0 - left
             opposite_side = 1;
-        }else{
+        } else {
             opposite_side = 0;
         }
+
         send_goal(stand_still);
         break;
+    }
     
-    case GameControllerMsg::GAMESTATE_READY:
+    case GameControllerMsg::STATE_READY:
     {
-        //RCLCPP_INFO(this->get_logger(), "🎯 READY | Etapa:ck:");
-
+        //RCLCPP_INFO(this->get_logger(), "GameController: State READY");
         send_goal(stand_still);
-        // static int ready_counter = 0;
-        // static int ready_etapa = ETAPA_WALK;
-
-        // POR CONTANDOR 
-
-        // switch (ready_etapa)
-        // {
-        // case ETAPA_WALK:
-        //     send_goal(walk);
-        //     ready_counter++;
-        //     if (ready_counter > 3700) 
-        //     {
-        //         send_goal(stand_still);
-        //         ready_etapa = ETAPA_TURN;
-        //         ready_counter = 0;
-        //     }
-        //     break;
-
-        // case ETAPA_TURN:
-        //     send_goal(turn_right);
-        //     ready_counter++;
-        //     if (ready_counter >= 80) // ~1.6 segundos de giro
-        //     {
-        //         ready_etapa = ETAPA_PARAR;
-        //         ready_counter = 0;
-        //     }
-        //     break;
-
-        // case ETAPA_PARAR:
-        //     send_goal(stand_still);
-        //     break;
-        // }
-
-        
-
-        // COM A POSIÇÃO DA BOLA
-
-        // int neck = robot.neck_pos.position19;
-        
-        // static bool yaw_fixed = false;  // variável estática local para garantir que IMU atualiza 1 vez so
-
-        // if (!yaw_fixed) // atualizar ponto zero da IMU
-        // {
-        //     yaw_reference_ = robot.imu_yaw_rad;
-        //     yaw_reference_set_ = true;
-        //     yaw_fixed = true;
-
-        // }
-        //RCLCPP_INFO(this->get_logger(), "🎯 READY | Etapa: %d | Neck: %d", ready_etapa, neck);    
-        
-        
-        // RCLCPP_INFO(this->get_logger(), "%d", opposite_side);   
-        // send_goal(walk);
-        // switch (ready_etapa)
-        // {
-        // case ETAPA_WALK:
-        //     if (opposite_side == 0)
-        //     {
-        //         if (neck >= 1700)
-        //         {
-        //             send_goal(walk);
-        //             //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
-        //         }
-        //         else
-        //         {
-        //             send_goal(stand_still);
-        //             ready_etapa = ETAPA_TURN;
-        //             //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
-        //         }
-        //     }
-        //     else  if(opposite_side == 1)
-        //     {
-        //         if (neck >= 1500)
-        //         {
-        //             send_goal(walk);
-        //             //RCLCPP_INFO(this->get_logger(), "🚶 Andando lateralmente");
-        //         }
-        //         else
-        //         {
-        //             send_goal(stand_still);
-        //             ready_etapa = ETAPA_TURN;
-        //             //RCLCPP_INFO(this->get_logger(), "➡️ Mudando para ETAPA_TURN");
-        //         }   
-        //     }
-                
-            
-        //     break;
-
-        // case ETAPA_TURN:
-        //     if (neck > 2068 || neck < 2028)
-        //     {
-        //         if (neck > 2068) send_goal(turn_left);
-        //         else send_goal(turn_right);
-        //         //RCLCPP_INFO(this->get_logger(), "↩️ Virando até alinhar com 2048");
-        //     }
-        //     else
-        //     {
-        //         ready_etapa = ETAPA_PARAR;
-        //         //RCLCPP_INFO(this->get_logger(), "✅ Alinhou com a bola, indo para PARAR");
-        //     }
-        //     break;
-
-        // case ETAPA_PARAR:
-        //     send_goal(stand_still);
-        //     //RCLCPP_INFO(this->get_logger(), "🛑 Parado (etapa final)");
-        //     break;
-        // }
-
-        // break;
+        break;
     }
         
-    case GameControllerMsg::GAMESTATE_SET: // feito
+    case GameControllerMsg::STATE_SET: // feito
+    {
+        //RCLCPP_INFO(this->get_logger(), "GameController: State SET");
         send_goal(stand_still);
         yaw_reference_set_ = false;
         break;
+    }
     
-    case GameControllerMsg::GAMESTATE_PLAYING:  // começo do jogo
-        if(gc_info.has_kick_off || (!gc_info.has_kick_off && gc_info.secondary_seconds_remaining == 0))
+    case GameControllerMsg::STATE_PLAYING:
+    {
+        //RCLCPP_INFO(this->get_logger(), "GameController: State PLAYING");
+        if (!(gc_info.has_kick_off) && !(gc_info.secondary_time <= 0) && (gc_info.seconds_remaining < 600)) 
         {
-            std_msgs::msg::Bool localization_active = robot.localization_msg; // topico que manda true/false para localização
+            //RCLCPP_INFO(this->get_logger(), "Kick-Off adversário, esperando");
+            send_goal(stand_still);
 
-            if(!localization_active.data){ 
-                // RCLCPP_INFO(this->get_logger(), "MACACAQUITO DANÇANDO")
-                if(is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game();
-                else if (is_kicker(ROBOT_NUMBER)) kicker_normal_game();
-                else if(is_bala(ROBOT_NUMBER)) bala_normal_game();
-            }
-            else{
-                // RCLCPP_INFO(this->get_logger(), "COM LOCALIZAÇÃO")
-                if (is_kicker(ROBOT_NUMBER)) kicker_localization_game();
-                else if (is_bala(ROBOT_NUMBER)) bala_localization_game();
-            }
+        } else if ((gc_info.has_kick_off) && (gc_info.secondary_time <= 0) && (is_kicker(ROBOT_NUMBER)) && (gc_info.seconds_remaining < 600))
+        {
+            //RCLCPP_INFO(this->get_logger(), "Kick-Off nosso, começando a se mover");
+            kicker_normal_game();
+        }
+
+        std_msgs::msg::Bool localization_active = robot.localization_msg; // topico que manda true/false para localização
+
+        if (!localization_active.data) {
+            if (is_goalkeeper(ROBOT_NUMBER)) goalkeeper_normal_game();
+            else if (is_kicker(ROBOT_NUMBER)) kicker_normal_game();
+            else if (is_bala(ROBOT_NUMBER)) bala_normal_game();
+        } else {
+            if (is_kicker(ROBOT_NUMBER)) kicker_localization_game();
+            else if (is_bala(ROBOT_NUMBER)) bala_localization_game();
         }
         break;
+    }
    
-    case GameControllerMsg::GAMESTATE_FINISHED: // feito
+    case GameControllerMsg::STATE_FINISHED: // feito
+        //RCLCPP_INFO(this->get_logger(), "GameController: State FINISHED");
         send_goal(stand_still);
         break;
     }
@@ -334,128 +253,356 @@ void RobotBehavior::bala_normal_game()                //estado de jogo normal; j
 	    break;
     }
 }
+void RobotBehavior::listener_callback_goal_center_vision(const VisionInfo::SharedPtr msg)
+{  
+    goalCenter.detected     =   msg->detected;  
+    //RCLCPP_INFO(this->get_logger(), "GOAL '%s'", goalCenter.detected ? "true" : "false");
+    goalCenter.left         =   msg->left;
+    goalCenter.center       =   msg->center;
+    goalCenter.right        =   msg->right;
+
+    goalCenter.far          =   msg->far;
+    goalCenter.med          =   msg->med;
+    goalCenter.close        =   msg->close;
+}
+void RobotBehavior::listener_callback_imu_yaw(const ImuAccelMsg::SharedPtr msg)
+{
+    const double x = msg->orientation.x;
+    const double y = msg->orientation.y;
+    const double z = msg->orientation.z;
+    const double w = msg->orientation.w;
+
+    const double robot_yaw_rad = std::atan2(
+        2.0 * (w * z + x * y),
+        1.0 - 2.0 * (y * y + z * z)
+    );
+
+    yaw_deg = robot_yaw_rad * 180.0 / M_PI;
+
+    if (first_yaw)
+    {
+        start_yaw_deg = yaw_deg;
+        first_yaw = false;
+
+        RCLCPP_INFO(this->get_logger(),"Yaw inicial %.2f",start_yaw_deg);
+        RCLCPP_INFO(this->get_logger(), "Yaw do robo no momento %.2f", yaw_deg);
+    }
+}
 
 void RobotBehavior::kicker_normal_game()                //estado de jogo normal; jogo rolando 
 {
     //RCLCPP_INFO(this->get_logger(), "robot state %d", robot.state);
-    RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
-    RCLCPP_WARN(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19);
-    RCLCPP_INFO(this->get_logger(), "Kicker Normal Game");
+    //RCLCPP_FATAL(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+    //RCLCPP_WARN(this->get_logger(), "posição do 19: %d", robot.neck_pos.position19); 
+    //RCLCPP_INFO(this->get_logger(), "Recebeu yaw %.2f", yaw_deg);   
+    //RCLCPP_INFO(this->get_logger(), "Lado oponente: %s",opositeSide() ? "true" : "false");
+
+    publisher_neck_state = this->create_publisher<std_msgs::msg::Int32>("/neck_state", 10); //pulisher do estado do pescoço 
+
+    vision_goal_center_subscriber = this->create_subscription<VisionInfo>(    
+    "goal_center_position", 10, std::bind(&RobotBehavior::listener_callback_goal_center_vision, this, std::placeholders::_1));
+
+    imu_yaw_subscriber = this->create_subscription<ImuAccelMsg>(
+    "/imu/data", 10, std::bind(&RobotBehavior::listener_callback_imu_yaw, this, std::placeholders::_1));
+    
+    //RCLCPP_INFO(this->get_logger(), "Kicker Normal Game");
     switch (robot.state)
     {
-    case searching_ball:
-        RCLCPP_INFO(this->get_logger(), "Searching ball");
-        //RCLCPP_ERROR(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
 
-        if(ball_is_locked())
-            {   //RCLCPP_INFO(this->get_logger(), "ball locked");
-                if(robot.ball_position == center) robot.state = ball_approach;      //anda ate a bola
-                else if(robot.neck_pos.position20 > 1250){
+
+        case searching_ball:
+        {
+            //RCLCPP_INFO(this->get_logger(), "Searching ball");
+            //RCLCPP_ERROR(this->get_logger(), "lost ball timer  %d", lost_ball_timer.delayNR(MAX_LOST_BALL_TIME));
+            if(ball_is_locked()) 
+            {
+                //RCLCPP_INFO(this->get_logger(), "ball locked");
+                if(robot.neck_pos.position20 >= 1400){
                     robot.state = aligning_with_the_ball;
                 }
-                else
+                else if(robot.neck_pos.position20 <= 1400 && robot.neck_pos.position19 >= 1730 && robot.neck_pos.position19 <= 2360)
                 {
-                    robot.state = ball_close;
+                    Rotate_timer.reset();
+                    robot.state = find_any_goal;
                 }
+                // else if(robot.neck_pos.position20 <= 1500 && (robot.neck_pos.position19 < 1730 || robot.neck_pos.position19 > 2360)){
+                    
+                //     robot.state = ball_close;
+                // }
             }
-        else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) send_goal(turn_left);        //alinha o corpo com a bola
-        //else send_goal(gait); // gait
-        break;
-    
-    case aligning_with_the_ball:
-        RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
-        if(robot_align_with_the_ball()) robot.state = ball_approach;
-        //else if(ball_is_locked()) robot.state = ball_approach;
-        else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-        else if(robot.neck_pos.position20 <= 1250) robot.state = ball_close;
-        else if(robot.neck_pos.position19 > 2150) send_goal(turn_left);
-        else if(robot.neck_pos.position19 < 1850) send_goal(turn_right);
-        break;
 
-    case ball_approach:
-        //RCLCPP_ERROR(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
-        RCLCPP_INFO(this->get_logger(), "ball_approach");
-        if((robot.neck_pos.position20 <= 1250)& (ball_is_locked())) 
-            {
-            robot.state = ball_close;
-            }         //perdeu a bola
-        else if(!robot.camera_ball_position.detected) 
-            {
-            robot.state = searching_ball;
-            } // pode estar bugando
-        else if(!robot_align_with_the_ball() && robot.neck_pos.position20 >= 1250) 
-            {
-            robot.state = aligning_with_the_ball;
-            }
-        else 
-            {
-            send_goal(walk);
-            }
-        break;
+            else if(lost_ball_timer.delayNR(MAX_LOST_BALL_TIME)) send_goal(turn_left);        //alinha o corpo com a bola
+            //else send_goal(gait); // gait
+            break;
+            
+        }
+        case aligning_with_the_ball:
+        {
 
+            //RCLCPP_INFO(this->get_logger(), "Aligning with the_ball");
+            
+            if(robot.neck_pos.position19 < 2360 && robot.neck_pos.position19 > 1730) robot.state = ball_approach;
 
-     case ball_close:
-         //RCLCPP_INFO(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
-         RCLCPP_INFO(this->get_logger(), "ball close");
+            //else if(ball_is_locked()) robot.state = ball_approach;
 
-         if(!robot.camera_ball_position.detected) robot.state = searching_ball;
-         else if (robot.neck_pos.position20 < 1250)
-         {
-        
-            if (robot.neck_pos.position19 < 1900)
-            {
-                send_goal(walk_right);
-                RCLCPP_INFO(this->get_logger(), "walking right");
-            }
-            else if (robot.neck_pos.position19 > 2400)
+            else if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+            //else if(robot.neck_pos.position20 <= 1450 && robot.neck_pos.position19 < 1730 && robot.neck_pos.position19 > 2360) robot.state = ball_close;
+            //else if(robot.neck_pos.position20 <= 1450 && robot.neck_pos.position19 >= 1730 && robot.neck_pos.position19 <= 2360) robot.state = aligning_with_goal;
+            else if(robot.neck_pos.position19 > 2360) send_goal(turn_left);
+            else if(robot.neck_pos.position19 < 1730) send_goal(turn_right);
+            break;
+
+        }
+        case ball_approach:
+        {
+
+            //RCLCPP_ERROR(this->get_logger(), "neck limit %d, ball locked %d, ball close %d", ball_in_close_limit(), ball_is_locked(), robot.camera_ball_position.close);
+            //RCLCPP_INFO(this->get_logger(), "ball_approach");
+
+            if((robot.neck_pos.position20 <= 1400)) 
                 {
-                send_goal(walk_left);
-                RCLCPP_INFO(this->get_logger(), "walking left");
+                    Rotate_timer.reset();
+                    robot.state = find_any_goal;
+                }        
+            else if(!robot.camera_ball_position.detected) //perdeu a bola
+                {
+                    robot.state = searching_ball;
+                } 
+            else if(robot.neck_pos.position19 < 1730 || robot.neck_pos.position19 > 2360) 
+                {
+                    robot.state = aligning_with_the_ball;
+                }
+            else 
+                {
+                    send_goal(walk);
+                }
+            break;
+                
+        }
+        case find_any_goal:
+        {     
+            //RCLCPP_INFO(this->get_logger(), "Find Goal");
+
+            send_goal(stand_still);
+
+            std_msgs::msg::Int32 msg;
+            msg.data = follow_goal_index;
+            publisher_neck_state->publish(msg);
+
+            if (goalCenter.center == true && gol_vision_stable() && opositeSide())
+            {
+
+                //RCLCPP_INFO(this->get_logger(), "Guardou a posição do 19");
+                pos19 = robot.neck_pos.position19;
+
+                error19 = pos19 - 2048;
+                RCLCPP_INFO(this->get_logger(), "error %d", error19);
+                
+                Rotate_timer.reset();
+                robot.state = aligning_with_goal;
             }
-            else
+            else if(goalCenter.center == true && gol_vision_stable() && opositeSide() == false)
+            {
+                robot.state = look_correct_goal;
+            }
+            else if(neck_finish_search && !In_kick_angle())
+            {
+                //RCLCPP_INFO(this->get_logger(), "NAO ACHOU O GOL");
+                
+                robot.state = turn_to_correct_goal;
+
+            }
+            else if(neck_finish_search && In_kick_angle())
             {
                 robot.state = kick_ball;
             }
+            break;
+
         }
-         //else if(robot_align_for_kick_left()) robot.state = kick_ball;
-         break;
+        case find_oponent_goal:
+        {
+            //RCLCPP_INFO(this->get_logger(), "find_oponent_goal");
 
-    case kick_ball:
-        RCLCPP_INFO(this->get_logger(), "kick");
-        if(robot.movement != 3 && robot.movement != 4 && robot.neck_pos.position20 <= 1250) 
-        {   
+            send_goal(stand_still);
 
-            if (robot.neck_pos.position19 > 2150 && robot.neck_pos.position19 <= 2400) 
-                {  
-                RCLCPP_INFO(this->get_logger(), "kick_left");
-                send_goal(left_kick);
-                robot.state = searching_ball;
-                    
-                // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+            std_msgs::msg::Int32 msg;
+            msg.data = follow_goal_index;
+            publisher_neck_state->publish(msg);
+
+            if(goalCenter.center == true && gol_vision_stable() && opositeSide())
+            {
+
+                //RCLCPP_INFO(this->get_logger(), "Guardou a posição do 19");
+                pos19 = robot.neck_pos.position19;
+
+                error19 = pos19 - 2048;
+                RCLCPP_INFO(this->get_logger(), "error %d", error19);
+                
+                Rotate_timer.reset();
+                robot.state = aligning_with_goal;
+            }
+            else if(neck_finish_search && !In_kick_angle())
+            {
+                //RCLCPP_INFO(this->get_logger(), "NAO ACHOU O GOL");
+                
+                robot.state = turn_to_correct_goal;
+
+            }
+            else if(neck_finish_search && In_kick_angle())
+            {
+                robot.state = kick_ball;
+            }
+
+            break;
+        }
+        case look_correct_goal:
+        {
+            //RCLCPP_INFO(this->get_logger(), "look_correct_goal");
+            Turn_ball_left_180();
+
+            break;
+        }
+        case turn_to_correct_goal:
+        {
+            //RCLCPP_INFO(this->get_logger(), "turn to correct goal");
+
+            Turn_ball_left_to_goal();
+
+            break;
+        }
+        case aligning_with_goal:
+        {
+            
+            //RCLCPP_INFO(this->get_logger(), "Aligning with goal");
+            if(error19 < 50)
+            {
+                if(error19 > -180)
+                {
+                    Turn_ball_left_little();
+                }   
+                else
+                {
+                    Turn_ball_left_lot();
                 }
-            else if (robot.neck_pos.position19 < 2150 && robot.neck_pos.position19 >= 1900)
+            }
+            else if(error19 > 50)
+            {
+                if(error19 < 180)
+                {
+                    Turn_ball_right_little();
+                }
+                else
+                {
+                    Turn_ball_right_lot();
+                }
+            }
+            break;
+        }
+        case searching_ball_after_goal:
+        {
+            send_goal(stand_still);
+            //RCLCPP_INFO(this->get_logger(), "Search Ball After goal");
+            std_msgs::msg::Int32 msg;
+            msg.data = follow_ball_index;
+            publisher_neck_state->publish(msg);
+
+            if(robot.neck_pos.position20 < 1400 && robot.neck_pos.position19 >= 1730 && robot.neck_pos.position19 <= 2360 && vision_stable())
+            {
+                //RCLCPP_INFO(this->get_logger(), "Ball found after goal alignment");
+                robot.state = kick_ball;
+            }
+            else if(robot.camera_ball_position.detected && robot.neck_pos.position20 > 1400)
+            {
+                robot.state = ball_approach_after_goal;
+            }
+            break;
+        }
+        case ball_approach_after_goal:
+        {
+            if((robot.neck_pos.position20 <= 1400)) 
+                {
+                    Rotate_timer.reset();
+                    robot.state = kick_ball;
+                }        
+            else if(robot.neck_pos.position19 > 2360) 
+            {
+                send_goal(turn_left);
+            }
+            else if(robot.neck_pos.position19 < 1730) 
+            {
+                send_goal(turn_right);
+            }
+            else 
+                {
+                send_goal(walk);
+                }
+            break;
+        }
+        // case ball_close:
+        // {
+        //      //RCLCPP_INFO(this->get_logger(), "ball right %d, ball left %d", robot_align_for_kick_right(), robot_align_for_kick_left());
+        //      RCLCPP_INFO(this->get_logger(), "ball close");
+
+        //     if(!robot.camera_ball_position.detected) robot.state = searching_ball;
+        //     else if(robot.neck_pos.position20 >= 1450) robot.state = aligning_with_the_ball;
+        //     if (robot.neck_pos.position19 < 1730)
+        //     {
+        //         send_goal(walk_right);
+        //         RCLCPP_INFO(this->get_logger(), "walking right");
+        //     }
+        //     else if (robot.neck_pos.position19 > 2360)
+        //     {
+        //         send_goal(walk_left);
+        //         RCLCPP_INFO(this->get_logger(), "walking left");
+        //     }
+        //     else
+        //     {
+        //         send_goal(stand_still);
+        //         robot.state = find_goal;
+        //     }
+        //     break;
+        // }
+        case kick_ball:
+        {
+            //RCLCPP_INFO(this->get_logger(), "kick");
+            if(robot.movement != 3 && robot.movement != 4) 
+            {   
+                if (robot.neck_pos.position19 >= 2150 && robot.neck_pos.position19 <= 2400) 
+                {  
+                    //RCLCPP_INFO(this->get_logger(), "kick_left");
+                    send_goal(left_kick);
+
+                    // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+                }
+                else if (robot.neck_pos.position19 <= 2150 && robot.neck_pos.position19 >= 1650)
                 {    
 
-                RCLCPP_INFO(this->get_logger(), "kick_right");
-                send_goal(right_kick);
-                robot.state = searching_ball;
-                // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
+                    //RCLCPP_INFO(this->get_logger(), "kick_right");
+                    send_goal(right_kick);
+                    // RCLCPP_INFO(this->get_logger(), "posição do 20: %d", robot.neck_pos.position20);
                 } 
-            else robot.state = ball_close;
-                
+                else if(robot.neck_pos.position19 < 1650)
+                {
+                    send_goal(walk_right);
+                }
+                else if(robot.neck_pos.position19 > 2400)
+                {
+                    send_goal(walk_left);
+                }
+            }
+            if(robot.finished_move)
+	        {
+                std_msgs::msg::Int32 msg;
+                msg.data = follow_ball_index;
+                publisher_neck_state->publish(msg);
+                robot.state = searching_ball;
+                lost_ball_timer.reset();
+            }
+            //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
+            break;
         }
-        else if(robot.finished_move)
-	    {
-            robot.state = searching_ball;
-            lost_ball_timer.reset();
-        }
-        else if(!robot.camera_ball_position.detected || !robot.camera_ball_position.close) robot.state = searching_ball;
-        else if (robot.neck_pos.position20 > 1250) robot.state = aligning_with_the_ball;
-        //else if(lost_ball_timer.delayNR(2000)) robot.state = searching_ball; //para testar com o corpo desatiavdo
-        break;
     }
 }
-
 void RobotBehavior::kicker_localization_game()                //estado de jogo normal; jogo rolando 
 {
     switch (robot.state)
@@ -811,6 +958,17 @@ bool RobotBehavior::robot_align_for_kick_right()
     return false;
 }
 
+bool RobotBehavior::robot_is_align_with_goal()
+{
+    if(goalCenter.detected == true && robot.neck_pos.position19 <= 2360 && robot.neck_pos.position19 >= 1730){
+        is_align_with_goal = true;
+    }
+    else{
+        is_align_with_goal = false;
+    }
+    return is_align_with_goal;
+}
+
 bool RobotBehavior::ball_in_right_foot()
 {
     if(ball_is_locked() && robot.neck_pos.position19 < 1850) return true;
@@ -822,7 +980,6 @@ bool RobotBehavior::ball_in_left_foot()
     if(ball_is_locked() && robot.neck_pos.position19 > 2250) return true;
     return false;
 }
-
 
 bool RobotBehavior::is_goalkeeper(int robot_num)
 {
@@ -860,6 +1017,177 @@ bool RobotBehavior::robot_align_with_the_ball()
         else return full_centered_neck();
     }
     else return false;
+}
+
+void RobotBehavior::Turn_ball_left_little()
+{
+    send_goal(turn_ball_left);
+    RCLCPP_INFO(this->get_logger(), "Rotacionar pra esquerda um pouco");
+    if(Rotate_timer.delay(3000))
+    {
+        send_goal(stand_still);
+        RCLCPP_INFO(this->get_logger(), "Acabou o timer");
+        robot.state = searching_ball_after_goal;
+    }
+    
+
+}
+void RobotBehavior::Turn_ball_left_lot_noSwitch()
+{
+   send_goal(turn_ball_left);
+    RCLCPP_INFO(this->get_logger(), "Rotacionar para esquerda muito");
+    if(Rotate_timer.delay(5000))
+    {
+        send_goal(stand_still);
+        RCLCPP_INFO(this->get_logger(), "Acabou o timer");
+    } 
+}
+
+void RobotBehavior::Turn_ball_left_lot()
+{
+    send_goal(turn_ball_left);
+    RCLCPP_INFO(this->get_logger(), "Rotacionar para esquerda muito");
+    if(Rotate_timer.delay(5000))
+    {
+        send_goal(stand_still);
+        //RCLCPP_INFO(this->get_logger(), "Acabou o timer");
+        robot.state = searching_ball_after_goal;
+    }
+    
+}
+
+void RobotBehavior::Turn_ball_right_little()
+{
+    send_goal(turn_ball_right);
+    RCLCPP_INFO(this->get_logger(), "Rotacionar para direita pouco");
+    if(Rotate_timer.delay(3000))
+    {
+        send_goal(stand_still);
+        //RCLCPP_INFO(this->get_logger(), "Acabou o timer");
+        robot.state = searching_ball_after_goal;
+    }
+    
+}
+
+void RobotBehavior::Turn_ball_right_lot()
+{
+    send_goal(turn_ball_right);
+    RCLCPP_INFO(this->get_logger(), "Rotacionar para direita muito");
+    if(Rotate_timer.delay(5000))
+    {
+        send_goal(stand_still);
+        RCLCPP_INFO(this->get_logger(), "Acabou o timer");
+        robot.state = searching_ball_after_goal;
+    }
+    
+}
+
+void RobotBehavior::Turn_ball_right_to_goal()
+{
+    send_goal(turn_ball_right);
+    RCLCPP_INFO(this->get_logger(), "Rotacionar para direita ate o gol");
+    if(In_kick_angle())
+    {
+        send_goal(stand_still);
+        robot.state = find_oponent_goal;
+    }
+}
+
+void RobotBehavior::Turn_ball_left_to_goal()
+{
+    send_goal(turn_ball_left);
+    RCLCPP_INFO(this->get_logger(), "Rotacionar para esquerda ate o gol");
+    if(In_kick_angle())
+    {
+        send_goal(stand_still);
+        robot.state = find_oponent_goal;
+    }
+}
+
+double RobotBehavior::normalize_yaw(double angle)
+{
+    angle = std::fmod(angle + 180.0, 360.0);
+
+    if (angle < 0.0) {
+        angle += 360.0;
+    }
+
+    return angle - 180.0;
+}
+
+bool RobotBehavior::opositeSide()
+{
+    normalize_max_yaw = normalize_yaw(start_yaw_deg + 90);
+    normalize_min_yaw = normalize_yaw(start_yaw_deg - 90);
+
+
+    //RCLCPP_INFO(this->get_logger(), "limite +90 %f", normalize_max_yaw);
+    //RCLCPP_INFO(this->get_logger(), "limite -90 %f", normalize_min_yaw);
+    //RCLCPP_INFO(this->get_logger(), "yaw atual %f", yaw_deg);
+
+    if (normalize_min_yaw <= normalize_max_yaw)
+    {
+        if (yaw_deg >= normalize_min_yaw && yaw_deg <= normalize_max_yaw)
+        {
+            RCLCPP_INFO(this->get_logger(), "Oposide side True");
+            return true;
+        }
+    }
+    else
+    {
+        if (yaw_deg >= normalize_min_yaw || yaw_deg <= normalize_max_yaw)
+        {
+            RCLCPP_INFO(this->get_logger(), "Oposide side True");
+            return true;
+        }
+    }
+    RCLCPP_INFO(this->get_logger(), "Oposide side False");
+    return false;
+}
+
+
+bool RobotBehavior::In_kick_angle()
+{
+    normalize_max_kick_angle = normalize_yaw(start_yaw_deg + 30);
+    normalize_min_kick_angle = normalize_yaw(start_yaw_deg - 30);
+
+
+    //RCLCPP_INFO(this->get_logger(), "limite +90 %f", normalize_max_kick_angle);
+    //RCLCPP_INFO(this->get_logger(), "limite -90 %f", normalize_min_kick_angle);
+    //RCLCPP_INFO(this->get_logger(), "yaw atual %f", yaw_deg);
+
+    if (normalize_min_kick_angle <= normalize_max_kick_angle)
+    {
+        if (yaw_deg >= normalize_min_kick_angle && yaw_deg <= normalize_max_kick_angle)
+        {
+            RCLCPP_INFO(this->get_logger(), "Kick angle True");
+            return true;
+        }
+    }
+    else
+    {
+        if (yaw_deg >= normalize_min_kick_angle || yaw_deg <= normalize_max_kick_angle)
+        {
+            RCLCPP_INFO(this->get_logger(), "Kick angle True");
+            return true;
+        }
+    }
+    RCLCPP_INFO(this->get_logger(), "Kick angle False");
+    return false;
+}
+
+
+void RobotBehavior::Turn_ball_left_180()
+{
+    send_goal(turn_ball_left);
+    RCLCPP_INFO(this->get_logger(), "Rotacionando 180 graus");
+    if(In_kick_angle())
+    {
+        send_goal(stand_still);
+        RCLCPP_INFO(this->get_logger(), "Acabou o timer");
+        robot.state = find_oponent_goal;
+    }
+    
 }
 
 void RobotBehavior::turn_to_ball()
@@ -912,6 +1240,15 @@ bool RobotBehavior::vision_stable() // feito
     return false;
 }
 
+bool RobotBehavior::gol_vision_stable()
+{
+    if(Gol_in_camera_center())
+    {
+        return true;
+    }
+    return false;
+}
+
 void RobotBehavior::detect_ball_position() // Funciona
 {
     // RCLCPP_DEBUG(this->get_logger(), "debug 1: centered_neck %d", centered_neck());
@@ -931,6 +1268,7 @@ void RobotBehavior::detect_ball_position() // Funciona
     }
 
 }
+
 
 bool RobotBehavior::neck_to_right() // testar
 {
@@ -971,21 +1309,19 @@ bool RobotBehavior::ball_in_camera_center() // feito
     return (robot.camera_ball_position.center) && robot.camera_ball_position.med;
 }
 
+bool RobotBehavior::Gol_in_camera_center()
+{
+    return (goalCenter.center) && goalCenter.med;
+}
+
 bool RobotBehavior::is_penalized() // feito
 {
     if(gc_info.penalized)
     {
         RCLCPP_DEBUG(this->get_logger(), "Robot Penalized, remain %d seconds", gc_info.seconds_till_unpenalized);
 
-        if(gc_info.seconds_till_unpenalized < 5)
-        {
-            RCLCPP_DEBUG(this->get_logger(), "Preparing to return, gait started");
-            send_goal(gait);
-        } 
-        else
-        {
-            send_goal(stand_still);
-        }
+        send_goal(stand_still);
+
         return true;
     }
     return false;

@@ -6,3 +6,4 @@ bool right          False
 bool far            False
 bool med            False
 bool close          False
+

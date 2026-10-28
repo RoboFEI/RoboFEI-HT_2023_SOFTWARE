@@ -23,7 +23,7 @@ def generate_launch_description():
     )
 
     team_number_launch_arg = DeclareLaunchArgument(
-        "team_number", default_value=TextSubstitution(text="7")
+        "team_number", default_value=TextSubstitution(text="65")
     )
 
     gc_node = Node(

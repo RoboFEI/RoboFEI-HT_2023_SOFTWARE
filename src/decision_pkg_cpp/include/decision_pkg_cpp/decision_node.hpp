@@ -40,6 +40,7 @@ class DecisionNode : public rclcpp::Node
         using ImuAccelMsg = sensor_msgs::msg::Imu;
         using VisionMsg = custom_interfaces::msg::Vision;
         using intMsg = std_msgs::msg::Int32;
+        using Boll = std_msgs::msg::Bool;
 
         using ControlActionMsg = custom_interfaces::action::Control;
         using GoalHandleControl = rclcpp_action::ClientGoalHandle<ControlActionMsg>;
@@ -66,6 +67,8 @@ class DecisionNode : public rclcpp::Node
         void listener_callback_goalpost_count(const std_msgs::msg::Int32::SharedPtr goalpost_count); // quantas traves o robo esta vendo
         void listener_callback_goalpost_px(const vision_msgs::msg::Point2D::SharedPtr goalpost_px_position); // posição x das traves
         void listener_callback_imu_rpy(const geometry_msgs::msg::Vector3Stamped::SharedPtr rpy);
+        void listener_callback_neck_finish(const std_msgs::msg::Bool::SharedPtr msg);
+        void listener_callback_imu_yaw(const sensor_msgs::msg::Imu::SharedPtr msg);
         void set_neck_position(); // fazer o robo olhar pra cima
         void look_right(); // fazer o robo olhar pra direita
         void look_down_to_ball(); // fazer o robo olhar pra baixo
@@ -81,6 +84,7 @@ class DecisionNode : public rclcpp::Node
 
         float FALL_ACCEL_TH;
         int FALSES_FALLEN_TH;
+        float robot_yaw;
 
         int NECK_CENTER_TH = get_center_th(robot.neck_pos.position20);
         //int NECK_CENTER_TH  = 150; //185
@@ -92,13 +96,14 @@ class DecisionNode : public rclcpp::Node
 
         // Timer pra acompanhar o goalpost - localização por visão
         rclcpp::TimerBase::SharedPtr neck_track_timer_; // para atualizar os valores do pescoço e ele olhar pro gol
-        bool neck_timer_active_;  
+        bool neck_timer_active_; 
+        bool neck_finish_search; 
         float last_pan_ = -1;
         float last_tilt_ = -1;
         int vision_wait_counter = 0;
         bool waiting_look_right = false;
         float previous_goalpost_x = -1.0;
-        
+
         // para a localização com UM7
         float delta_yaw; 
         float yaw_reference_ = 0.0;
@@ -122,6 +127,7 @@ class DecisionNode : public rclcpp::Node
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_accel_subscriber_;
         rclcpp::Subscription<VisionMsg>::SharedPtr vision_subscriber_;
         rclcpp::Subscription<intMsg>::SharedPtr running_move_subscriber_;
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr vision_subscriber_neck_finish;
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr localization_subscriber;
         rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr goalpost_count; // quantas traves foram detectadas 
         rclcpp::Subscription<VisionMsg>::SharedPtr goalpost_division_lines; // de acordo com as grades da visao 

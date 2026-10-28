@@ -342,7 +342,7 @@ private:
           last_movement = movement;
 
           if (do_gait){
-            movement = 15;
+            movement = 1;
             contador++;
             if (contador >= cWalk){
               do_gait = false;

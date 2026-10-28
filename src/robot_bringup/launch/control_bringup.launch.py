@@ -43,6 +43,13 @@ def generate_launch_description():
         arguments=['--ros-args', '--log-level', 'info'],
         emulate_tty=True
     )
+
+    imu = Node(
+        package="control",
+        executable="publicar_imu_tex",
+        output="screen",
+        emulate_tty=True
+    )
     
     neck_control = Node(
         package="control",
@@ -75,4 +82,5 @@ def generate_launch_description():
     ld.add_action(gait)
     ld.add_action(neck_control)
     ld.add_action(initial_position)
+    ld.add_action(imu)
     return ld

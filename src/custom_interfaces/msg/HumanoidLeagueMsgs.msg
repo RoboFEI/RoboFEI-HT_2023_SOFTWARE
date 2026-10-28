@@ -2,66 +2,123 @@
 # for additional information see documentation of the game controller
 # https://github.com/bhuman/GameController
 
+# Informações recebidas do GameController
 
 std_msgs/Header header
 
-uint8 GAMESTATE_INITAL=0
-uint8 GAMESTATE_READY=1
-uint8 GAMESTATE_SET=2
-uint8 GAMESTATE_PLAYING=3
-uint8 GAMESTATE_FINISHED=4
-uint8 game_state 3
+# Fases da partida:
 
-# Secondary state, penaltyshoot is penalty shootout at the end of the game,
+uint8 GAME_PHASE_NORMAL=0
+uint8 GAME_PHASE_PENALTY_SHOOT_OUT=1
+uint8 GAME_PHASE_EXTRA_TIME=2
+uint8 GAME_PHASE_TIMEOUT=3
+
+uint8 game_phase
+
+# Estados da partida:
+
+uint8 STATE_INITIAL=0
+uint8 STATE_READY=1
+uint8 STATE_SET=2
+uint8 STATE_PLAYING=3
+uint8 STATE_FINISHED=4
+
+uint8 state 3
+
+# Jogadas especiais:
+
+uint8 SET_PLAY_NONE=0
+uint8 SET_PLAY_DIRECT_FREE_KICK=1
+uint8 SET_PLAY_INDIRECT_FREE_KICK=2
+uint8 SET_PLAY_PENALTY_KICK=3
+uint8 SET_PLAY_THROW_IN=4
+uint8 SET_PLAY_GOAL_KICK=5
+uint8 SET_PLAY_CORNER_KICK=6
+
+uint8 set_play
+
+# Estados de penalty:
+
+uint8 PENALTY_NONE=0
+uint8 PENALTY_ILLEGAL_POSITIONING=1
+uint8 PENALTY_MOTION_IN_SET=2
+uint8 PENALTY_MOTION_IN_STOP=3
+uint8 PENALTY_LOCAL_GAME_STUCK=4
+uint8 PENALTY_INCAPABLE_ROBOT=5
+uint8 PENALTY_PICK_UP=6
+uint8 PENALTY_BALL_HOLDING=7
+uint8 PENALTY_LEAVING_THE_FIELD=8
+uint8 PENALTY_PLAYING_WITH_ARMS_HANDS=9
+uint8 PENALTY_PUSHING=10
+uint8 PENALTY_CAUTIONED=11
+uint8 PENALTY_SENT_OFF=12
+uint8 PENALTY_SUBSTITUTE=13
+
+uint8 penalty
+
+# penaltyshoot is penalty shootout at the end of the game,
 # penaltykick is a kick during the game
-uint8 STATE_NORMAL = 0
-uint8 STATE_PENALTYSHOOT = 1
-uint8 STATE_OVERTIME = 2
-uint8 STATE_TIMEOUT = 3
-uint8 STATE_DIRECT_FREEKICK = 4
-uint8 STATE_INDIRECT_FREEKICK = 5
-uint8 STATE_PENALTYKICK = 6
-uint8 STATE_CORNER_KICK = 7
-uint8 STATE_GOAL_KICK = 8
-uint8 STATE_THROW_IN = 9
-uint8 secondary_state 0
 
-# For newest version of game controller
-# Tells which team has the free kick or penalty kick
-uint8 secondary_state_team
-# The secondary state contains a sub mode in which phase of execution the secondary state is
-uint8 MODE_PREPARATION = 0
-uint8 MODE_PLACING = 1
-uint8 MODE_END = 2
-uint8 secondary_state_mode
+# Estado de interrupção da partida:
 
+uint8 stopped
+
+# Tipos de competição:
+
+uint8 COMPETITION_TYPE_SMALL=0
+uint8 COMPETITION_TYPE_MIDDLE=1
+uint8 COMPETITION_TYPE_LARGE=2
+
+uint8 competition_type
+
+# Informações gerais da partida:
+
+uint8 packet_number
+uint8 players_per_team
 bool first_half
+uint8 kicking_team
+
+# Tempos da partida (Em segundos):
+
+int16 seconds_remaining
+int16 secondary_time
+
+# Identificação das equipes:
+
+uint8 team_number
 uint8 own_score
 uint8 rival_score
 
-# Seconds remaining for the game half
-int16 seconds_remaining
-# Seconds remaining for things like kickoff
-int16 secondary_seconds_remaining
+# Informações da equipe:
+
+uint8 BLUE=0
+uint8 RED=1
+uint8 YELLOW=2
+uint8 BLACK=3
+uint8 WHITE=4
+uint8 GREEN=5
+uint8 ORANGE=6
+uint8 PURPLE=7
+uint8 BROWN=8
+uint8 GRAY=9
+
+uint8 team_color
+uint8 goalkeeper_color
+uint8 goalkeeper
+uint16 message_budget
+
+# Informações derivadas para o comportamento do robô:
 
 bool has_kick_off
 bool penalized
-uint16 seconds_till_unpenalized
+uint8 seconds_till_unpenalized
 
-# Team colors
-uint8 BLUE = 0
-uint8 RED = 1
-uint8 team_color
+# Informações de cobrança para pênaltis:
 
-bool drop_in_team
-uint16 drop_in_time
-
-# The number of the current penalty shot during penalty shootout
 uint8 penalty_shot
-# a binary pattern indicating the successful penalty shots (1 for successful, 0 for unsuccessful)
 uint16 single_shots
 
-string coach_message
+# Situação dos jogadores da equipe:
 
 bool[] team_mates_with_penalty
 bool[] team_mates_with_red_card

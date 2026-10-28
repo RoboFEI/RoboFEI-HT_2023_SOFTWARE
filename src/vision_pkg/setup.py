@@ -32,7 +32,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'detect     = vision_pkg.detect:main'
+            'detect     = vision_pkg.detect:main',
+            'subscriber = vision_pkg.submodules.Line_draw:main'
         ],
     },
 )

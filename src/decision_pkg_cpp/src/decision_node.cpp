@@ -48,6 +48,12 @@ DecisionNode::DecisionNode() : Node("decision_node")
       std::bind(&DecisionNode::listener_callback_vision, this, std::placeholders::_1)
     );
 
+    vision_subscriber_neck_finish = this->create_subscription<std_msgs::msg::Bool>(
+      "neck_search_finished",
+      rclcpp::QoS(10),
+      std::bind(&DecisionNode::listener_callback_neck_finish, this, std::placeholders::_1)
+    );
+
     running_move_subscriber_ = this->create_subscription<intMsg>(
         "move_running",
         rclcpp::QoS(10),
@@ -121,9 +127,9 @@ DecisionNode::~DecisionNode()
 
 void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_info)
 {
-    if (this->gc_info.secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && this->gc_info.game_state == GameControllerMsg::GAMESTATE_SET)
+    if (this->gc_info.game_phase == GameControllerMsg::GAME_PHASE_PENALTY_SHOOT_OUT && this->gc_info.state == GameControllerMsg::STATE_SET)
     {
-      if(gc_info->secondary_state == GameControllerMsg::STATE_PENALTYSHOOT && gc_info->game_state == GameControllerMsg::GAMESTATE_PLAYING)
+      if(gc_info->game_phase == GameControllerMsg::GAME_PHASE_PENALTY_SHOOT_OUT && gc_info->state == GameControllerMsg::STATE_PLAYING)
       {
         side_penalty = rand()%2;
       }
@@ -137,7 +143,7 @@ void DecisionNode::listener_callback_GC(const GameControllerMsg::SharedPtr gc_in
 void DecisionNode::listener_callback_imu_rpy(const geometry_msgs::msg::Vector3Stamped::SharedPtr rpy)
 {
     robot.imu_yaw_rad = rpy->vector.z;
-    //RCLCPP_INFO(this->get_logger(), "🧭 Yaw recebido: %.3f rad", robot.imu_yaw_rad);
+    RCLCPP_INFO(this->get_logger(), "🧭 Yaw recebido: %.3f rad", robot.imu_yaw_rad);
 }
 
 void DecisionNode::listener_callback_neck_pos(const JointStateMsg::SharedPtr neck_pos)
@@ -149,6 +155,11 @@ void DecisionNode::listener_callback_neck_pos(const JointStateMsg::SharedPtr nec
     // RCLCPP_INFO(this->get_logger(), "Id 19: %d  |  Id 20: %d", robot.neck_pos.position19, robot.neck_pos.position20);
 }
 
+
+void DecisionNode::listener_callback_neck_finish(const std_msgs::msg::Bool::SharedPtr msg)
+{
+  this->neck_finish_search = msg->data;
+}
 void DecisionNode::listener_callback_imu_gyro(const ImuGyroMsg::SharedPtr imu_gyro)
 {
     this->robot.imu_gyro = *imu_gyro;
@@ -162,17 +173,18 @@ void DecisionNode::listener_callback_imu_accel(const ImuAccelMsg::SharedPtr imu_
                       imu_accel->linear_acceleration.y,
                       imu_accel->linear_acceleration.z); 
 }
-
 void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
                                        const float &robot_accel_y,
                                        const float &robot_accel_z)
 {
-  // RCLCPP_INFO(this->get_logger(), "Recive Imu Accel Info");
-  // RCLCPP_INFO(this->get_logger(), "\nAx: %f\nAy: %f\nAz: %f\n", robot_accel_x, robot_accel_y, robot_accel_z);
+  //RCLCPP_INFO(this->get_logger(), "Recive Imu Accel Info");
+  //RCLCPP_INFO(this->get_logger(), "\nAx: %f\nAy: %f\nAz: %f\n", robot_accel_x, robot_accel_y, robot_accel_z);
 
-  if(abs(robot_accel_y) < FALL_ACCEL_TH)
-  {
+  if((abs(robot_accel_z) < -FALL_ACCEL_TH) || (abs(robot_accel_z) > FALL_ACCEL_TH))
+  {    
+   
       falses_fallen_counter += 1;
+      RCLCPP_INFO(this->get_logger(),"False Falling counter %.3f", falses_fallen_counter);
   }
   else
   {
@@ -182,9 +194,9 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
 
   if(falses_fallen_counter > FALSES_FALLEN_TH)
   {
-    if(robot_accel_z > FALL_ACCEL_TH)       this->robot.fall = FallenFront;
-    else if(robot_accel_z < -FALL_ACCEL_TH) this->robot.fall = FallenBack;
-    else if(robot_accel_x > FALL_ACCEL_TH)  this->robot.fall = FallenLeft;
+    if(robot_accel_z < -FALL_ACCEL_TH)       this->robot.fall = FallenFront;
+    else if(robot_accel_z > FALL_ACCEL_TH) this->robot.fall = FallenBack;
+    else if(robot_accel_y > FALL_ACCEL_TH)  this->robot.fall = FallenLeft;
     else this->robot.fall = FallenRight;  
   }
   // RCLCPP_INFO(this->get_logger(), "Robot Fall State: %d", robot.fall);

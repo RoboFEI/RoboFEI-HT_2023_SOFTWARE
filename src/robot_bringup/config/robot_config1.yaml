@@ -21,7 +21,7 @@
 
 /decision_node:
   ros__parameters:
-    FALL_ACCEL_TH: 7.0
+    FALL_ACCEL_TH: 750.0
     FALSES_FALLEN_TH: 30
 
 /image_node:

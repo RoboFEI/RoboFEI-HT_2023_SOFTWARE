@@ -18,7 +18,15 @@ enum State
     aligning_with_the_ball = 2,
     ball_approach = 3,
     ball_close = 4,
-    kick_ball = 5
+    kick_ball = 5,
+    aligning_with_goal = 6,
+    searching_ball_after_goal = 7,
+    find_any_goal = 8,
+    look_correct_goal = 9,
+    find_oponent_goal = 10,
+    turn_to_correct_goal = 11,
+    ball_approach_after_goal = 12
+
 };
 
 enum FallStatus
@@ -39,7 +47,7 @@ enum Move
     right_kick_to_right = 31,
     //right_kick_to_left  = 32,
     left_kick_to_left   = 34, 
-    left_kick_penalty  = 35,
+    left_kick_penalty   = 35,
     turn_right          = 5,
     turn_left           = 6,
     goodbye             = 7,
@@ -51,8 +59,8 @@ enum Move
     stand_up_side       = 18,
     walk_left           = 20,
     walk_right          = 21,
-    turn_ball_left      = 9,
-    turn_ball_right      = 10
+    turn_ball_left      = 10,
+    turn_ball_right     = 9
 };
 
 enum ReadyEtapa

@@ -692,8 +692,8 @@ if (L_swing) {
 
  double rlGyroErr = MotionStatus::RL_GYRO;
  double fbGyroErr = MotionStatus::FB_GYRO;
- printf("IMU : %f\n", fbGyroErr);
- printf("IMU 2: %f\n", rlGyroErr);
+ //printf("IMU : %f\n", fbGyroErr);
+//  printf("IMU 2: %f\n", rlGyroErr);
 #ifdef MX28_1024
  outValue[1] += dir[1] * rlGyroErr * BALANCE_HIP_ROLL_GAIN; // R_HIP_ROLL
  outValue[7] += dir[7] * rlGyroErr * BALANCE_HIP_ROLL_GAIN; // L_HIP_ROLL
@@ -764,7 +764,7 @@ double Walking::splineBalance(double angle, double vel, double gain)
  double offset = 1000.0 * gain * (cmd.x - angle);
 
 #if LOG_BALANCE
- //fprintf(m_balanceLog, "%5.3f %5.3f %5.3f %5.3f\n", angle, vel, offset, cmd.t);
+ //fprintf(m_balanceLog, "%5.3f %5.3f %5.3f  %5.3f\n", angle, vel, offset, cmd.t);
 #endif
 return offset;
 } 

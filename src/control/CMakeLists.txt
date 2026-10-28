@@ -80,6 +80,21 @@ install(TARGETS neck_control
 )
 
 # =========================
+# publish_imu
+# =========================
+add_executable(publicar_imu_tex src/publicar_imu_tex.cpp)
+
+ament_target_dependencies(publicar_imu_tex
+  rclcpp
+  sensor_msgs
+)
+
+install(TARGETS publicar_imu_tex
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+# =========================
 # control
 # =========================
 add_executable(control src/control.cpp)

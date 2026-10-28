@@ -22,8 +22,8 @@ class GameStateReceiver(Node):
     def __init__(self):
         super().__init__('game_controller')
 
-        self.declare_parameter('team_number', 7)
-        self.declare_parameter('robot_number', 2)
+        self.declare_parameter('team_number', 65)
+        self.declare_parameter('robot_number', 1)
         self.team = self.get_parameter('team_number').get_parameter_value().integer_value
         self.player_number = self.get_parameter('robot_number').get_parameter_value().integer_value
         logger.info('We are playing as player {} in team {}'.format(self.player_number, self.team))
@@ -33,6 +33,7 @@ class GameStateReceiver(Node):
         self.man_penalize = False
         self.game_controller_lost_time = 20
         self.game_controller_connected_publisher = self.create_publisher(Bool, 'game_controller_connected', 1)
+        #logger.info("Declarado publisher do GameController quando conectado")
 
         # The address listening on and the port for sending back the robots meta data
         self.declare_parameter('listen_host', '0.0.0.0')
@@ -40,6 +41,7 @@ class GameStateReceiver(Node):
         listen_host = self.get_parameter('listen_host').value
         listen_port = self.get_parameter('listen_port').value
         self.declare_parameter('answer_port',3939)
+        #logger.info("Declarado portas")
 
 
         self.addr = (listen_host, listen_port)
@@ -63,6 +65,7 @@ class GameStateReceiver(Node):
         self.socket.settimeout(2)
         self.socket2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.socket2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        #logger.info("Socket aberta")
 
     def receive_forever(self):
         """ Waits in a loop that is terminated by setting self.running = False """
@@ -77,24 +80,30 @@ class GameStateReceiver(Node):
             Calls :func:`on_new_gamestate`
             Sends an answer to the GC """
         try:
+            #logger.info("Tentando receber e interpretar o pacote")
             data, peer = self.socket.recvfrom(GameState.sizeof())
 
             # Throws a ConstError if it doesn't work
+            #logger.info("Package recebido, tentando interpretar")
             parsed_state = GameState.parse(data)
 
             # Assign the new package after it parsed successful to the state
+            #logger.info("Sla, mas ta funcionando")
             self.state = parsed_state
             self.time = time.time()
 
             # Publish that game controller received message
+            #logger.info("Criando publisher para o package")
             msg = Bool()
             msg.data = True
             self.game_controller_connected_publisher.publish(msg)
 
             # Call the handler for the package
+            #logger.info("Chamando o handler para o package")
             self.on_new_gamestate(self.state)
 
             # Answer the GameController
+            #logger.info("Respondendo o GameController")
             self.answer_to_gamecontroller(peer)
 
         except AssertionError as ae:
@@ -108,7 +117,7 @@ class GameStateReceiver(Node):
                 self.time += 5  # Resend message every five seconds
                 logger.info("No GameController message received, allowing robot to move", throttle_duration_sec=5)
                 msg = GameStateMsg()
-                msg.game_state = 3  # PLAYING
+                msg.state = 3  # PLAYING
                 self.state_publisher.publish(msg)
                 msg2 = Bool()
                 msg2.data = False
@@ -116,13 +125,16 @@ class GameStateReceiver(Node):
 
     def answer_to_gamecontroller(self, peer):
         """ Sends a life sign to the game controller """
-        return_message = 0 if self.man_penalize else 2
 
+        #logger.info("Enviando data package de volta para o GameController")
         data = Container(header=b"RGrt",
                          version=GAME_CONTROLLER_RESPONSE_VERSION,
-                         team=self.team,
                          player=self.player_number,
-                         message=return_message)
+                         team=self.team,
+                         fallen=0,
+                         pose=[0,0,0],
+                         ballAge=0,
+                         ball=[0,0])
         try:
             destination = peer[0], self.answer_port
             logger.debug('Sending answer to {} port {}'.format(destination[0], destination[1]))
@@ -136,6 +148,7 @@ class GameStateReceiver(Node):
             :param state: Game State
         """
 
+        #logger.info("Chamando novo GameState ou sla oq isso faz")
         is_own_team = lambda number: number == self.team
         own_team = self.select_team_by(is_own_team, state.teams)
 
@@ -152,35 +165,34 @@ class GameStateReceiver(Node):
         except IndexError:
             logger.error('Robot {} not playing'.format(self.player_number))
             return
-
+       
         msg = GameStateMsg()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.game_state = state.game_state.intvalue
-        msg.secondary_state = state.secondary_state.intvalue
-        msg.secondary_state_mode = state.secondary_state_info[1]
+        msg.game_phase = state.game_phase.intvalue
+        msg.state = state.state.intvalue
+        msg.set_play = state.set_play.intvalue
         msg.first_half = state.first_half
         msg.own_score = own_team.score
         msg.rival_score = rival_team.score
         msg.seconds_remaining = state.seconds_remaining
-        msg.secondary_seconds_remaining = state.secondary_seconds_remaining
-        msg.has_kick_off = state.kickoff_team == self.team
-        msg.penalized = me.penalty != 0
-        msg.seconds_till_unpenalized = me.secs_till_unpenalized
-        msg.secondary_state_team = state.secondary_state_info[0]
-        msg.secondary_state_mode = state.secondary_state_info[1]
+        msg.secondary_time = state.secondary_time
+        msg.has_kick_off = state.kicking_team == self.team
+        msg.penalized = True if int(me.penalty) >0 else False
+        msg.seconds_till_unpenalized = me.seconds_till_unpenalized
         msg.team_color = own_team.team_color.intvalue
-        msg.drop_in_team = state.drop_in_team
-        msg.drop_in_time = state.drop_in_time
+        # msg.drop_in_team = state.drop_in_team
+        # msg.drop_in_time = state.drop_in_time
         msg.penalty_shot = own_team.penalty_shot
         msg.single_shots = own_team.single_shots
-        msg.coach_message = own_team.coach_message
+        # msg.coach_message = own_team.coach_message
         penalties = []
         red_cards = []
-        for i in range(6):
-            penalties.append(own_team.players[i].penalty != 0)
-            red_cards.append(own_team.players[i].number_of_red_cards != 0)
+        for i in range(min(state.players_per_team, len(own_team.players))):
+            penalties.append(int(own_team.players[i].penalty) != 0)
+            red_cards.append(int(own_team.players[i].penalty) == 12)
         msg.team_mates_with_penalty = penalties
         msg.team_mates_with_red_card = red_cards
+        msg.team_number = own_team.team_number
         self.state_publisher.publish(msg)
 
     def get_last_state(self):

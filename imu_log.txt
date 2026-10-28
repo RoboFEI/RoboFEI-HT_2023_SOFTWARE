@@ -1,0 +1,12 @@
+LOG DA IMU - tempo decorrido desde o inicio
+Formato: tempo_s | roll_deg | pitch_deg | yaw_deg | acc_x | acc_y | acc_z | gyro_x | gyro_y | gyro_z
+10.018 s | Roll: -3.46 deg | Pitch: -95.27 deg | Yaw: 4.57 deg | Acc: [990.00, 58.00, -91.00] | Gyro: [-1330.00, -910.00, -210.00]
+20.056 s | Roll: -3.41 deg | Pitch: -94.73 deg | Yaw: 5.61 deg | Acc: [988.00, 56.00, -82.00] | Gyro: [-140.00, 490.00, -280.00]
+30.088 s | Roll: 0.74 deg | Pitch: -105.07 deg | Yaw: 14.83 deg | Acc: [1018.00, 61.00, -176.00] | Gyro: [-49840.00, -14910.00, -57960.00]
+40.105 s | Roll: 1.59 deg | Pitch: -105.80 deg | Yaw: 167.49 deg | Acc: [1026.00, -126.00, -260.00] | Gyro: [29190.00, 7490.00, 2590.00]
+50.125 s | Roll: -8.73 deg | Pitch: -108.24 deg | Yaw: 163.37 deg | Acc: [649.00, 354.00, -212.00] | Gyro: [1890.00, 4830.00, -17920.00]
+60.184 s | Roll: -4.56 deg | Pitch: -104.77 deg | Yaw: 122.84 deg | Acc: [1519.00, 11.00, -293.00] | Gyro: [-24640.00, -1890.00, -25690.00]
+70.185 s | Roll: -7.15 deg | Pitch: -109.88 deg | Yaw: 144.67 deg | Acc: [949.00, 68.00, -307.00] | Gyro: [-12040.00, 8050.00, 14560.00]
+80.221 s | Roll: -4.18 deg | Pitch: -105.25 deg | Yaw: 140.94 deg | Acc: [1054.00, 433.00, -353.00] | Gyro: [-61600.00, -210.00, -30590.00]
+90.263 s | Roll: -3.34 deg | Pitch: -118.34 deg | Yaw: 130.21 deg | Acc: [727.00, 114.00, -220.00] | Gyro: [39060.00, 24080.00, -35980.00]
+100.285 s | Roll: -5.21 deg | Pitch: -120.90 deg | Yaw: 192.43 deg | Acc: [748.00, 111.00, -510.00] | Gyro: [-15680.00, -6440.00, -10780.00]

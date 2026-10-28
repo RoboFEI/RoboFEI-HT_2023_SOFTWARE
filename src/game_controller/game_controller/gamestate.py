@@ -14,7 +14,7 @@
 
 # Adapted from from https://github.com/RoboCup-Humanoid-TC/GameController/blob/master/protocols/python/gamestate.py
 
-from construct import Array, Byte, Bytes, Const, Enum, Flag, Int16sl, Int16ul, Struct
+from construct import Array, Byte, Bytes, Const, Enum, Flag, Int16sl, Int16ul, Struct, Float32l
 try:
     from construct import PaddedString
 except ImportError:
@@ -33,12 +33,23 @@ RobotInfo = "robot_info" / Struct(
     # PENALTY_HL_KID_REQUEST_FOR_SERVICE          6
     # PENALTY_HL_KID_REQUEST_FOR_PICKUP_2_SERVICE 7
     # MANUAL                                      15
-    "penalty" / Byte,
-    "secs_till_unpenalized" / Byte,
-    "number_of_warnings" / Byte,
-    "number_of_yellow_cards" / Byte,
-    "number_of_red_cards" / Byte,
-    "goalkeeper" / Flag
+    "penalty" / Enum(Byte,
+                        PENALTY_NONE = 0,
+                        PENALTY_ILLEGAL_POSITIONING = 1,
+                        PENALTY_MOTION_IN_SET = 2,
+                        PENALTY_MOTION_IN_STOP = 3,
+                        PENALTY_LOCAL_GAME_STUCK = 4,
+                        PENALTY_INCAPABLE_ROBOT = 5,
+                        PENALTY_PICK_UP = 6,
+                        PENALTY_BALL_HOLDING = 7,
+                        PENALTY_LEAVING_THE_FIELD = 8, 
+                        PENALTY_PLAYING_WITH_ARMS_HANDS = 9,
+                        PENALTY_PUSHING = 10,
+                        PENALTY_CAUTIONED = 11,
+                        PENALTY_SENT_OFF = 12,
+                        PENALTY_SUBSTITUTE = 13),
+    "seconds_till_unpenalized" / Byte,
+    "cautions" / Byte
 )
 
 TeamInfo = "team" / Struct(
@@ -54,56 +65,67 @@ TeamInfo = "team" / Struct(
                         PURPLE=7,
                         BROWN=8,
                         GRAY=9),
+    "goalkeeperColour" / Enum(Byte,
+                        BLUE=0,
+                        RED=1,
+                        YELLOW=2,
+                        BLACK=3,
+                        WHITE=4,
+                        GREEN=5,
+                        ORANGE=6,
+                        PURPLE=7,
+                        BROWN=8,
+                        GRAY=9),
+    "goalkeeper" / Byte,
     "score" / Byte,
     "penalty_shot" / Byte,  # penalty shot counter
     "single_shots" / Short,  # bits represent penalty shot success
-    "coach_sequence" / Byte,
-    "coach_message" / PaddedString(253, 'utf8'),
-    "coach" / RobotInfo,
-    "players" / Array(11, RobotInfo)
+    "messageBudget" / Short,
+    "players" / Array(20, RobotInfo)
 )
 
 GameState = "gamedata" / Struct(
     "header" / Const(b'RGme'),
-    "version" / Const(12, Short),
+    "version" / Const(20, Byte),
     "packet_number" / Byte,
     "players_per_team" / Byte,
-    "game_type" / Byte,
-    "game_state" / Enum(Byte,
+    "competition_type" / Byte,
+    "stopped" / Byte,
+    "game_phase" / Enum(Byte,
+                        GAME_PHASE_NORMAL = 0,
+                        GAME_PHASE_PENALTY_SHOOT_OUT = 1,
+                        GAME_PHASE_EXTRA_TIME = 2,
+                        GAME_PHASE_TIMEOUT = 3),
+    "state" / Enum(Byte,
                         STATE_INITIAL=0,
-                        STATE_READY=1,      # go to start positions
-                        STATE_SET=2,        # keep ready
-                        STATE_PLAYING=3,    # start play
+                        STATE_READY=1,      # Tempo para o time que tem kick-off jogar (10 segundos no inicio de tempo)
+                        STATE_SET=2,        # 
+                        STATE_PLAYING=3,    # Estado de jogo normal
                         STATE_FINISHED=4),  # game over
+    "set_play" / Enum(Byte,
+                        SET_PLAY_NONE = 0,
+                        SET_PLAY_DIRECT_FREE_KICK = 1,
+                        SET_PLAY_INDIRECT_FREE_KICK = 2,
+                        SET_PLAY_PENALTY_KICK = 3,
+                        SET_PLAY_THROW_IN = 4,
+                        SET_PLAY_GOAL_KICK = 5,
+                        SET_PLAY_CORNER_KICK = 6),
     "first_half" / Flag,
-    "kickoff_team" / Byte,
-    "secondary_state" / Enum(Byte,
-                             STATE_NORMAL=0,
-                             STATE_PENALTYSHOOT=1,
-                             STATE_OVERTIME=2,
-                             STATE_TIMEOUT=3,
-                             STATE_DIRECT_FREEKICK=4,
-                             STATE_INDIRECT_FREEKICK=5,
-                             STATE_PENALTYKICK=6,
-                             STATE_CORNERKICK=7,
-                             STATE_GOALKICK=8,
-                             STATE_THROWIN=9,
-                             DROPBALL=128,
-                             UNKNOWN=255),
-    "secondary_state_info" / Bytes(4),
-    "drop_in_team" / Flag,
-    "drop_in_time" / Short,
+    "kicking_team" / Byte,
     "seconds_remaining" / Int16sl,
-    "secondary_seconds_remaining" / Int16sl,
-    "teams" / Array(2, "team" / TeamInfo)
+    "secondary_time" / Int16sl,
+    "teams" / Array(2, TeamInfo)
 )
 
-GAME_CONTROLLER_RESPONSE_VERSION = 2
+GAME_CONTROLLER_RESPONSE_VERSION = 4
 
 ReturnData = Struct(
     "header" / Const(b"RGrt"),
-    "version" / Const(2, Byte),
-    "team" / Byte,
+    "version" / Byte,
     "player" / Byte,
-    "message" / Byte
+    "team" / Byte,
+    "fallen" / Byte,
+    "pose" / Array(3, Float32l),
+    "ballAge" / Float32l,
+    "ball" / Array(2, Float32l)
 )
