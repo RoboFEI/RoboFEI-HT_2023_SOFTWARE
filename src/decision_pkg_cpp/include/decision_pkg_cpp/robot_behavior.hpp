@@ -8,8 +8,9 @@
 #include "std_msgs/msg/int32.hpp"
 #include "custom_interfaces/msg/vision.hpp"
 #include "sensor_msgs/msg/imu.hpp"
+#include "geometry_msgs/msg/point.hpp"
 
-#define ROBOT_NUMBER 2
+#define ROBOT_NUMBER 3
 //2 KICKER
 //3 BALA
 
@@ -18,6 +19,7 @@ using namespace std::chrono_literals;
 using Int32 = std_msgs::msg::Int32;
 using VisionInfo = custom_interfaces::msg::Vision;
 using ImuAccelMsg = sensor_msgs::msg::Imu;
+using Point = geometry_msgs::msg::Point;
 
 struct GoalCenterInformation
 {  
@@ -61,6 +63,7 @@ class RobotBehavior : public DecisionNode
         bool robot_align_with_the_ball();
         bool goalkeeper_align_with_the_ball(); // feito, precisa testar
         bool robot_align_for_kick_right();
+        void calcularDistancia(int error19, int error20);
         bool robot_align_for_kick_left();
         bool centered_neck();
         void detect_ball_position();
@@ -79,6 +82,8 @@ class RobotBehavior : public DecisionNode
         bool In_kick_angle();
         void Turn_ball_left_to_goal();
         void Turn_ball_right_to_goal();
+        bool gol_in_robot_limits();
+        bool Turn_to_kick_angle();
 
         
 
@@ -89,8 +94,26 @@ class RobotBehavior : public DecisionNode
         bool opositeSide();
 
         int pos19;
+        int pos20;
         bool back_to_search;
         int error19;
+        int error20;
+
+        /*valores distancia*/
+        float angulo19;
+        float anguloEmRadianos19;
+        float angulo20;
+        float anguloEmRadianos20;
+        float distancia;
+        float golx;
+        float goly;
+        float catetoX;
+        float catetoY;
+        float posicaoRoboX;
+        float posicaoRoboY;
+        double anguloGlobal;
+
+
         float start_yaw_deg;
         bool first_yaw = true;
         double yaw_deg;
@@ -98,7 +121,7 @@ class RobotBehavior : public DecisionNode
         float normalize_min_yaw;
         float normalize_max_kick_angle;
         float normalize_min_kick_angle;
-        float error_yaw;
+        float yaw_error;
         RobotBehavior();
         virtual ~RobotBehavior();
 
@@ -112,6 +135,7 @@ class RobotBehavior : public DecisionNode
         AssyncTimer look_right_timer;
         AssyncTimer check_goalpost_timer;
         AssyncTimer Rotate_timer;
+        AssyncTimer timer_lost_ball;
 
         void change_state(State new_state);
         bool aligning_with_goal_entry_done = false;
@@ -121,6 +145,7 @@ class RobotBehavior : public DecisionNode
 
         rclcpp::TimerBase::SharedPtr robot_behavior_;
         rclcpp::Publisher<Int32>::SharedPtr publisher_neck_state;
+        rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr publisher_posicao_robo;
         rclcpp::Subscription<VisionInfo>::SharedPtr vision_goal_center_subscriber;
         rclcpp::Subscription<ImuAccelMsg>::SharedPtr imu_yaw_subscriber;
 

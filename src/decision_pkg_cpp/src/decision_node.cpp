@@ -184,7 +184,7 @@ void DecisionNode::robot_detect_fallen(const float &robot_accel_x,
   {    
    
       falses_fallen_counter += 1;
-      RCLCPP_INFO(this->get_logger(),"False Falling counter %.3f", falses_fallen_counter);
+      RCLCPP_INFO(this->get_logger(),"False Falling counter %.3d", falses_fallen_counter);
   }
   else
   {

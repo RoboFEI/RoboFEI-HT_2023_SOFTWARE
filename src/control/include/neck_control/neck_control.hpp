@@ -121,7 +121,7 @@ class NeckNode : public rclcpp::Node
     BallPositionPx ball_pos_px;
     int cont_lost_ball = 0;
     int search_ball_delay = 10;
-    std::vector<int> search_ball_limits = {2348,2498,2648}; //Não usar valores < 2048
+    std::vector<int> search_ball_limits = {2548,2698,2848}; //Não usar valores < 2048
     std::vector<int> search_ball_samples = {75,100,125};
     std::vector<int> search_ball_pos = {2048,2048};
     float search_ball_state = 0;

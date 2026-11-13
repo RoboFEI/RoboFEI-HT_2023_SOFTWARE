@@ -443,15 +443,15 @@ private:
 
         imu_publisher_->publish(msg);
 
-        RCLCPP_INFO_THROTTLE(
-            this->get_logger(),
-            *this->get_clock(),
-            2000,
-            "IMU publicada | Roll: %.2f | Pitch: %.2f | YALL: %.2f",
-            roll_,
-            pitch_,
-            yaw_
-        );
+        //RCLCPP_INFO_THROTTLE(
+        //    this->get_logger(),
+        //    *this->get_clock(),
+        //    2000,
+        //    "IMU publicada | Roll: %.2f | Pitch: %.2f | YALL: %.2f",
+        //    roll_,
+        //    pitch_,
+        //    yaw_
+        //);
     }
 };
 

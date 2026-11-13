@@ -83,4 +83,3 @@ def findGoalpost(img, results, classesValues):
     img_cp, goalpost_positions = drawGoalpostBox(img_cp, results, goalpost_indices)
     
     return img_cp, goalpost_positions
-
